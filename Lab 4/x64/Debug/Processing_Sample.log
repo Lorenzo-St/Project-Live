@@ -1,6 +1,0 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(534,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (Processing_Sample.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  credits.c
-  Processing_Sample.vcxproj -> C:\Users\Strea\Desktop\My Stuff\Class Folders\Tofu SVN\GAM100\Lab 4\x64\Debug\Live to Survive.exe
-  1 File(s) copied
-  1 File(s) copied
-  23 File(s) copied
