@@ -15,6 +15,23 @@
 
 
 /* |----------------------- Structs ---------------------------| */
+
+typedef struct player
+{
+  int health;
+  int weapon;  /*0 signifies a slow pistol, 1 is a single barrel machine gun, 2 is a sniper riffle, 3 is a shotgun, 4 is semi-Auto Pistol*/
+  float playerRadius;
+  float cooldown;
+  float move_speed;
+  float x, y;
+  float direction[2];
+  float velocity[2];
+  float rot;
+  int kills;
+  int powerUp; /* 0: no powerup, 1: insta kill, 2: RAPID FIRE, 3: FULL HEAL, 4: SCREEN WIPE, 5: INVINCIBILITY, 6: TIME WARP (WIP)  */
+  float powerUpTimer;
+}player;
+
 typedef struct slider{
 
   char title[100];

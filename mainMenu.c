@@ -29,7 +29,7 @@ void initAnim(void);
 
 button buttons[BUTTONS] = { 0 };
 enemy animations[MAX_ANIME_BULLETS] = { 0 };
-enemy player = { 0 };
+enemy Player = { 0 };
 bullet animBullets[MAX_ANIME_BULLETS] = { 0 };
 
 void setupButtons()
@@ -104,8 +104,8 @@ void drawAnimBullets(void)
 int animShoot(enemy a)
 {
   float dir[2] = { 0,0 };
-  dir[0] = player.x - a.x;
-  dir[1] = player.y - a.y;
+  dir[0] = Player.x - a.x;
+  dir[1] = Player.y - a.y;
   float magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
   dir[0] /= magnitude;
   dir[1] /= magnitude;
@@ -198,20 +198,20 @@ void moveAnim(void)
     animations[i].dir[1] += -animations[i].dir[1] * CP_System_GetDt();
   }
 
-  if (player.dir[0] <= 20 && player.dir[1] <= 20)
+  if (Player.dir[0] <= 20 && Player.dir[1] <= 20)
   {
 
-    player.dir[0] = CP_Random_RangeFloat(-100, 100);
-    if (player.x + player.dir[0] > CP_System_GetWindowWidth() / 2.0 || player.x + player.dir[0] < -CP_System_GetWindowWidth() / 2.0f)
-      player.dir[0] = -player.dir[0];
-    player.dir[1] = CP_Random_RangeFloat(-100, 100);
-    if (player.y + player.dir[1] > CP_System_GetWindowHeight() / 2.0 || player.y + player.dir[1] < -CP_System_GetWindowHeight() / 2.0f)
-      player.dir[1] = -player.dir[1];
+    Player.dir[0] = CP_Random_RangeFloat(-100, 100);
+    if (Player.x + Player.dir[0] > CP_System_GetWindowWidth() / 2.0 || Player.x + Player.dir[0] < -CP_System_GetWindowWidth() / 2.0f)
+      Player.dir[0] = -Player.dir[0];
+    Player.dir[1] = CP_Random_RangeFloat(-100, 100);
+    if (Player.y + Player.dir[1] > CP_System_GetWindowHeight() / 2.0 || Player.y + Player.dir[1] < -CP_System_GetWindowHeight() / 2.0f)
+      Player.dir[1] = -Player.dir[1];
   }
-  player.x += player.dir[0] * CP_System_GetDt();
-  player.y += player.dir[1] * CP_System_GetDt();
-  player.dir[0] += -player.dir[0] * CP_System_GetDt();
-  player.dir[1] += -player.dir[1] * CP_System_GetDt();
+  Player.x += Player.dir[0] * CP_System_GetDt();
+  Player.y += Player.dir[1] * CP_System_GetDt();
+  Player.dir[0] += -Player.dir[0] * CP_System_GetDt();
+  Player.dir[1] += -Player.dir[1] * CP_System_GetDt();
 }
 
 void drawAnimEnemies(void)
@@ -226,7 +226,7 @@ void drawAnimEnemies(void)
   }
   CP_Settings_StrokeWeight(1.5f);
   CP_Settings_Fill(CP_Color_CreateHex(0x99A3A4));
-  CP_Graphics_DrawCircle(player.x + (CP_System_GetWindowWidth() / 2.0f), -player.y + (CP_System_GetWindowHeight() / 2.0f), player.radius);
+  CP_Graphics_DrawCircle(Player.x + (CP_System_GetWindowWidth() / 2.0f), -Player.y + (CP_System_GetWindowHeight() / 2.0f), Player.radius);
 
 }
 
@@ -246,12 +246,12 @@ void initAnim(void)
   }
   float Ex = CP_Random_RangeFloat(-CP_System_GetWindowWidth() / 2.0f + 200, CP_System_GetWindowWidth() / 2.0f - 200);
   float Ey = CP_Random_RangeFloat(-CP_System_GetWindowHeight() / 2.0f + 200, CP_System_GetWindowHeight() / 2.0f - 200);
-  player = (enemy){ 1, Ex, Ey };  
-  player.speed = 50;
-  player.cooldown = 1.5f;
-  player.type = CP_Random_RangeInt(0, 1);
-  player.radius = 25;
-  player.health = 60;
+  Player = (enemy){ 1, Ex, Ey };  
+  Player.speed = 50;
+  Player.cooldown = 1.5f;
+  Player.type = CP_Random_RangeInt(0, 1);
+  Player.radius = 25;
+  Player.health = 60;
 }
 int moveAnimBullets(void)
 {
