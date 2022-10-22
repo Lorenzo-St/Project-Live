@@ -1,5 +1,20 @@
 #pragma once
 
+
+/* |----------------------- Defines ---------------------------| */
+#define MAX_ENEMIES 100
+#define MAX_BULLETS 500
+#define MAX_DROPS 10
+#define KEY_COUNT 6
+#define SPREAD_COUNT 10
+#define BULLET_SPEED 10
+#define MAX_BOSSESS 10
+#define BASE_PATTERN 10
+#define MAX_TEXT 10
+#define AUDIOS 2
+
+
+/* |----------------------- Structs ---------------------------| */
 typedef struct slider{
 
   char title[100];
@@ -21,7 +36,7 @@ typedef struct button
 
 
 }button;
-/* |----------------------- Structs ---------------------------| */
+
 typedef struct bullet
 {
   int active;

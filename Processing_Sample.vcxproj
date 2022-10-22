@@ -196,6 +196,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="credits.c" />
+    <ClCompile Include="drawStuff.c" />
     <ClCompile Include="endScreen.c" />
     <ClCompile Include="gameLoop.c" />
     <ClCompile Include="globalData.c" />
@@ -204,9 +205,11 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
     <ClCompile Include="options.c" />
     <ClCompile Include="scoring.c" />
     <ClCompile Include="spashScreen.c" />
+    <ClCompile Include="worldInit.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="credits.h" />
+    <ClInclude Include="drawStuff.h" />
     <ClInclude Include="endScreen.h" />
     <ClInclude Include="gameLoop.h" />
     <ClInclude Include="globalData.h" />
@@ -215,6 +218,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
     <ClInclude Include="scoring.h" />
     <ClInclude Include="spashScreen.h" />
     <ClInclude Include="structs.h" />
+    <ClInclude Include="worldInit.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

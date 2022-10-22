@@ -1,18 +1,10 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(534,5): warning MSB8028: The intermediate directory (x64\Release\) contains files shared from another project (Processing_Sample.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  credits.c
-  endScreen.c
+﻿  drawStuff.c
   gameLoop.c
-  globalData.c
-  main.c
-  mainMenu.c
-  options.c
-  scoring.c
-  spashScreen.c
   Generating code
   Previous IPDB not found, fall back to full compilation.
   All 88 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
-  Processing_Sample.vcxproj -> C:\Users\Strea\Desktop\My Stuff\Programming Projects\Project Live\Project-Live\x64\Release\Live to Survive.exe
+  Processing_Sample.vcxproj -> E:\My Stuff\Programmin Projects\Project-Live\x64\Release\Live to Survive.exe
   1 File(s) copied
   1 File(s) copied
   23 File(s) copied
