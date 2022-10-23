@@ -2,6 +2,7 @@
 #include "structs.h"
 #include "cprocessing.h"
 
+int initPlayer(player *pl, float* multiplier, float* addTimer);
 int initStrings(string *pickupText);
 int initBosses(enemy *bosses);
 void initAudio(CP_Sound *bulletSounds);

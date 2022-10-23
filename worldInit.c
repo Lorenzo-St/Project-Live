@@ -1,8 +1,26 @@
 #include "worldInit.h"
 #include "structs.h"
 #include "cprocessing.h"
+#include "globalData.h"
 
-int initStrings(string* pickupText)
+int initPlayer(player *pl, float* multiplier, float* addTimer)
+{
+  (*pl).powerUp = 0;
+  (*pl).powerUpTimer = 0.0f;
+  (*pl).x, (*pl).y = 0;
+  (*pl).move_speed = 100;
+  (*pl).cooldown = 1.0f;
+  *addTimer = 5.0f;
+  (*pl).kills = 0;
+  (*pl).weapon = 0;
+  (*pl).health = 200;
+  (*pl).playerRadius = 20;
+  *multiplier = 1;
+  setTime(0.0f);
+  return 0;
+}
+
+int initStrings(string *pickupText)
 {
   for (int i = 0; i < MAX_TEXT; i++)
   {

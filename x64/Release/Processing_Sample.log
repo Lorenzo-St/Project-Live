@@ -1,9 +1,8 @@
 ﻿  checkStuff.c
-  gameLoop.c
   Generating code
-  9 of 88 functions (10.2%) were compiled, the rest were copied from previous compilation.
+  4 of 91 functions ( 4.4%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Processing_Sample.vcxproj -> E:\My Stuff\Programmin Projects\Project-Live\x64\Release\Live to Survive.exe
   1 File(s) copied

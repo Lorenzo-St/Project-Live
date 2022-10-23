@@ -17,15 +17,16 @@
 #include "gameLoop.h"
 #include "structs.h"
 #include "globalData.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "worldInit.h"
 #include "drawStuff.h"
 #include "addStuff.h"
 #include "moveStuff.h"
 #include "shootStuff.h"
 #include "checkStuff.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 /* |---------------------- Game Stuff --------------------| */
 
 /* Gameworld and enemy stats and storage */
@@ -41,27 +42,11 @@ item items[MAX_DROPS] = { 0 };
 string pickupText[MAX_TEXT] = { 0 };
 CP_Sound bulletSounds[AUDIOS] = { 0 };
 player pl = { 0 };
-
+camera c = { 0 };
+building buildings[NUMBER_OF_BUILDINGS] = { 0 };
 /*Player statsand data storage items */
 
 int playerKeys[KEY_COUNT] = { 87, 65, 83, 68, 340, 32 };
-
-int initPlayer(void)
-{
-  pl.powerUp = 0;
-  pl.powerUpTimer = 0.0f;
-  pl.x, pl.y = 0;
-  pl.move_speed = 100;
-  pl.cooldown = 1.0f;
-  addTimer = 5.0f;
-  pl.kills = 0;
-  pl.weapon = 0;
-  pl.health = 200;
-  pl.playerRadius = 20;
-  multiplier = 1;
-  setTime(0.0f);
-  return 0;
-}
 
 // use CP_Engine_SetNextGameState to specify this function as the initialization function
 // this function will be called once at the beginning of the program
@@ -72,23 +57,13 @@ void gameLoopInit(void)
   CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
   bossesEnabled = 0;
   initAudio(bulletSounds);
-  initPlayer();
+  initPlayer(&pl, &multiplier, &addTimer);
   initEnemies(en);
   initBullets(bullets);
   initDrops(items);
   initBosses(bosses);
+  buildings[0] = (building){ 100, 100, 100, 100 };
 }
-
-void drawPlayer(void)
-{
-  CP_Settings_StrokeWeight(1.5f);
-  CP_Settings_Fill(CP_Color_CreateHex(0x99A3A4));
-  CP_Graphics_DrawCircle(pl.x + (CP_System_GetWindowWidth() / 2.0f), -pl.y + (CP_System_GetWindowHeight() / 2.0f), pl.playerRadius * 2);
-  CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-  CP_Graphics_DrawRectAdvanced((pl.x + ((pl.direction[0] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (CP_System_GetWindowWidth() / 2.0f), (-pl.y + ((pl.direction[1] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (CP_System_GetWindowHeight() / 2.0f), pl.playerRadius / 1.25f, 10, pl.rot, 0.0f);
-}
-
-
 
 // use CP_Engine_SetNextGameState to specify this function as the update function
 // this function will be called repeatedly every frame
@@ -111,31 +86,35 @@ void gameLoopUpdate(void)
   CP_Settings_TextSize(200);
   CP_Font_DrawText(buffer, CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f);
 
-  pl.direction[0] = CP_Input_GetMouseX() - ((CP_System_GetWindowWidth() / 2.0f) + pl.x);
-  pl.direction[1] = CP_Input_GetMouseY() - ((CP_System_GetWindowHeight() / 2.0f) - pl.y);
+  pl.direction[0] = CP_Input_GetMouseX()- ((CP_System_GetWindowWidth() / 2.0f) + (pl.x - c.x));
+  pl.direction[1] = CP_Input_GetMouseY() - ((CP_System_GetWindowHeight() / 2.0f) - (pl.y - c.y));
   pl.rot = (float)(atan2(pl.direction[1], pl.direction[0]) * (180.0f / 3.14159265f) + 90.0f);
-
+  c.x = pl.x;
+  c.y = pl.y;
 
   /* Draw all on screen items */
-  drawBullets(bullets);
-  drawPlayer();
-  drawEnemies(en);
-  drawItems(items);
-  drawBosses(bosses);
-  drawPickupText(pickupText);
+  drawBullets(bullets,c);
+  drawPlayer(pl,c);
+  drawEnemies(en,c);
+  drawItems(items,c);
+  drawBosses(bosses,c);
+  drawPickupText(pickupText,c);
+  drawBuildings(buildings,c);
 
   /* Check  enemy shooting */
   enemyShoot(en, bulletSounds, bullets, pl);
   bossShoot(bosses, pl, bullets);
 
   /* Move on screen items    */
-  moveEnemies(en);
-  moveBullets(bullets, en, bosses, &pl, items);
+  moveEnemies(en, buildings);
+  moveBullets(bullets, en, bosses, &pl, items, buildings);
   moveBosses(bosses);
 
+  int check = checkAgainstBuilding(buildings, 0, &pl);
+
   /* Check user input and collisions */
-  checkKeys(pl, multiplier, bullets, playerKeys, isPaused);
-  checkItems(items, pl, en, bosses, pickupText);
+  checkKeys(&pl, &multiplier, bullets, playerKeys, isPaused, check);
+  checkItems(items, &pl, en, bosses, pickupText);
 
   CP_Settings_Fill(CP_Color_Create(139, 50, 77, (200 - pl.health)));
   CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f, CP_System_GetWindowWidth() + 100.0f, CP_System_GetWindowHeight() + 100.0f);

@@ -1,5 +1,6 @@
 #include "structs.h"
 #include "cprocessing.h"
+#include <math.h>
 
 int fireAtPlayer(enemy a, bullet* bullets, player pl, CP_Sound *bulletSounds)
 {
@@ -163,8 +164,8 @@ int playerFire(player pl, bullet *bullets)
     for (int k = 0; k < SPREAD_COUNT; k++)
     {
       angle = CP_Random_RangeFloat(-100, 100);
-      dir[0] = (CP_Input_GetMouseX() - CP_System_GetWindowWidth() / 2.0f) - pl.x + angle;
-      dir[1] = -(CP_Input_GetMouseY() - CP_System_GetWindowHeight() / 2.0f) - pl.y + angle;
+      dir[0] = (CP_Input_GetMouseX() - CP_System_GetWindowWidth() / 2.0f) + angle;
+      dir[1] = -(CP_Input_GetMouseY() - CP_System_GetWindowHeight() / 2.0f) + angle;
       magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
       dir[0] /= magnitude;
       dir[1] /= magnitude;
@@ -192,8 +193,8 @@ int playerFire(player pl, bullet *bullets)
   }
   else
   {
-    dir[0] = (CP_Input_GetMouseX() - CP_System_GetWindowWidth() / 2.0f) - pl.x;
-    dir[1] = -(CP_Input_GetMouseY() - CP_System_GetWindowHeight() / 2.0f) - pl.y;
+    dir[0] = (CP_Input_GetMouseX() - CP_System_GetWindowWidth() / 2.0f);
+    dir[1] = -(CP_Input_GetMouseY() - CP_System_GetWindowHeight() / 2.0f);
     magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
     dir[0] /= magnitude;
     dir[1] /= magnitude;

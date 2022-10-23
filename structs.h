@@ -12,7 +12,7 @@
 #define BASE_PATTERN 10
 #define MAX_TEXT 10
 #define AUDIOS 2
-
+#define NUMBER_OF_BUILDINGS 5
 
 /* |----------------------- Structs ---------------------------| */
 
@@ -32,6 +32,11 @@ typedef struct player
   float powerUpTimer;
 }player;
 
+typedef struct Camera 
+{
+  float x, y;
+}camera;
+
 typedef struct slider{
 
   char title[100];
@@ -41,6 +46,14 @@ typedef struct slider{
   float length;
   float value; /* Between 0 and 1 */
 }slider;
+
+typedef struct building 
+{
+  float x, y;
+  float xLen, yLen;
+  int hasInterior;
+  int doorSide;
+}building;
 
 typedef struct button
 {
@@ -103,3 +116,4 @@ typedef struct string
   float life;
   char buffer[100];
 }string;
+

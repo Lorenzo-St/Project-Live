@@ -53,7 +53,11 @@ void SplashUpdate(void)
 		if (alpha < -10) 
 			CP_Engine_SetNextGameStateForced(MainMenuInit, MainMenuUpdate, MainMenuExit);
 	}
-
+	if (CP_Input_KeyTriggered(KEY_ANY) || CP_Input_MouseClicked())
+	{
+		counter = 100;
+		alpha = -100;
+	}
 
 	CP_Graphics_ClearBackground(CP_Color_CreateHex(0x000000));
 

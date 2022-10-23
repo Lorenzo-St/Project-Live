@@ -1,4 +1,4 @@
 #pragma once
-int moveBullets(bullet* bullets, enemy* en, enemy* bosses, player* pl, item* items);
+int moveBullets(bullet* bullets, enemy* en, enemy* bosses, player* pl, item* items, building buildings[]);
 int moveBosses(enemy* bosses);
-int moveEnemies(enemy* en);
+int moveEnemies(enemy* en, building buildings[]);

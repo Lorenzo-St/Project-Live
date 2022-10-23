@@ -2,6 +2,17 @@
 #include "structs.h"
 #include "cprocessing.h"
 #include "stdio.h"
+#include <math.h>
+
+void drawPlayer(player pl, camera c)
+{
+  CP_Settings_StrokeWeight(1.5f);
+  CP_Settings_Fill(CP_Color_CreateHex(0x22A3A4FF));
+  CP_Graphics_DrawCircle((pl.x - c.x) + (CP_System_GetWindowWidth() / 2.0f), -(pl.y - c.y) + (CP_System_GetWindowHeight() / 2.0f), pl.playerRadius * 2);
+  CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+  CP_Graphics_DrawRectAdvanced(((pl.x - c.x) + ((pl.direction[0] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (CP_System_GetWindowWidth() / 2.0f), (-(pl.y - c.y) + ((pl.direction[1] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (CP_System_GetWindowHeight() / 2.0f), pl.playerRadius / 1.25f, 10, pl.rot, 0.0f);
+}
+
 
 void drawWeapon(int weapon, float powerUpTimer, int powerUp)
 {
@@ -82,7 +93,7 @@ void drawWeapon(int weapon, float powerUpTimer, int powerUp)
   }
 }
 
-void drawBullets(bullet* bullets)
+void drawBullets(bullet* bullets, camera C)
 {
   for (int i = 0; i < MAX_BULLETS; i++)
   {
@@ -94,33 +105,33 @@ void drawBullets(bullet* bullets)
       CP_Settings_Fill(CP_Color_Create(201, 254, 255, 255));
 
     CP_Settings_StrokeWeight(0.0f);
-    CP_Graphics_DrawCircle(bullets[i].x + (CP_System_GetWindowWidth() / 2.0f), -bullets[i].y + (CP_System_GetWindowHeight() / 2.0f), bullets[i].radius);
+    CP_Graphics_DrawCircle((bullets[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(bullets[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f), bullets[i].radius);
   }
 }
 
-void drawEnemies(enemy* en)
+void drawEnemies(enemy* en, camera C)
 {
   CP_Settings_Fill(CP_Color_Create(226, 225, 76, 255));
   for (int i = 0; i < MAX_ENEMIES; i++)
   {
     if (en[i].active == 0)
       continue;
-    CP_Graphics_DrawCircle(en[i].x + (CP_System_GetWindowWidth() / 2.0f), -en[i].y + (CP_System_GetWindowHeight() / 2.0f), en[i].radius);
+    CP_Graphics_DrawCircle((en[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(en[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f), en[i].radius);
   }
 }
 
-void drawBosses(enemy* bosses)
+void drawBosses(enemy* bosses, camera C)
 {
   CP_Settings_Fill(CP_Color_Create(50, 100, 230, 255));
   for (int i = 0; i < MAX_BOSSESS; i++)
   {
     if (bosses[i].active == 0)
       continue;
-    CP_Graphics_DrawCircle(bosses[i].x + (CP_System_GetWindowWidth() / 2.0f), -bosses[i].y + (CP_System_GetWindowHeight() / 2.0f), bosses[i].radius);
+    CP_Graphics_DrawCircle((bosses[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(bosses[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f), bosses[i].radius);
   }
 }
 
-void drawPickupText(string* pickupText)
+void drawPickupText(string* pickupText, camera C)
 {
   CP_Settings_TextSize(30);
   for (int i = 0; i < MAX_TEXT; i++)
@@ -133,13 +144,13 @@ void drawPickupText(string* pickupText)
       continue;
     }
     CP_Settings_Fill(CP_Color_Create(100, 100, 100, 125));
-    CP_Font_DrawText(pickupText[i].buffer, pickupText[i].x + (CP_System_GetWindowWidth() / 2.0f), -pickupText[i].y + (CP_System_GetWindowHeight() / 2.0f));
+    CP_Font_DrawText(pickupText[i].buffer, (pickupText[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(pickupText[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f));
     pickupText[i].y++;
     pickupText[i].life -= CP_System_GetDt();
   }
 }
 
-void drawItems(item* items)
+void drawItems(item* items, camera C)
 {
   CP_Settings_StrokeWeight(0.0f);
   for (int i = 0; i < MAX_DROPS; i++)
@@ -151,25 +162,37 @@ void drawItems(item* items)
     {
     case 0:
       CP_Settings_Fill(CP_Color_Create(19, 136, 8, 255));
-      CP_Graphics_DrawRectAdvanced(items[i].x + (CP_System_GetWindowWidth() / 2.0f), -items[i].y + (CP_System_GetWindowHeight() / 2.0f), items[i].radius, items[i].radius, 45.0f, 0.0f);
+      CP_Graphics_DrawRectAdvanced((items[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(items[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f), items[i].radius, items[i].radius, 45.0f, 0.0f);
       CP_Settings_TextSize(10);
       CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-      CP_Font_DrawText("Health", items[i].x + (CP_System_GetWindowWidth() / 2.0f), -items[i].y + (CP_System_GetWindowHeight() / 2.0f));
+      CP_Font_DrawText("Health", (items[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(items[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f));
       break;
     case 1:
       CP_Settings_Fill(CP_Color_Create(201, 242, 201, 255));
-      CP_Graphics_DrawRectAdvanced(items[i].x + (CP_System_GetWindowWidth() / 2.0f), -items[i].y + (CP_System_GetWindowHeight() / 2.0f), items[i].radius, items[i].radius, 0, 5);
+      CP_Graphics_DrawRectAdvanced((items[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(items[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f), items[i].radius, items[i].radius, 0, 5);
       CP_Settings_TextSize(10);
       CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-      CP_Font_DrawText("Weapon", items[i].x + (CP_System_GetWindowWidth() / 2.0f), -items[i].y + (CP_System_GetWindowHeight() / 2.0f));
+      CP_Font_DrawText("Weapon", (items[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(items[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f));
       break;
     case 2:
       CP_Settings_Fill(CP_Color_Create(250, 100, 255, 255));
-      CP_Graphics_DrawRectAdvanced(items[i].x + (CP_System_GetWindowWidth() / 2.0f), -items[i].y + (CP_System_GetWindowHeight() / 2.0f), items[i].radius, items[i].radius, 0, 5);
+      CP_Graphics_DrawRectAdvanced((items[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(items[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f), items[i].radius, items[i].radius, 0, 5);
       CP_Settings_TextSize(10);
       CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-      CP_Font_DrawText("POWERUP", items[i].x + (CP_System_GetWindowWidth() / 2.0f), -items[i].y + (CP_System_GetWindowHeight() / 2.0f));
+      CP_Font_DrawText("POWERUP", (items[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(items[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f));
       break;
     }
+  }
+}
+
+void drawBuildings(building *buildings, camera c) 
+{
+  CP_Settings_Fill(CP_Color_Create(10, 10, 10, 255));
+  for (int i = 0; i < NUMBER_OF_BUILDINGS; i++) 
+  {
+    if (fabsf(buildings[i].x - c.x) > fabsf(CP_System_GetWindowWidth() / 2.0f) + 300 || fabsf(buildings[i].y - c.y) > fabsf(CP_System_GetWindowHeight() / 2.0f) + 300)
+      continue;
+
+    CP_Graphics_DrawRect((buildings[i].x - c.x) + (CP_System_GetWindowWidth() / 2.0f), -(buildings[i].y - c.y) + (CP_System_GetWindowHeight() / 2.0f),  buildings[i].xLen, buildings[i].yLen);
   }
 }
