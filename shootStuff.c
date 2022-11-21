@@ -24,14 +24,12 @@ int fireAtPlayer(enemy a, bullet* bullets, player pl, CP_Sound *bulletSounds)
       bullets[i].pwr = CP_Random_RangeInt(5, 25);
       bullets[i].users = 0;
       bullets[i].speed = BULLET_SPEED;
-      CP_Sound_PlayAdvanced(bulletSounds[0], 2.0f, CP_Random_RangeFloat(3.0f, 10.0f), 0, CP_SOUND_GROUP_0);
+      /*CP_Sound_PlayAdvanced(bulletSounds[0], 2.0f, CP_Random_RangeFloat(3.0f, 10.0f), 0, CP_SOUND_GROUP_0);*/
       break;
     }
   }
   return 0;
 }
-
-
 
 int bossPatterns(enemy boss, player pl, bullet *bullets)
 {
@@ -69,7 +67,7 @@ int bossPatterns(enemy boss, player pl, bullet *bullets)
     break;
   case 1:
 
-    for (int k = 0; k < SPREAD_COUNT * 3; k++)
+    for (int k = 0; k < SPREAD_COUNT * 2; k++)
     {
       angle = CP_Random_RangeFloat(-100, 100);
       dir[0] = pl.x - boss.x + angle;
@@ -153,6 +151,7 @@ int bossPatterns(enemy boss, player pl, bullet *bullets)
   }
   return 0;
 }
+
 int playerFire(player pl, bullet *bullets)
 {
   float dir[2] = { 0,0 };
@@ -163,7 +162,7 @@ int playerFire(player pl, bullet *bullets)
 
     for (int k = 0; k < SPREAD_COUNT; k++)
     {
-      angle = CP_Random_RangeFloat(-100, 100);
+      angle = CP_Random_RangeFloat(-50, 50);
       dir[0] = (CP_Input_GetMouseX() - CP_System_GetWindowWidth() / 2.0f) + angle;
       dir[1] = -(CP_Input_GetMouseY() - CP_System_GetWindowHeight() / 2.0f) + angle;
       magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
@@ -231,7 +230,7 @@ int playerFire(player pl, bullet *bullets)
             bullets[i].pwr = 300;
           else if (pl.powerUp == 1)
             bullets[i].pwr = 20000;
-          bullets[i].speed *= 4;
+          bullets[i].speed *= 2;
           break;
         case 4:
           if (pl.powerUp != 1)

@@ -25,6 +25,7 @@ void preUpdate(void);
 
 int main(void)
 {
+  CP_System_SetFrameRate(60.0f);
 	CP_Engine_SetPreUpdateFunction(preUpdate);
 	CP_Engine_SetNextGameState(SplashInit, SplashUpdate, SplashExit);
 	CP_Engine_Run();

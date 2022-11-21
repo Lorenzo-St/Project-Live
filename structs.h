@@ -12,9 +12,11 @@
 #define BASE_PATTERN 10
 #define MAX_TEXT 10
 #define AUDIOS 2
-#define NUMBER_OF_BUILDINGS 5
+#define NUMBER_OF_BUILDINGS 50
 
 /* |----------------------- Structs ---------------------------| */
+
+typedef unsigned int bool;
 
 typedef struct player
 {
@@ -40,7 +42,7 @@ typedef struct Camera
 typedef struct slider{
 
   char title[100];
-  int selected;
+  bool selected;
   float x;
   float y;
   float length;
@@ -51,13 +53,13 @@ typedef struct building
 {
   float x, y;
   float xLen, yLen;
-  int hasInterior;
+  bool hasInterior;
   int doorSide;
 }building;
 
 typedef struct button
 {
-  int selected;
+  bool selected;
   char words[100];
   float x;
   float y;
@@ -69,8 +71,8 @@ typedef struct button
 
 typedef struct bullet
 {
-  int active;
-  int users;
+  bool active;
+  bool users;
   int pwr;
   float x;
   float y;
@@ -82,9 +84,20 @@ typedef struct bullet
 
 }bullet;
 
+typedef struct invItem 
+{
+  char* name;
+  char itemId;
+  unsigned char type;/* 0 == weapon, 1 == material, 2+ == ??? */
+  bool stackable;
+  int count;
+  float durability;
+  struct invItem* next;
+}InvItem;
+
 typedef struct item
 {
-  int active;
+  bool active;
   float x;
   float y;
   int type;/*0 is health, 1 is weapon, 2 powerup*/
@@ -95,7 +108,7 @@ typedef struct item
 
 typedef struct enemy
 {
-  int active;
+  bool active;
   float x;
   float y;
   float cooldown;
@@ -111,7 +124,7 @@ typedef struct enemy
 
 typedef struct string
 {
-  int active;
+  bool active;
   float x, y;
   float life;
   char buffer[100];

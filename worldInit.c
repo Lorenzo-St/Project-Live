@@ -2,6 +2,16 @@
 #include "structs.h"
 #include "cprocessing.h"
 #include "globalData.h"
+#include "checkStuff.h"
+
+int initBuildings(building* buildings)
+{
+  for (int i = 0; i < NUMBER_OF_BUILDINGS; i++) 
+  {
+    buildings[i] = (building){ CP_Random_RangeFloat(-10000, 10000),CP_Random_RangeFloat(-1000, 1000),CP_Random_RangeFloat(100, 2000), CP_Random_RangeFloat(100, 2000),CP_Random_RangeInt(0, 1), CP_Random_RangeInt(0, 3) };
+  }
+  return 0;
+}
 
 int initPlayer(player *pl, float* multiplier, float* addTimer)
 {
@@ -54,7 +64,7 @@ void initAudio(CP_Sound* bulletSounds)
   bulletSounds[0] = CP_Sound_Load("./Assets/pew.mp3");
 }
 
-int initEnemies(enemy* en)
+int initEnemies(enemy* en, building* buildings)
 {
   for (int i = 0; i < MAX_ENEMIES; i++)
   {
@@ -62,6 +72,11 @@ int initEnemies(enemy* en)
     float Ex = CP_Random_RangeFloat(-CP_System_GetWindowWidth() / 2.0f + 200, CP_System_GetWindowWidth() / 2.0f - 200);
     float Ey = CP_Random_RangeFloat(-CP_System_GetWindowHeight() / 2.0f + 200, CP_System_GetWindowHeight() / 2.0f - 200);
     en[i] = (enemy){ 0, Ex, Ey };
+    while (checkInsideBuilding(buildings, 1, en[i]) != 0)
+    {
+      en[i].x = CP_Random_RangeFloat(-CP_System_GetWindowWidth() / 2.0f + 200, CP_System_GetWindowWidth() / 2.0f - 200);
+      en[i].y = CP_Random_RangeFloat(-CP_System_GetWindowHeight() / 2.0f + 200, CP_System_GetWindowHeight() / 2.0f - 200);
+    }
     en[i].speed = 50;
     en[i].cooldown = 1.5f;
     en[i].type = CP_Random_RangeInt(0, 1);

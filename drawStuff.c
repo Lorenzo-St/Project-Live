@@ -13,7 +13,6 @@ void drawPlayer(player pl, camera c)
   CP_Graphics_DrawRectAdvanced(((pl.x - c.x) + ((pl.direction[0] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (CP_System_GetWindowWidth() / 2.0f), (-(pl.y - c.y) + ((pl.direction[1] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (CP_System_GetWindowHeight() / 2.0f), pl.playerRadius / 1.25f, 10, pl.rot, 0.0f);
 }
 
-
 void drawWeapon(int weapon, float powerUpTimer, int powerUp)
 {
   float screen_center = CP_System_GetWindowWidth() / 2.0f;
@@ -116,6 +115,8 @@ void drawEnemies(enemy* en, camera C)
   {
     if (en[i].active == 0)
       continue;
+    if (fabsf(en[i].x - C.x) > (CP_System_GetWindowWidth() / 2.0f) + 200 || fabsf(en[i].y - C.y) > (CP_System_GetWindowHeight() / 2.0f) + 200)
+      en[i].active = 0;
     CP_Graphics_DrawCircle((en[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(en[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f), en[i].radius);
   }
 }
@@ -127,6 +128,8 @@ void drawBosses(enemy* bosses, camera C)
   {
     if (bosses[i].active == 0)
       continue;
+    if (fabsf(bosses[i].x - C.x) > (CP_System_GetWindowWidth() / 2.0f) + 200 || fabsf(bosses[i].y - C.y) > (CP_System_GetWindowHeight() / 2.0f) + 200)
+      bosses[i].active = 0;
     CP_Graphics_DrawCircle((bosses[i].x - C.x) + (CP_System_GetWindowWidth() / 2.0f), -(bosses[i].y - C.y) + (CP_System_GetWindowHeight() / 2.0f), bosses[i].radius);
   }
 }
@@ -190,7 +193,7 @@ void drawBuildings(building *buildings, camera c)
   CP_Settings_Fill(CP_Color_Create(10, 10, 10, 255));
   for (int i = 0; i < NUMBER_OF_BUILDINGS; i++) 
   {
-    if (fabsf(buildings[i].x - c.x) > fabsf(CP_System_GetWindowWidth() / 2.0f) + 300 || fabsf(buildings[i].y - c.y) > fabsf(CP_System_GetWindowHeight() / 2.0f) + 300)
+    if (fabsf(buildings[i].x - c.x) > fabsf(CP_System_GetWindowWidth() / 2.0f) + (buildings[i].xLen / 2.0f) || fabsf(buildings[i].y - c.y) > fabsf(CP_System_GetWindowHeight() / 2.0f) + (buildings[i].yLen / 2.0f))
       continue;
 
     CP_Graphics_DrawRect((buildings[i].x - c.x) + (CP_System_GetWindowWidth() / 2.0f), -(buildings[i].y - c.y) + (CP_System_GetWindowHeight() / 2.0f),  buildings[i].xLen, buildings[i].yLen);

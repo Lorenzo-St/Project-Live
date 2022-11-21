@@ -23,10 +23,11 @@
 #include "moveStuff.h"
 #include "shootStuff.h"
 #include "checkStuff.h"
+#include "debugInfo.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 /* |---------------------- Game Stuff --------------------| */
 
 /* Gameworld and enemy stats and storage */
@@ -44,31 +45,43 @@ CP_Sound bulletSounds[AUDIOS] = { 0 };
 player pl = { 0 };
 camera c = { 0 };
 building buildings[NUMBER_OF_BUILDINGS] = { 0 };
-/*Player statsand data storage items */
 
 int playerKeys[KEY_COUNT] = { 87, 65, 83, 68, 340, 32 };
+
+camera *retCam() 
+{
+  return &c;
+}
 
 // use CP_Engine_SetNextGameState to specify this function as the initialization function
 // this function will be called once at the beginning of the program
 void gameLoopInit(void)
 {
+
   CP_Settings_RectMode(CP_POSITION_CENTER);
   CP_Settings_EllipseMode(CP_POSITION_CENTER);
   CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
   bossesEnabled = 0;
+  initBuildings(buildings);
   initAudio(bulletSounds);
   initPlayer(&pl, &multiplier, &addTimer);
-  initEnemies(en);
+  initEnemies(en, buildings);
   initBullets(bullets);
   initDrops(items);
   initBosses(bosses);
-  buildings[0] = (building){ 100, 100, 100, 100 };
+
+  while (checkInsideBuilding(buildings, 0, pl) != 0)
+  {
+    pl.x = CP_Random_RangeFloat(-1000, 1000);
+    pl.y = CP_Random_RangeFloat(-1000, 1000);
+  }
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the update function
 // this function will be called repeatedly every frame
 void gameLoopUpdate(void)
 {
+  CP_Settings_Stroke(CP_Color_CreateHex(0x000000ff));
   if (pl.health <= 0)
   {
     CP_Engine_SetNextGameState(endScreenInit, endScreenUpdate, endScreenExit);
@@ -108,7 +121,7 @@ void gameLoopUpdate(void)
   /* Move on screen items    */
   moveEnemies(en, buildings);
   moveBullets(bullets, en, bosses, &pl, items, buildings);
-  moveBosses(bosses);
+  moveBosses(bosses, buildings);
 
   int check = checkAgainstBuilding(buildings, 0, &pl);
 
@@ -125,7 +138,7 @@ void gameLoopUpdate(void)
   drawWeapon(pl.weapon, pl.powerUpTimer, pl.powerUp);
   if (addTimer <= 0)
   {
-    addEnemy(bossesEnabled,en, bosses);
+    addEnemy(bossesEnabled,en, bosses, buildings, c);
     addTimer = 5.0f / cbrtf((float)pl.kills + 1.0f);
   }
   if (getTime() >= 60.0f)
@@ -148,6 +161,7 @@ void gameLoopUpdate(void)
     CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255- (int)(50.0f * (5 - (10-getTime())))));
     CP_Font_DrawText("Your Goal: Live long", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f);
   }
+  //drawDebugInfo(&pl, en);
 
 }
 

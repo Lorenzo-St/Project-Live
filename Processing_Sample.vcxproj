@@ -198,6 +198,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
     <ClCompile Include="addStuff.c" />
     <ClCompile Include="checkStuff.c" />
     <ClCompile Include="credits.c" />
+    <ClCompile Include="debugInfo.c" />
     <ClCompile Include="drawStuff.c" />
     <ClCompile Include="endScreen.c" />
     <ClCompile Include="gameLoop.c" />
@@ -206,6 +207,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
     <ClCompile Include="mainMenu.c" />
     <ClCompile Include="moveStuff.c" />
     <ClCompile Include="options.c" />
+    <ClCompile Include="playerInv.c" />
     <ClCompile Include="scoring.c" />
     <ClCompile Include="shootStuff.c" />
     <ClCompile Include="spashScreen.c" />
@@ -215,6 +217,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
     <ClInclude Include="addStuff.h" />
     <ClInclude Include="checkStuff.h" />
     <ClInclude Include="credits.h" />
+    <ClInclude Include="debugInfo.h" />
     <ClInclude Include="drawStuff.h" />
     <ClInclude Include="endScreen.h" />
     <ClInclude Include="gameLoop.h" />
@@ -222,6 +225,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
     <ClInclude Include="mainMenu.h" />
     <ClInclude Include="moveStuff.h" />
     <ClInclude Include="options.h" />
+    <ClInclude Include="playerInv.h" />
     <ClInclude Include="scoring.h" />
     <ClInclude Include="shootStuff.h" />
     <ClInclude Include="spashScreen.h" />

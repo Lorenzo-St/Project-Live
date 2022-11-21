@@ -19,6 +19,7 @@
 #include <string.h>
 #include <math.h>
 
+
 #define OPTIONSBUTTONS 5
 #define AUDIO_SLIDERS 2
 
@@ -26,6 +27,7 @@ button optionsButton[OPTIONSBUTTONS] = { 0 };
 button displayScreen[2] = { 0 };
 int opsSubScreen = 0;
 slider audioSliders[AUDIO_SLIDERS] = { 0 };
+
 
 void initSliders(void) 
 {

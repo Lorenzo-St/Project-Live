@@ -2,33 +2,32 @@
 #include "cprocessing.h"
 #include "addStuff.h"
 #include "checkStuff.h"
+#include "debugInfo.h"
 #include <math.h>
 
-int moveEnemies(enemy* en, building buildings[])
+int moveEnemies(enemy* en, building *buildings)
 {
   for (int i = 0; i < MAX_ENEMIES; i++)
   {
     if (en[i].active == 0)
       continue;
+    
     if (en[i].dir[0] <= 10 && en[i].dir[1] <= 10)
     {
       en[i].dir[0] = CP_Random_RangeFloat(-100, 100);
-      if (en[i].x + en[i].dir[0] > CP_System_GetWindowWidth() / 2.0 || en[i].x + en[i].dir[0] < -CP_System_GetWindowWidth() / 2.0f)
-        en[i].dir[0] = -en[i].dir[0];
       en[i].dir[1] = CP_Random_RangeFloat(-100, 100);
-      if (en[i].y + en[i].dir[1] > CP_System_GetWindowHeight() / 2.0 || en[i].y + en[i].dir[1] < -CP_System_GetWindowHeight() / 2.0f)
-        en[i].dir[1] = -en[i].dir[1];
     }
     int check = checkAgainstBuilding( buildings, 1, en[i]);
-    en[i].x += en[i].dir[0] * CP_System_GetDt() * (check == 0 || check == 2);
-    en[i].y += en[i].dir[1] * CP_System_GetDt() * (check == 0 || check == 1);
-    en[i].dir[0] += -en[i].dir[0] * CP_System_GetDt() * (check == 0 || check == 2);
-    en[i].dir[1] += -en[i].dir[1] * CP_System_GetDt() * (check == 0 || check == 1);
+    en[i].x += (en[i].dir[0] * CP_System_GetDt()) * (check == 0 || check == 2);
+    en[i].y += (en[i].dir[1] * CP_System_GetDt()) * (check == 0 || check == 1);
+    en[i].dir[0] += -en[i].dir[0] * CP_System_GetDt();
+    en[i].dir[1] += -en[i].dir[1] * CP_System_GetDt();
+    //drawDebugLine(en[i].x, en[i].x + en[i].dir[0], en[i].y, en[i].y + en[i].dir[0]);
   }
   return 0;
 }
 
-int moveBosses(enemy* bosses)
+int moveBosses(enemy* bosses, building *buildings)
 {
   for (int i = 0; i < MAX_BOSSESS; i++)
   {
@@ -37,16 +36,14 @@ int moveBosses(enemy* bosses)
     if (bosses[i].dir[0] <= 10 && bosses[i].dir[1] <= 10)
     {
       bosses[i].dir[0] = CP_Random_RangeFloat(-100, 100);
-      if (bosses[i].x + bosses[i].dir[0] > CP_System_GetWindowWidth() / 2.0 || bosses[i].x + bosses[i].dir[0] < -CP_System_GetWindowWidth() / 2.0f)
-        bosses[i].dir[0] = -bosses[i].dir[0];
       bosses[i].dir[1] = CP_Random_RangeFloat(-100, 100);
-      if (bosses[i].y + bosses[i].dir[1] > CP_System_GetWindowHeight() / 2.0 || bosses[i].y + bosses[i].dir[1] < -CP_System_GetWindowHeight() / 2.0f)
-        bosses[i].dir[1] = -bosses[i].dir[1];
     }
-    bosses[i].x += bosses[i].dir[0] * CP_System_GetDt();
-    bosses[i].y += bosses[i].dir[1] * CP_System_GetDt();
+    int check = checkAgainstBuilding(buildings, 1, bosses[i]);
+    bosses[i].x += (bosses[i].dir[0] * CP_System_GetDt()) * (check == 0 || check == 2);
+    bosses[i].y += (bosses[i].dir[1] * CP_System_GetDt()) * (check == 0 || check == 1);
     bosses[i].dir[0] += -bosses[i].dir[0] * CP_System_GetDt();
     bosses[i].dir[1] += -bosses[i].dir[1] * CP_System_GetDt();
+    //drawDebugLine(bosses[i].x, bosses[i].x + bosses[i].dir[0], bosses[i].y, bosses[i].y + bosses[i].dir[0]);
   }
   return 0;
 }
@@ -72,8 +69,11 @@ int moveBullets(bullet* bullets, enemy* en, enemy* bosses, player *pl, item *ite
       float distance = sqrtf((bullets[i].x - (*pl).x) * (bullets[i].x - (*pl).x) + (bullets[i].y - (*pl).y) * (bullets[i].y - (*pl).y));
       if (distance < (*pl).playerRadius && bullets[i].users == 0)
       {
-        if ((*pl).powerUp == 5)
+        if ((*pl).powerUp == 5) 
+        {
+          bullets[i].active = 0;
           continue;
+        }
         (*pl).health -= bullets[i].pwr;
         bullets[i].active = 0;
         bullets[i].speed = BULLET_SPEED;

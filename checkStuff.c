@@ -2,6 +2,7 @@
 #include "structs.h"
 #include "addStuff.h"
 #include "shootStuff.h"
+#include "playerInv.h"
 #include <stdarg.h>
 #include <math.h>
 
@@ -153,7 +154,10 @@ int checkItems(item *items, player *pl, enemy *en, enemy *bosses, string *pickup
         (*pl).health += items[i].containes;
         break;
       case 1:
-        (*pl).weapon = items[i].containes;
+        
+
+
+
         break;
       case 2:
         switch (items[i].containes)
@@ -214,11 +218,59 @@ int checkItems(item *items, player *pl, enemy *en, enemy *bosses, string *pickup
   return 0;
 }
 
+int checkInsideBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...) 
+{
+  va_list v;
+  va_start(v, which);
+  switch (which) 
+  {
+  case 0:;
+    player* p = va_arg(v, player*);
+    for (int i = 0; i < NUMBER_OF_BUILDINGS; i++)
+    {
+      building* b = buildings + i;
+      if (b->xLen == 0 || b->yLen == 0)
+        continue;
+      if (b->x - p->x > CP_System_GetWindowWidth() / 2.0f || b->y - p->y > CP_System_GetWindowHeight() / 2.0f)
+        continue;
+      if (p->x < b->x - (b->xLen / 2.0f) ||
+         p->x > b->x + (b->xLen / 2.0f) ||
+         p->y < b->y - (b->yLen / 2.0f) ||
+         p->y > b->y + (b->yLen / 2.0f));
+      else
+        return 1;
+    
+    }
+    break;
+  case 1:;
+    enemy* e = va_arg(v, enemy*);
+    for (int i = 0; i < NUMBER_OF_BUILDINGS; i++)
+    {
+      building* b = buildings + i;
+      if (b->xLen == 0 || b->yLen == 0)
+        continue;
+      if (b->x - e->x > CP_System_GetWindowWidth() / 2.0f || b->y - e->y > CP_System_GetWindowHeight() / 2.0f)
+        continue;
+      if (e->x < b->x - (b->xLen / 2.0f) ||
+        e->x > b->x + (b->xLen / 2.0f) ||
+        e->y < b->y - (b->yLen / 2.0f) ||
+        e->y > b->y + (b->yLen / 2.0f));
+      else
+        return 1;
+
+    }
+    break;
+    break;
+  }
+  return 0;
+}
+
 int checkAgainstBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...)
 {
   
   va_list v;
   va_start(v, which);
+  int result = 0;
   switch (which) 
   {
   case 0:;
@@ -246,13 +298,12 @@ int checkAgainstBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...
       float distance = sqrtf(tX2 * tX2 + tY2 * tY2);
       if (distance < p->playerRadius)
       {
-        int result = 0;
-        if (sqrtf(((p->x + (p->velocity[0]))-tX) * ((p->x + (p->velocity[0])) - tX) + tY2 * tY2) < distance)
+
+        if (sqrtf(((p->x + (p->velocity[0])) - tX) * ((p->x + (p->velocity[0])) - tX) + tY2 * tY2) < distance)
            result += 1;
         if (sqrtf(((p->y + (p->velocity[1])) - tY) * ((p->y + (p->velocity[1])) - tY) + tX2 * tX2) < distance)
           result += 2;
-        if (result != 0)
-          return result;
+          
       }
     }
     break;
@@ -277,15 +328,13 @@ int checkAgainstBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...
       float tX2 = e->x - tX;
       float tY2 = e->y - tY;
       float distance = sqrtf(tX2 * tX2 + tY2 * tY2);
-      if (distance < e->radius)
+      if (distance < e->radius/2.0f)
       {
-        int result = 0;
-        if (sqrtf(((e->x + (e->dir[0])) - tX) * ((e->x + (e->dir[0])) - tX) + tY2 * tY2) < distance)
+        if (sqrtf(((e->x + e->dir[0] * CP_System_GetDt()) - tX) * ((e->x + e->dir[0] * CP_System_GetDt() - tX) + tY2 * tY2)) < distance)
           result += 1;
-        if (sqrtf(((e->y + (e->dir[1])) - tY) * ((e->y + (e->dir[1])) - tY) + tX2 * tX2) < distance)
+        if (sqrtf(((e->y + e->dir[1] * CP_System_GetDt()) - tY) * ((e->y + e->dir[1] * CP_System_GetDt() - tY) + tX2 * tX2)) < distance)
           result += 2;
-        if (result != 0)
-          return result;
+        
       }
     }
     break;
@@ -318,5 +367,5 @@ int checkAgainstBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...
     break;
   }
   va_end(v);
-  return 0;
+  return result;
 }

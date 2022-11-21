@@ -1,6 +1,8 @@
 #include "structs.h"
 #include "cprocessing.h"
+#include "checkStuff.h"
 #include <stdio.h>
+
 
 int addPickup(item a, string* pickupText)
 {
@@ -60,7 +62,7 @@ int addPickup(item a, string* pickupText)
   return 0;
 }
 
-void addEnemy(int bossesEnabled, enemy* en, enemy* bosses)
+void addEnemy(int bossesEnabled, enemy* en, enemy* bosses, building *buildings, camera c)
 {
   if (bossesEnabled == 0)
   {
@@ -71,8 +73,13 @@ void addEnemy(int bossesEnabled, enemy* en, enemy* bosses)
       if (en[i].active == 0)
       {
         en[i].active = 1;
-        en[i].x = CP_Random_RangeFloat(-CP_System_GetWindowWidth() / 2.0f + 200, CP_System_GetWindowWidth() / 2.0f - 200);
-        en[i].y = CP_Random_RangeFloat(-CP_System_GetWindowHeight() / 2.0f + 200, CP_System_GetWindowHeight() / 2.0f - 200);
+        en[i].x = CP_Random_RangeFloat(c.x - CP_System_GetWindowWidth() / 2.0f , c.x + CP_System_GetWindowWidth() / 2.0f);
+        en[i].y = CP_Random_RangeFloat(c.y  - CP_System_GetWindowHeight() / 2.0f, c.y +  CP_System_GetWindowHeight() / 2.0f);
+        while (checkInsideBuilding(buildings, 1, en[i]) != 0) 
+        {
+          en[i].x = CP_Random_RangeFloat(c.x - CP_System_GetWindowWidth() / 2.0f, c.x + CP_System_GetWindowWidth() / 2.0f);
+          en[i].y = CP_Random_RangeFloat(c.y - CP_System_GetWindowHeight() / 2.0f, c.y + CP_System_GetWindowHeight() / 2.0f);
+        }
         en[i].speed = 50;
         en[i].cooldown = 1.5f;
         en[i].type = CP_Random_RangeInt(0, 1);
@@ -93,8 +100,13 @@ void addEnemy(int bossesEnabled, enemy* en, enemy* bosses)
         if (en[i].active == 0)
         {
           en[i].active = 1;
-          en[i].x = CP_Random_RangeFloat(-CP_System_GetWindowWidth() / 2.0f + 200, CP_System_GetWindowWidth() / 2.0f - 200);
-          en[i].y = CP_Random_RangeFloat(-CP_System_GetWindowHeight() / 2.0f + 200, CP_System_GetWindowHeight() / 2.0f - 200);
+          en[i].x = CP_Random_RangeFloat(c.x - CP_System_GetWindowWidth() / 2.0f, c.x + CP_System_GetWindowWidth() / 2.0f);
+          en[i].y = CP_Random_RangeFloat(c.y - CP_System_GetWindowHeight() / 2.0f, c.y + CP_System_GetWindowHeight() / 2.0f);
+          while (checkInsideBuilding(buildings, 1, en[i]) != 0)
+          {
+            en[i].x = CP_Random_RangeFloat(c.x - CP_System_GetWindowWidth() / 2.0f, c.x + CP_System_GetWindowWidth() / 2.0f);
+            en[i].y = CP_Random_RangeFloat(c.y - CP_System_GetWindowHeight() / 2.0f, c.y + CP_System_GetWindowHeight() / 2.0f);
+          }
           en[i].speed = 50;
           en[i].cooldown = 1.5f;
           en[i].type = CP_Random_RangeInt(0, 1);
@@ -113,8 +125,13 @@ void addEnemy(int bossesEnabled, enemy* en, enemy* bosses)
         if (bosses[i].active == 0)
         {
           bosses[i].active = 1;
-          bosses[i].x = CP_Random_RangeFloat(-CP_System_GetWindowWidth() / 2.0f + 200, CP_System_GetWindowWidth() / 2.0f - 200);
-          bosses[i].y = CP_Random_RangeFloat(-CP_System_GetWindowHeight() / 2.0f + 200, CP_System_GetWindowHeight() / 2.0f - 200);
+          bosses[i].x = CP_Random_RangeFloat(c.x - CP_System_GetWindowWidth() / 2.0f, c.x + CP_System_GetWindowWidth() / 2.0f);
+          bosses[i].y = CP_Random_RangeFloat(c.y - CP_System_GetWindowHeight() / 2.0f, c.y + CP_System_GetWindowHeight() / 2.0f);
+          while (checkInsideBuilding(buildings, 1, bosses[i]) != 0)
+          {
+            bosses[i].x = CP_Random_RangeFloat(c.x - CP_System_GetWindowWidth() / 2.0f, c.x + CP_System_GetWindowWidth() / 2.0f);
+            bosses[i].y = CP_Random_RangeFloat(c.y - CP_System_GetWindowHeight() / 2.0f, c.y + CP_System_GetWindowHeight() / 2.0f);
+          }
           bosses[i].speed = 25;
           bosses[i].cooldown = .2f;
           bosses[i].health = 300;

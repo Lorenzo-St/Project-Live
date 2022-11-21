@@ -12,9 +12,10 @@
 //---------------------------------------------------------
 
 #pragma once
-
+#include "structs.h"
 void gameLoopInit(void);
 void gameLoopUpdate(void);
 void gameLoopExit(void);
+camera *retCam();
 
 
