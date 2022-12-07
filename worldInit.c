@@ -71,9 +71,17 @@ int initEnemies(enemy* en, building* buildings)
 
     float Ex = CP_Random_RangeFloat(-CP_System_GetWindowWidth() / 2.0f + 200, CP_System_GetWindowWidth() / 2.0f - 200);
     float Ey = CP_Random_RangeFloat(-CP_System_GetWindowHeight() / 2.0f + 200, CP_System_GetWindowHeight() / 2.0f - 200);
+    int skips = 0;
     en[i] = (enemy){ 0, Ex, Ey };
+
     while (checkInsideBuilding(buildings, 1, en[i]) != 0)
     {
+      if (skips++ > 200)
+      {
+        en[i].x = 10000;
+        en[i].y = 10000;
+        break;
+      }
       en[i].x = CP_Random_RangeFloat(-CP_System_GetWindowWidth() / 2.0f + 200, CP_System_GetWindowWidth() / 2.0f - 200);
       en[i].y = CP_Random_RangeFloat(-CP_System_GetWindowHeight() / 2.0f + 200, CP_System_GetWindowHeight() / 2.0f - 200);
     }

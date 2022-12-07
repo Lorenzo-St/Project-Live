@@ -93,7 +93,7 @@ int moveBullets(bullet* bullets, enemy* en, enemy* bosses, player *pl, item *ite
             if (en[k].health <= 0)
             {
               (*pl).kills++;
-              if (CP_Random_RangeInt(0, 100) < 75)
+              if (CP_Random_RangeInt(0, 100) < /*75*/ 100)
               {
                 float temploc[2] = { en[k].x, en[k].y };
                 dropItem(temploc, items);

@@ -150,14 +150,14 @@ int dropItem(float loc[], item* items)
     {
       items[i].x = loc[0];
       items[i].y = loc[1];
-      items[i].type = CP_Random_RangeInt(0, 2);
+      items[i].type = CP_Random_RangeInt(1, 1);
       switch (items[i].type)
       {
       case 0:
         items[i].containes = CP_Random_RangeInt(40, 90);
         break;
       case 1:
-        items[i].containes = CP_Random_RangeInt(1, 4);
+        items[i].containes = CP_Random_RangeInt(0, 1);
         break;
       case 2:
         items[i].containes = CP_Random_RangeInt(1, 5);

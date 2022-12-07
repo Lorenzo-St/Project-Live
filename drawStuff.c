@@ -2,6 +2,8 @@
 #include "structs.h"
 #include "cprocessing.h"
 #include "stdio.h"
+#include "checkStuff.h"
+
 #include <math.h>
 
 void drawPlayer(player pl, camera c)
@@ -198,4 +200,81 @@ void drawBuildings(building *buildings, camera c)
 
     CP_Graphics_DrawRect((buildings[i].x - c.x) + (CP_System_GetWindowWidth() / 2.0f), -(buildings[i].y - c.y) + (CP_System_GetWindowHeight() / 2.0f),  buildings[i].xLen, buildings[i].yLen);
   }
+}
+
+void drawInventory(InvItem* head) 
+{
+  float centerX = SCREEN_WIDTH * (6.5f / 8.0f);
+  float centerY = SCREEN_HEIGHT / 2.0f;
+  float pannelWidth = SCREEN_WIDTH * (3 / 8.0f);
+  float pannelHeight = SCREEN_HEIGHT * 1.0f;
+  float itemWidth = pannelWidth / ((ITEMS_PER_ROW));
+  float itemHeight = itemWidth;
+  float itemX = centerX - (pannelWidth/2) + itemWidth;
+  float itemY = SCREEN_HEIGHT / 6.0f;
+  int row = 0;
+  int i = 0;
+
+  CP_Settings_Fill(INVENTORY);
+  CP_Graphics_DrawRectAdvanced(centerX, centerY, pannelWidth, pannelHeight, 0, 20.0f);
+  CP_Settings_Fill(BLACK);
+  CP_Settings_TextSize(90);
+  CP_Font_DrawText("Inventory", centerX, itemHeight/1.5f);
+  while (head) 
+  {
+    float pos[2] = { itemX + (itemWidth * 1.15f * i) ,itemY + (itemHeight * 1.25f * row) };
+    CP_Color c = BLACK;
+    if (checkMouseBoxCollide(pos[0] - SCREEN_WIDTH * .5f, -(pos[1] - SCREEN_HEIGHT * .5f), itemWidth, itemHeight))
+    {
+      c = WHITE;
+    }
+    CP_Settings_Fill(c);
+    CP_Graphics_DrawRectAdvanced(pos[0], pos[1], itemWidth, itemHeight, 0, 20);
+    head = head->next;
+    if (++i >= ITEMS_PER_ROW - 1)
+    {
+      row++;
+      i = 0;
+    }
+
+  }
+}
+
+void drawArc(float startAngle, float endAngle, float x, float y, float radius) 
+{
+  CP_Graphics_BeginShape();
+  CP_Graphics_AddVertex(x, y);
+  for (; startAngle < endAngle; startAngle++)
+  {
+    float x2 = x + radius * cosf(startAngle * 3.1415f / 180.0f);
+    float y2 = y + radius * sinf(startAngle * 3.1415f / 180.0f);
+    CP_Graphics_AddVertex(x2, y2);
+  }
+  CP_Graphics_EndShape();
+}
+
+void drawWheel(InvItem* wheel)
+{
+  float x = SCREEN_WIDTH / 2.0f;
+  float y = SCREEN_HEIGHT / 2.0f;
+  float radius = SCREEN_WIDTH / 2.0f;
+  CP_Color C = WHEEL_BG;
+  CP_Settings_Fill(C);
+  C.a += 100;
+  CP_Settings_Stroke(C);
+  CP_Settings_StrokeWeight(10);
+  CP_Graphics_DrawEllipseAdvanced(x, y, radius, radius, 0);
+  CP_Settings_StrokeWeight(2);
+  radius *= .5f;
+  for (float angle = -1; angle < 360; angle += 60) 
+  {
+    if (checkMouseArcCollide(angle, angle + 61, x, y, radius))
+      C = WHEEL_FG;
+    else
+      C = WHEEL_BG;
+    CP_Settings_Fill(C);
+    drawArc(angle, angle + 61, x, y, radius);
+  }
+
+  
 }

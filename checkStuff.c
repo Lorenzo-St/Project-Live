@@ -3,10 +3,40 @@
 #include "addStuff.h"
 #include "shootStuff.h"
 #include "playerInv.h"
+
 #include <stdarg.h>
+#include <stdio.h>
 #include <math.h>
 
-int checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, int isPaused, int check)
+bool checkMouseBoxCollide(float x, float y, float width, float height) 
+{
+  float topCorner[2] = { x - .5f * width, y + .5f * height };
+  float bottomCorner[2] = { x + .5f * width, y - .5f * height };
+  float mousePos[2] = { CP_Input_GetMouseX() - .5f * SCREEN_WIDTH, -(CP_Input_GetMouseY() - .5f * SCREEN_HEIGHT) };
+  if (mousePos[0] < topCorner[0] 
+    || mousePos[0] > bottomCorner[0] 
+    || mousePos[1] > topCorner[1] 
+    || mousePos[1] < bottomCorner[1]) 
+  {
+    return 0;
+  }
+  return 1;
+}
+
+bool checkMouseArcCollide(float startAngle, float endAngle, float centerX, float centerY, float radius) 
+{
+  float mouse[2] = { CP_Input_GetMouseX(), CP_Input_GetMouseY() };
+  float angle = atan2f(centerY - mouse[1], centerX - mouse[0]);
+  float distance = sqrtf((mouse[0] - centerX) * (mouse[0] - centerX) + (mouse[1] - centerY) * (mouse[1] - centerY));
+  angle *= (180.0f / 3.14159f);
+  angle += 180.0f;
+  if (angle < startAngle || angle > endAngle || distance > radius)
+    return false;
+  
+  return true;
+}
+
+bool checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, bool *InvOpen, bool* wheelOpen,int isPaused, int check)
 {
   (*pl).velocity[0] = 0.0f;
   (*pl).velocity[1] = 0.0f;
@@ -34,9 +64,7 @@ int checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, i
         if ((*pl).powerUp != 2)
           (*pl).cooldown = .1f;
         else if ((*pl).powerUp == 2)
-          (*pl).cooldown = .0f;
-
-        break;
+         break;
       case 2:
         if ((*pl).powerUp != 2)
           (*pl).cooldown = 1.3f;
@@ -59,13 +87,24 @@ int checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, i
     {
       switch (playerKeys[i])
       {
-      case 340:
+      case KEY_I:
+        pl->powerUp = 5;
+        pl->health = 300;
+        pl->powerUpTimer = INFINITY;
+        break;
+      case KEY_Q:
+        *wheelOpen = !*wheelOpen;
+        break;
+      case KEY_E:
+        *InvOpen = !*InvOpen;
+        break;
+      case KEY_LEFT_SHIFT:
         if (*multiplier <= 1)
         {
           *multiplier = 4;
         }
         break;
-      case 32:
+      case KEY_SPACE:
         if ((*pl).weapon == 4)
           playerFire((*pl), bullets);
         break;
@@ -75,16 +114,17 @@ int checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, i
     {
       switch (playerKeys[i])
       {
-      case 87:
+
+      case KEY_W:
         (*pl).velocity[1] += velo;
         break;
-      case 65:
+      case KEY_A:
         (*pl).velocity[0] += -velo;
         break;
-      case 83:
+      case KEY_S:
         (*pl).velocity[1] += -velo;
         break;
-      case 68:
+      case KEY_D:
         (*pl).velocity[0] += velo;
         break;
       case 256:
@@ -93,7 +133,7 @@ int checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, i
         else
           isPaused = 1;
         break;
-      case 32:
+      case KEY_SPACE:
         if ((*pl).weapon == 4)
           break;
         if ((*pl).cooldown <= 0)
@@ -153,10 +193,15 @@ int checkItems(item *items, player *pl, enemy *en, enemy *bosses, string *pickup
       case 0:
         (*pl).health += items[i].containes;
         break;
-      case 1:
-        
-
-
+      case 1:;
+        unsigned char id = (unsigned char)items->containes;
+        int j = addItem(id);
+        if (j == -1)
+        {
+          items[i].active = 0;
+          return -1;
+        }
+          
 
         break;
       case 2:
@@ -218,7 +263,7 @@ int checkItems(item *items, player *pl, enemy *en, enemy *bosses, string *pickup
   return 0;
 }
 
-int checkInsideBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...) 
+bool checkInsideBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...)
 {
   va_list v;
   va_start(v, which);
@@ -265,7 +310,7 @@ int checkInsideBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...)
   return 0;
 }
 
-int checkAgainstBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...)
+bool checkAgainstBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...)
 {
   
   va_list v;
@@ -369,3 +414,4 @@ int checkAgainstBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...
   va_end(v);
   return result;
 }
+

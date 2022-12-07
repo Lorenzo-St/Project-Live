@@ -1,11 +1,11 @@
 #pragma once
-
-
-/* |----------------------- Defines ---------------------------| */
+#include "cprocessing.h"
+/* |----------------------- Defines  ---------------------------| */
 #define MAX_ENEMIES 100
 #define MAX_BULLETS 500
 #define MAX_DROPS 10
-#define KEY_COUNT 6
+#define MAX_ITEMS 6
+#define KEY_COUNT 9
 #define SPREAD_COUNT 10
 #define BULLET_SPEED 10
 #define MAX_BOSSESS 10
@@ -13,8 +13,23 @@
 #define MAX_TEXT 10
 #define AUDIOS 2
 #define NUMBER_OF_BUILDINGS 50
+#define FALSE 0
+#define false FALSE
+#define TRUE 1
+#define true TRUE
+#define ITEMS_PER_ROW 10
+#define WHEEL_SIZE 6
+#define SCREEN_WIDTH  CP_System_GetWindowWidth()
+#define SCREEN_HEIGHT CP_System_GetWindowHeight()
 
-/* |----------------------- Structs ---------------------------| */
+/* |----------------------- Colors   ---------------------------| */
+#define INVENTORY CP_Color_CreateHex(0X505050BA)
+#define WHEEL_BG  CP_Color_CreateHex(0xC7C5FC7C)
+#define WHEEL_FG  CP_Color_CreateHex(0xe0e7ee7C)
+#define BLACK     CP_Color_CreateHex(0x000000FF)
+#define WHITE     CP_Color_CreateHex(0xFFFFFFFF)
+
+/* |-----------------------  types   ---------------------------| */
 
 typedef unsigned int bool;
 
@@ -129,4 +144,6 @@ typedef struct string
   float life;
   char buffer[100];
 }string;
+
+/* |----------------------- Gloabals ---------------------------| */
 

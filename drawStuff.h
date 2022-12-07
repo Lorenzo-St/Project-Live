@@ -9,3 +9,5 @@ void drawBosses(enemy *bosses, camera C);
 void drawPickupText(string *pickupText, camera C);
 void drawItems(item *items, camera C);
 void drawBuildings(building* buildings, camera c);
+void drawInventory(InvItem* head);
+void drawWheel(InvItem* wheel);

@@ -24,18 +24,29 @@
 #include "shootStuff.h"
 #include "checkStuff.h"
 #include "debugInfo.h"
+#include "playerInv.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 /* |---------------------- Game Stuff --------------------| */
 
-/* Gameworld and enemy stats and storage */
-int bossesEnabled = 0;
+/* Input Keys */
+int playerKeys[KEY_COUNT] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q };
+
+/* Bools */
+bool bossesEnabled = false;
+bool isPaused = false;
+bool invOpen = false;
+bool wheelOpen = false;
+
+/* standard Data*/
 int screen = 0;
-int isPaused = 0;
 float addTimer = 5.0f;
 float multiplier = 1;
+
+/* Arrays, Change to Linked lists when optimizing */
 enemy en[MAX_ENEMIES] = { 0 };
 enemy bosses[MAX_BOSSESS] = { 0 };
 bullet bullets[MAX_BULLETS] = { 0 };
@@ -46,7 +57,6 @@ player pl = { 0 };
 camera c = { 0 };
 building buildings[NUMBER_OF_BUILDINGS] = { 0 };
 
-int playerKeys[KEY_COUNT] = { 87, 65, 83, 68, 340, 32 };
 
 camera *retCam() 
 {
@@ -69,6 +79,14 @@ void gameLoopInit(void)
   initBullets(bullets);
   initDrops(items);
   initBosses(bosses);
+  for(int i = 0; i < WHEEL_SIZE; i++)
+  {
+    removeFromWheel(i);
+  }  
+  while (returnHead())
+  {
+    freeItem(0);
+  }
 
   while (checkInsideBuilding(buildings, 0, pl) != 0)
   {
@@ -113,7 +131,12 @@ void gameLoopUpdate(void)
   drawBosses(bosses,c);
   drawPickupText(pickupText,c);
   drawBuildings(buildings,c);
+  if (invOpen)
+    drawInventory(returnHead());
+  if (wheelOpen)
+    drawWheel(returnWheel());
 
+  CP_Settings_StrokeWeight(0);
   /* Check  enemy shooting */
   enemyShoot(en, bulletSounds, bullets, pl);
   bossShoot(bosses, pl, bullets);
@@ -126,7 +149,7 @@ void gameLoopUpdate(void)
   int check = checkAgainstBuilding(buildings, 0, &pl);
 
   /* Check user input and collisions */
-  checkKeys(&pl, &multiplier, bullets, playerKeys, isPaused, check);
+  checkKeys(&pl, &multiplier, bullets, playerKeys, &invOpen, &wheelOpen, isPaused, check);
   checkItems(items, &pl, en, bosses, pickupText);
 
   CP_Settings_Fill(CP_Color_Create(139, 50, 77, (200 - pl.health)));
