@@ -37,16 +37,16 @@ void initSliders(void)
     {
     case 0:
       snprintf(audioSliders[i].title, sizeof audioSliders[i].title, "Sounds");
-      audioSliders[i].x = CP_System_GetWindowWidth() / 2.0f;
-      audioSliders[i].y = CP_System_GetWindowHeight() / 3.0f;
-      audioSliders[i].length = CP_System_GetWindowWidth() / 5.0f;
+      audioSliders[i].x = SCREEN_WIDTH / 2.0f;
+      audioSliders[i].y = SCREEN_HEIGHT / 3.0f;
+      audioSliders[i].length = SCREEN_WIDTH / 5.0f;
       audioSliders[i].value = 1.0f;
       break;
     case 1:
       snprintf(audioSliders[i].title, sizeof audioSliders[i].title, "Music");
-      audioSliders[i].x = CP_System_GetWindowWidth() / 2.0f;
-      audioSliders[i].y = CP_System_GetWindowHeight() / 3.0f + 200;
-      audioSliders[i].length = CP_System_GetWindowWidth() / 5.0f;
+      audioSliders[i].x = SCREEN_WIDTH / 2.0f;
+      audioSliders[i].y = SCREEN_HEIGHT / 3.0f + 200;
+      audioSliders[i].length = SCREEN_WIDTH / 5.0f;
       audioSliders[i].value = .5f;
       break;
     }
@@ -62,36 +62,36 @@ void setupOptionsButtons(void)
     {
     case 0:
       snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Display!");
-      optionsButton[i].x = (CP_System_GetWindowWidth() / 6.0f);
-      optionsButton[i].y = (CP_System_GetWindowHeight() / 10.0f);
+      optionsButton[i].x = (SCREEN_WIDTH / 6.0f);
+      optionsButton[i].y = (SCREEN_HEIGHT / 10.0f);
       optionsButton[i].width = 300;
       optionsButton[i].height = 100;
       break;
     case 1:
       snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Graphics!");
-      optionsButton[i].x = (CP_System_GetWindowWidth() / 3.0f);
-      optionsButton[i].y = (CP_System_GetWindowHeight() /10.0f);
+      optionsButton[i].x = (SCREEN_WIDTH / 3.0f);
+      optionsButton[i].y = (SCREEN_HEIGHT /10.0f);
       optionsButton[i].width = 300;
       optionsButton[i].height = 100;
       break;
     case 2:
       snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Controls!");
-      optionsButton[i].x = (CP_System_GetWindowWidth() / 2.0f);
-      optionsButton[i].y = (CP_System_GetWindowHeight() / 10.0f);
+      optionsButton[i].x = (SCREEN_WIDTH / 2.0f);
+      optionsButton[i].y = (SCREEN_HEIGHT / 10.0f);
       optionsButton[i].width = 300;
       optionsButton[i].height = 100;
       break;
     case 3:
       snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Audio!");
-      optionsButton[i].x = (CP_System_GetWindowWidth() / 1.5f);
-      optionsButton[i].y = (CP_System_GetWindowHeight() / 10.0f);
+      optionsButton[i].x = (SCREEN_WIDTH / 1.5f);
+      optionsButton[i].y = (SCREEN_HEIGHT / 10.0f);
       optionsButton[i].width = 300;
       optionsButton[i].height = 100;
       break;
     case 4:
       snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Exit!");
-      optionsButton[i].x = (CP_System_GetWindowWidth() / 1.2f);
-      optionsButton[i].y = (CP_System_GetWindowHeight() / 10.0f);
+      optionsButton[i].x = (SCREEN_WIDTH / 1.2f);
+      optionsButton[i].y = (SCREEN_HEIGHT / 10.0f);
       optionsButton[i].width = 300;
       optionsButton[i].height = 100;
       break;
@@ -105,15 +105,15 @@ void setupOptionsButtons(void)
     {
     case 0:
       snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "Set Fullscreen");
-      displayScreen[i].x = (CP_System_GetWindowWidth() / 2.0f);
-      displayScreen[i].y = (CP_System_GetWindowHeight() / 3.0f);
+      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].y = (SCREEN_HEIGHT / 3.0f);
       displayScreen[i].width = 300;
       displayScreen[i].height = 150;
       break;
     case 1:
       snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "Set Windowed");
-      displayScreen[i].x = (CP_System_GetWindowWidth() / 2.0f);
-      displayScreen[i].y = (CP_System_GetWindowHeight() / 2.0f);
+      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].y = (SCREEN_HEIGHT / 2.0f);
       displayScreen[i].width = 300;
       displayScreen[i].height = 150;
       break;
@@ -259,8 +259,8 @@ void drawSubScreen(void)
   switch (opsSubScreen)
   {
   case 0:
-    snprintf(buffer, sizeof buffer, "The current screen resolution is %i by %i", CP_System_GetWindowWidth(), CP_System_GetWindowHeight());
-    CP_Font_DrawText(buffer, CP_System_GetWindowWidth() / 2.0f, 250.0f);
+    snprintf(buffer, sizeof buffer, "The current screen resolution is %i by %i", SCREEN_WIDTH, SCREEN_HEIGHT);
+    CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, 250.0f);
     for (int i = 0; i < 2; i++)
     {
       if (mX > displayScreen[i].x + (.5 * displayScreen[i].width) || mX < displayScreen[i].x - (.5 * displayScreen[i].width) || mY > displayScreen[i].y + (.5 * displayScreen[i].height) || mY < displayScreen[i].y - (.5 * displayScreen[i].height))
@@ -306,17 +306,17 @@ void drawSubScreen(void)
     break;
   case 1:
     snprintf(buffer, sizeof buffer, "Wumpus is very lonely today");
-    CP_Font_DrawText(buffer, CP_System_GetWindowWidth() / 2.0f, 250.0f);
+    CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, 250.0f);
     break;
   case 2:;
-    float xpos = CP_System_GetWindowWidth() / 3.0f;
-    float ypos = CP_System_GetWindowHeight() / 3.0f;
+    float xpos = SCREEN_WIDTH / 3.0f;
+    float ypos = SCREEN_HEIGHT / 3.0f;
     CP_Settings_Fill(CP_Color_Create(50, 50, 50, 255));
-    CP_Graphics_DrawRect(xpos, ypos, CP_System_GetWindowWidth() / 35.0f, CP_System_GetWindowHeight() / 20.0f);
-    CP_Graphics_DrawRect(xpos, ypos + 100, CP_System_GetWindowWidth() / 35.0f, CP_System_GetWindowHeight() / 20.0f);
-    CP_Graphics_DrawRect(xpos, ypos + 200, CP_System_GetWindowWidth() / 35.0f, CP_System_GetWindowHeight() / 20.0f);
-    CP_Graphics_DrawRect(xpos, ypos + 300, CP_System_GetWindowWidth() / 35.0f, CP_System_GetWindowHeight() / 20.0f);
-    CP_Graphics_DrawRect(xpos, ypos + 400, CP_System_GetWindowWidth() / 15.0f, CP_System_GetWindowHeight() / 20.0f);
+    CP_Graphics_DrawRect(xpos, ypos, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos, ypos + 100, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos, ypos + 200, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos, ypos + 300, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos, ypos + 400, SCREEN_WIDTH / 15.0f, SCREEN_HEIGHT / 20.0f);
     CP_Graphics_DrawEllipse(xpos - 150, ypos + 400, 100, 150);
     CP_Graphics_DrawEllipse(xpos, ypos + 550, 100, 150);
     CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));

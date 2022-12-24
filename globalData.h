@@ -1,5 +1,7 @@
 #pragma once
-
-float getTime(void);
-float setTime(float);
-float addTime(float);
+ 
+int    getBulletCount  (void);
+float  getTime         (void);
+void   setBulletCount  (int);
+void   setTime         (float);
+void   addTime         (float);

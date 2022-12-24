@@ -33,22 +33,22 @@ void setupEndButtons()
     {
     case 0:
       snprintf(endButtons[i].words, sizeof endButtons[i].words, "YES!");
-      endButtons[i].x = (CP_System_GetWindowWidth() / 3.0f);
-      endButtons[i].y = (CP_System_GetWindowHeight() / 1.5f);
+      endButtons[i].x = (SCREEN_WIDTH / 3.0f);
+      endButtons[i].y = (SCREEN_HEIGHT / 1.5f);
       endButtons[i].width = 300;
       endButtons[i].height = 100;
       break;
     case 1:
       snprintf(endButtons[i].words, sizeof endButtons[i].words, "NO!");
-      endButtons[i].x = (CP_System_GetWindowWidth() / 1.5f);
-      endButtons[i].y = (CP_System_GetWindowHeight() / 1.5f);
+      endButtons[i].x = (SCREEN_WIDTH / 1.5f);
+      endButtons[i].y = (SCREEN_HEIGHT / 1.5f);
       endButtons[i].width = 300;
       endButtons[i].height = 100;
       break;
     case 2:
       snprintf(endButtons[i].words, sizeof endButtons[i].words, "Save & Exit!");
-      endButtons[i].x = (CP_System_GetWindowWidth() / 2.0f);
-      endButtons[i].y = (CP_System_GetWindowHeight() / 1.25f);
+      endButtons[i].x = (SCREEN_WIDTH / 2.0f);
+      endButtons[i].y = (SCREEN_HEIGHT / 1.25f);
       endButtons[i].width = 300;
       endButtons[i].height = 100;
       break;
@@ -125,13 +125,13 @@ void endScreenUpdate(void)
   CP_Graphics_ClearBackground(CP_Color_Create(139, 50, 77, 100));
   CP_Settings_TextSize(70);
   CP_Settings_Fill(CP_Color_Create(10, 10, 10, 255));
-  CP_Font_DrawText("YOU DIED", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 3.0f);
-  CP_Font_DrawText("PLAY AGAIN?", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f - 100);
+  CP_Font_DrawText("YOU DIED", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 3.0f);
+  CP_Font_DrawText("PLAY AGAIN?", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f - 100);
 
   char buff[100];
   snprintf(buff, sizeof buff, "%.3f seconds", getTime());
-  CP_Font_DrawText("You lasted for:", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 4.0f - 80);
-  CP_Font_DrawText(buff, CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 4.0f);
+  CP_Font_DrawText("You lasted for:", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 4.0f - 80);
+  CP_Font_DrawText(buff, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 4.0f);
   CP_Settings_TextSize(50);
   CP_Settings_StrokeWeight(10);
   drawEndButtons();

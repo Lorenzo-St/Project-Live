@@ -25,6 +25,7 @@
 #include "checkStuff.h"
 #include "debugInfo.h"
 #include "playerInv.h"
+#include "globalImages.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -33,13 +34,14 @@
 /* |---------------------- Game Stuff --------------------| */
 
 /* Input Keys */
-int playerKeys[KEY_COUNT] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q };
+int playerKeys[KEY_COUNT] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q, KEY_R };
 
 /* Bools */
 bool bossesEnabled = false;
 bool isPaused = false;
 bool invOpen = false;
 bool wheelOpen = false;
+bool invHovered = false;
 
 /* standard Data*/
 int screen = 0;
@@ -47,22 +49,34 @@ float addTimer = 5.0f;
 float multiplier = 1;
 
 /* Arrays, Change to Linked lists when optimizing */
-enemy en[MAX_ENEMIES] = { 0 };
-enemy bosses[MAX_BOSSESS] = { 0 };
-bullet bullets[MAX_BULLETS] = { 0 };
+static enemy* enHead = NULL; 
+static bullet* head = NULL;
 item items[MAX_DROPS] = { 0 };
-string pickupText[MAX_TEXT] = { 0 };
+notiString pickupText[MAX_TEXT] = { 0 };
 CP_Sound bulletSounds[AUDIOS] = { 0 };
 player pl = { 0 };
 camera c = { 0 };
 building buildings[NUMBER_OF_BUILDINGS] = { 0 };
 
-
-camera *retCam() 
+camera *retCam(void) 
 {
   return &c;
 }
 
+player* returnPlayer(void) 
+{
+  return &pl;
+}
+
+bool returnInvSel(void) 
+{
+  return invHovered;
+}
+
+void disableWheel(void) 
+{
+  wheelOpen = false;
+}
 // use CP_Engine_SetNextGameState to specify this function as the initialization function
 // this function will be called once at the beginning of the program
 void gameLoopInit(void)
@@ -71,14 +85,15 @@ void gameLoopInit(void)
   CP_Settings_RectMode(CP_POSITION_CENTER);
   CP_Settings_EllipseMode(CP_POSITION_CENTER);
   CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+  CP_Settings_ImageWrapMode(CP_IMAGE_WRAP_REPEAT);
   bossesEnabled = 0;
-  initBuildings(buildings);
+  initScrollable();
+  //initBuildings(buildings);
   initAudio(bulletSounds);
   initPlayer(&pl, &multiplier, &addTimer);
-  initEnemies(en, buildings);
-  initBullets(bullets);
   initDrops(items);
-  initBosses(bosses);
+  initImages();
+
   for(int i = 0; i < WHEEL_SIZE; i++)
   {
     removeFromWheel(i);
@@ -87,19 +102,26 @@ void gameLoopInit(void)
   {
     freeItem(0);
   }
+  addItem(0, 1);
+  addToWheel(returnItemAtPos(0), 0, 0);
+  swatchActive(0, &pl);
+  initializeAmmo(&pl);
+  addItem(2, retAmmo()->lightStorage);
 
-  while (checkInsideBuilding(buildings, 0, pl) != 0)
+  /*while (checkInsideBuilding(buildings, 0, pl) != 0)
   {
     pl.x = CP_Random_RangeFloat(-1000, 1000);
     pl.y = CP_Random_RangeFloat(-1000, 1000);
-  }
+  }*/
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the update function
 // this function will be called repeatedly every frame
 void gameLoopUpdate(void)
 {
+
   CP_Settings_Stroke(CP_Color_CreateHex(0x000000ff));
+  drawBackGroundLayer();
   if (pl.health <= 0)
   {
     CP_Engine_SetNextGameState(endScreenInit, endScreenUpdate, endScreenExit);
@@ -108,62 +130,67 @@ void gameLoopUpdate(void)
 
   CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
   addTime(CP_System_GetDt());
-  char buffer[15];
-  snprintf(buffer, sizeof buffer, "%.3f", getTime());
-  CP_Settings_Fill(CP_Color_Create(0, 0, 0, 25));
-  CP_Settings_TextSize(300 - (getTime() - floorf(getTime())) * 125.0f);
-  CP_Font_DrawText(buffer, CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f);
-  CP_Settings_Fill(CP_Color_Create(50, 50, 50, 50));
-  CP_Settings_TextSize(200);
-  CP_Font_DrawText(buffer, CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f);
 
-  pl.direction[0] = CP_Input_GetMouseX()- ((CP_System_GetWindowWidth() / 2.0f) + (pl.x - c.x));
-  pl.direction[1] = CP_Input_GetMouseY() - ((CP_System_GetWindowHeight() / 2.0f) - (pl.y - c.y));
+  pl.direction[0] = CP_Input_GetMouseX()- ((SCREEN_WIDTH / 2.0f) + (pl.x - c.x));
+  pl.direction[1] = CP_Input_GetMouseY() - ((SCREEN_HEIGHT / 2.0f) - (pl.y - c.y));
   pl.rot = (float)(atan2(pl.direction[1], pl.direction[0]) * (180.0f / 3.14159265f) + 90.0f);
   c.x = pl.x;
   c.y = pl.y;
 
   /* Draw all on screen items */
-  drawBullets(bullets,c);
+  drawBullets(head,c);
   drawPlayer(pl,c);
-  drawEnemies(en,c);
-  drawItems(items,c);
-  drawBosses(bosses,c);
+  drawEnemies(&enHead, c);
+  drawItems(items,c);;
   drawPickupText(pickupText,c);
-  drawBuildings(buildings,c);
+  //drawBuildings(buildings,c);
+
   if (invOpen)
-    drawInventory(returnHead());
+    invHovered = drawInventory(returnHead());
+  else
+    invHovered = false;
   if (wheelOpen)
-    drawWheel(returnWheel());
+    drawWheel(&pl);
+  drawAmmo(&pl, invOpen, wheelOpen );
 
   CP_Settings_StrokeWeight(0);
   /* Check  enemy shooting */
-  enemyShoot(en, bulletSounds, bullets, pl);
-  bossShoot(bosses, pl, bullets);
+  enemyShoot(enHead, bulletSounds, &head, pl);
 
   /* Move on screen items    */
-  moveEnemies(en, buildings);
-  moveBullets(bullets, en, bosses, &pl, items, buildings);
-  moveBosses(bosses, buildings);
+  moveEnemies(enHead, buildings);
+  moveBullets(&head, &enHead,  &pl, items, buildings);
 
-  int check = checkAgainstBuilding(buildings, 0, &pl);
+  int check = /*checkAgainstBuilding(buildings, 0, &pl)*/0;
 
   /* Check user input and collisions */
-  checkKeys(&pl, &multiplier, bullets, playerKeys, &invOpen, &wheelOpen, isPaused, check);
-  checkItems(items, &pl, en, bosses, pickupText);
+  checkKeys(&pl, &multiplier, &head, playerKeys, &invOpen, &wheelOpen, isPaused, check);
+  checkItems(items, &pl, enHead, pickupText);
 
   CP_Settings_Fill(CP_Color_Create(139, 50, 77, (200 - pl.health)));
-  CP_Graphics_DrawRect(CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f, CP_System_GetWindowWidth() + 100.0f, CP_System_GetWindowHeight() + 100.0f);
+  CP_Graphics_DrawRect(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, SCREEN_WIDTH + 100.0f, SCREEN_HEIGHT + 100.0f);
   CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
   addTimer -= CP_System_GetDt();
   if (pl.cooldown > 0)
     pl.cooldown -= CP_System_GetDt();
-  drawWeapon(pl.weapon, pl.powerUpTimer, pl.powerUp);
+  //drawWeapon(pl.weapon, pl.powerUpTimer, pl.powerUp);
+
   if (addTimer <= 0)
   {
-    addEnemy(bossesEnabled,en, bosses, buildings, c);
+    int type;
+    if (bossesEnabled)
+    {
+      type = CP_Random_RangeInt(0, ENEMY_TYPE);
+      enHead = setEnemyStats(addEnemy(&enHead), c, type);
+    }
+    else
+    {
+      while (type = CP_Random_RangeInt(0, ENEMY_TYPE), type == 2);
+      enHead = setEnemyStats(addEnemy(&enHead), c, type);
+    }
     addTimer = 5.0f / cbrtf((float)pl.kills + 1.0f);
   }
+
   if (getTime() >= 60.0f)
     bossesEnabled = 1;
   multiplier -= CP_System_GetDt() * 5;
@@ -177,14 +204,11 @@ void gameLoopUpdate(void)
     pl.powerUp = 0;
   CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
   CP_Settings_TextSize(100);
-  if (getTime() < 5.0f)
-    CP_Font_DrawText("Your Goal: Live long", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f);
-  else if (getTime() < 10.0f)
-  {
-    CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255- (int)(50.0f * (5 - (10-getTime())))));
-    CP_Font_DrawText("Your Goal: Live long", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f);
-  }
-  //drawDebugInfo(&pl, en);
+  if (pl.weapon->reloadClock > 0)
+    pl.weapon->reloadClock -= CP_System_GetDt();
+  else if (pl.weapon->reloadClock < 0)
+    pl.weapon->reloadClock = 0;
+  drawDebugInfo(&pl, enHead);
 
 }
 
@@ -196,4 +220,6 @@ void gameLoopExit(void)
   {
     CP_Sound_Free(&bulletSounds[i]);
   }
+  freeImages();
+  releaseScrollable();
 }

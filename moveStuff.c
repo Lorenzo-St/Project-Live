@@ -3,131 +3,120 @@
 #include "addStuff.h"
 #include "checkStuff.h"
 #include "debugInfo.h"
+#include "globalData.h"
+#include "playerInv.h"
+
 #include <math.h>
+
+
 
 int moveEnemies(enemy* en, building *buildings)
 {
-  for (int i = 0; i < MAX_ENEMIES; i++)
+  while(en)
   {
-    if (en[i].active == 0)
-      continue;
+
     
-    if (en[i].dir[0] <= 10 && en[i].dir[1] <= 10)
+    if (en->dir[0] <= 10 && en->dir[1] <= 10)
     {
-      en[i].dir[0] = CP_Random_RangeFloat(-100, 100);
-      en[i].dir[1] = CP_Random_RangeFloat(-100, 100);
+      en->dir[0] = CP_Random_RangeFloat(-100, 100);
+      en->dir[1] = CP_Random_RangeFloat(-100, 100);
     }
-    int check = checkAgainstBuilding( buildings, 1, en[i]);
-    en[i].x += (en[i].dir[0] * CP_System_GetDt()) * (check == 0 || check == 2);
-    en[i].y += (en[i].dir[1] * CP_System_GetDt()) * (check == 0 || check == 1);
-    en[i].dir[0] += -en[i].dir[0] * CP_System_GetDt();
-    en[i].dir[1] += -en[i].dir[1] * CP_System_GetDt();
-    //drawDebugLine(en[i].x, en[i].x + en[i].dir[0], en[i].y, en[i].y + en[i].dir[0]);
+    int check = /*checkAgainstBuilding( buildings, 1, en[i])*/0;
+    en->x += (en->dir[0] * CP_System_GetDt()) * (check == 0 || check == 2);
+    en->y += (en->dir[1] * CP_System_GetDt()) * (check == 0 || check == 1);
+    en->dir[0] += -en->dir[0] * CP_System_GetDt();
+    en->dir[1] += -en->dir[1] * CP_System_GetDt();
+    //drawDebugLine(en->x, en->x + en->dir[0], en->y, en->y + en->dir[0]);
+    en = en->next;
   }
   return 0;
 }
 
-int moveBosses(enemy* bosses, building *buildings)
+int moveBullets(bullet** bullets, enemy** en, player *pl, item *items, building buildings[])
 {
-  for (int i = 0; i < MAX_BOSSESS; i++)
+  int count = 0;
+  //bullet** head = bullets;
+  bullet* current = *bullets;
+  bullet* prev = *bullets;
+  if (current == NULL)
+    return -1;
+  bool freed = false;
+
+  while (current)
   {
-    if (bosses[i].active == 0)
-      continue;
-    if (bosses[i].dir[0] <= 10 && bosses[i].dir[1] <= 10)
-    {
-      bosses[i].dir[0] = CP_Random_RangeFloat(-100, 100);
-      bosses[i].dir[1] = CP_Random_RangeFloat(-100, 100);
+    count++;
+    freed = false;
+    int check = /*checkAgainstBuilding(buildings, 2, current)*/ 0;
+    current->x += (current->dir[0] * current->speed);
+    current->y += (current->dir[1] * current->speed);
+    current->life -= CP_System_GetDt();
+    if (current->life <= 0 || check)
+    { 
+      freed = true;
+      goto end;
     }
-    int check = checkAgainstBuilding(buildings, 1, bosses[i]);
-    bosses[i].x += (bosses[i].dir[0] * CP_System_GetDt()) * (check == 0 || check == 2);
-    bosses[i].y += (bosses[i].dir[1] * CP_System_GetDt()) * (check == 0 || check == 1);
-    bosses[i].dir[0] += -bosses[i].dir[0] * CP_System_GetDt();
-    bosses[i].dir[1] += -bosses[i].dir[1] * CP_System_GetDt();
-    //drawDebugLine(bosses[i].x, bosses[i].x + bosses[i].dir[0], bosses[i].y, bosses[i].y + bosses[i].dir[0]);
-  }
-  return 0;
-}
-
-int moveBullets(bullet* bullets, enemy* en, enemy* bosses, player *pl, item *items, building buildings[])
-{
-
-  for (int i = 0; i < MAX_BULLETS; i++)
-  {
-    if (bullets[i].active)
+    float distance = sqrtf((current->x - pl->x) * (current->x - pl->x) + (current->y - pl->y) * (current->y - pl->y));
+    if (distance < pl->playerRadius && current->users == 0)
     {
-      int check = checkAgainstBuilding(buildings, 2, bullets[i] );
-      bullets[i].active = 1 * (check == 0);
-      bullets[i].x += (bullets[i].dir[0] * bullets[i].speed);
-      bullets[i].y += (bullets[i].dir[1] * bullets[i].speed);
-      bullets[i].life -= CP_System_GetDt();
-      if (bullets[i].life <= 0)
+      if (pl->powerUp != 5)
       {
-        bullets[i].active = 0;
-        bullets[i].users = 0;
-        bullets[i].speed = BULLET_SPEED;
+        pl->health -= current->pwr;
       }
-      float distance = sqrtf((bullets[i].x - (*pl).x) * (bullets[i].x - (*pl).x) + (bullets[i].y - (*pl).y) * (bullets[i].y - (*pl).y));
-      if (distance < (*pl).playerRadius && bullets[i].users == 0)
+      freed = true;
+      goto end;
+    }
+    else if (current->users != 1)
+      goto end;
+    enemy* cur = *en;
+    enemy* preve = *en;
+    while (cur && !freed) 
+    {
+      float distance2 = sqrtf((current->x - cur->x) * (current->x - cur->x) + (current->y - cur->y) * (current->y - cur->y));
+      if (distance2 > cur->radius / 2.0f)
       {
-        if ((*pl).powerUp == 5) 
-        {
-          bullets[i].active = 0;
-          continue;
-        }
-        (*pl).health -= bullets[i].pwr;
-        bullets[i].active = 0;
-        bullets[i].speed = BULLET_SPEED;
+        preve = cur;
+        cur = cur->next;
+        continue;
       }
-      else if (bullets[i].users == 1)
-      {
-        for (int k = 0; k < MAX_ENEMIES; k++)
-        {
-          if (en[k].active == 0)
-            continue;
-          float distance2 = sqrtf((bullets[i].x - en[k].x) * (bullets[i].x - en[k].x) + (bullets[i].y - en[k].y) * (bullets[i].y - en[k].y));
-          if (distance2 < en[k].radius / 2.0f)
-          {
-            en[k].health -= bullets[i].pwr;
-            bullets[i].active = 0;
-            bullets[i].speed = BULLET_SPEED;
-            if (en[k].health <= 0)
-            {
-              (*pl).kills++;
-              if (CP_Random_RangeInt(0, 100) < /*75*/ 100)
-              {
-                float temploc[2] = { en[k].x, en[k].y };
-                dropItem(temploc, items);
-              }
-              en[k].active = 0;
+      cur->health -= current->pwr;
 
-            }
-          }
-        }
-        for (int k = 0; k < MAX_BOSSESS; k++)
-        {
-          if (bosses[k].active == 0)
-            continue;
-          float distance2 = sqrtf((bullets[i].x - bosses[k].x) * (bullets[i].x - bosses[k].x) + (bullets[i].y - bosses[k].y) * (bullets[i].y - bosses[k].y));
-          if (distance2 < bosses[k].radius / 2.0f)
-          {
-            bosses[k].health -= bullets[i].pwr;
-            bullets[i].active = 0;
-            bullets[i].speed = BULLET_SPEED;
-            if (bosses[k].health <= 0)
-            {
-              (*pl).kills++;
-              if (CP_Random_RangeInt(0, 100) < 75)
-              {
-                float temploc[2] = { bosses[k].x, bosses[k].y };
-                dropItem(temploc, items);
-              }
-              bosses[k].active = 0;
+      freed = true;
+      if (cur->health > 0)
+        break;
 
-            }
-          }
-        }
-      }
+      pl->kills++;
+      if (CP_Random_RangeInt(0, 100) > /*75*/ 100)
+        break;
+      float temploc[2] = { cur->x, cur->y };
+      dropItem(temploc, items);
+      enemy* last = cur;
+      if (cur == *en)
+        *en = cur->next;
+      preve->next = last->next;
+      cur = last->next;
+      removeEnemy(last);
+      break;
+    }
+
+    end:
+
+    if (!freed) {
+      prev = current;
+      current = current->next;
+    }
+    else 
+    {
+      bullet* last = current;
+      if (last == *bullets)
+        *bullets = current->next;
+      prev->next = current->next;
+      current = current->next;
+      removeBullet(last);
     }
   }
+
+  if (count > getBulletCount())
+    setBulletCount(count);
+
   return 0;
 }

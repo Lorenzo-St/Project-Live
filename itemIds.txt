@@ -1,0 +1,13 @@
+-1  - NULL ITEM
+0   - pistol [Light]
+1   - Assult Rifle V1 [Lught]
+2   - light ammo
+3   - medium ammo
+4   - heavy ammo
+5   - weapon parts
+6   - Kit parts
+7   - ammo parts
+8   - Health kit
+9   - Mini Shotty
+10  - RPG M99LX
+

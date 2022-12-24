@@ -22,8 +22,8 @@ void initButton(void)
 {
 	returnButton.height = 100;
 	returnButton.width = 300;
-	returnButton.x = CP_System_GetWindowWidth() / 2.0f;
-	returnButton.y = CP_System_GetWindowHeight() / 1.25f;
+	returnButton.x = SCREEN_WIDTH / 2.0f;
+	returnButton.y = SCREEN_HEIGHT / 1.25f;
 	snprintf(returnButton.words, sizeof returnButton.words, "Return");
 }
 
@@ -84,10 +84,10 @@ void creditsUpdate(void)
   drawButton();
 	CP_Settings_TextSize(40);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	CP_Font_DrawText("Create by: Lorenzo St. Luce", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 3.0f);
-	CP_Font_DrawText("Instructor: Andy Ellinger", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.5f);
-	CP_Font_DrawText("Special Thanks: My roommates for play testing.", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f);
-	CP_Font_DrawText("Copyright (c) 2020 DigiPen, All rights reserved.", CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 1.75f);
+	CP_Font_DrawText("Create by: Lorenzo St. Luce", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 3.0f);
+	CP_Font_DrawText("Instructor: Andy Ellinger", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.5f);
+	CP_Font_DrawText("Special Thanks: My roommates for play testing.", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f);
+	CP_Font_DrawText("Copyright (c) 2020 DigiPen, All rights reserved.", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 1.75f);
   checkButton();
 
 }

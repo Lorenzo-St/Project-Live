@@ -60,8 +60,8 @@ void initsButtons(void)
 {
 	submitButton.height = 100;
 	submitButton.width = 300;
-	submitButton.x = CP_System_GetWindowWidth() / 2.0f;
-	submitButton.y = CP_System_GetWindowHeight() / 1.3f;
+	submitButton.x = SCREEN_WIDTH / 2.0f;
+	submitButton.y = SCREEN_HEIGHT / 1.3f;
 	snprintf(submitButton.words, sizeof submitButton.words, "Submit");
 }
 
@@ -87,9 +87,9 @@ void drawLeaderBoard(void)
   for (int i = 0; i < MAX_LINES; i++)
   {
     CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_MIDDLE);
-    CP_Font_DrawText(names[i], CP_System_GetWindowWidth()/3.0f, 100 + (30.0f * i));
+    CP_Font_DrawText(names[i], SCREEN_WIDTH/3.0f, 100 + (30.0f * i));
     CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_RIGHT, CP_TEXT_ALIGN_V_MIDDLE);
-    CP_Font_DrawText(times[i], CP_System_GetWindowWidth() / 1.5f, 100 + (30.0f * i));
+    CP_Font_DrawText(times[i], SCREEN_WIDTH / 1.5f, 100 + (30.0f * i));
   }
 }
 
@@ -208,9 +208,9 @@ void scoresUpdate(void)
   readInput();
   char buff[100];
   snprintf(buff, sizeof buff, "Your Time: %.3f seconds", getTime());
-  CP_Font_DrawText(buff, CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 1.1f);
+  CP_Font_DrawText(buff, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 1.1f);
   snprintf(buff, sizeof buff, "Name: %s", userInput);
-  CP_Font_DrawText(buff, CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 1.2f);
+  CP_Font_DrawText(buff, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 1.2f);
   checkButtonss();
 
 }

@@ -1,5 +1,7 @@
 
 float time = 0;
+int highestBulletCount = 0;
+
 
 float getTime(void) 
 {
@@ -12,4 +14,14 @@ void setTime(float a)
 void addTime(float a) 
 {
   time += a;
+}
+
+int getBulletCount(void) 
+{
+  return highestBulletCount;
+}
+
+void setBulletCount(int a) 
+{
+  highestBulletCount = a;
 }

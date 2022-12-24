@@ -1,0 +1,7 @@
+What you were working on last
+ - Initial release final touches
+   - New menue
+   - New title
+   - Complete options
+   - Credits finished
+   - Objectives pannel

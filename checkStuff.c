@@ -3,6 +3,7 @@
 #include "addStuff.h"
 #include "shootStuff.h"
 #include "playerInv.h"
+#include "drawStuff.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -36,49 +37,25 @@ bool checkMouseArcCollide(float startAngle, float endAngle, float centerX, float
   return true;
 }
 
-bool checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, bool *InvOpen, bool* wheelOpen,int isPaused, int check)
+bool checkKeys(player *pl, float *multiplier, bullet **bullets, int *playerKeys, bool *InvOpen, bool* wheelOpen,int isPaused, int check)
 {
-  (*pl).velocity[0] = 0.0f;
-  (*pl).velocity[1] = 0.0f;
+  pl->velocity[0] = 0.0f;
+  pl->velocity[1] = 0.0f;
   int errored = 0;
-  float velo = ((*pl).move_speed * CP_System_GetDt());
-  if (CP_Input_MouseClicked())
+  float velo = (pl->move_speed * CP_System_GetDt());
+  if (CP_Input_MouseTriggered(MOUSE_BUTTON_1)) 
   {
-    if ((*pl).weapon == 4)
+    if (pl->weapon->type == 2) 
+    {
       playerFire((*pl), bullets);
+    }
   }
   if (CP_Input_MouseDown(MOUSE_BUTTON_1))
   {
-    if ((*pl).cooldown <= 0 && (*pl).weapon != 4)
+    if (pl->cooldown <= 0 && pl->weapon->type != 2)
     {
       playerFire((*pl), bullets);
-      switch ((*pl).weapon)
-      {
-      case 0:
-        if ((*pl).powerUp != 2)
-          (*pl).cooldown = .8f;
-        else if ((*pl).powerUp == 2)
-          (*pl).cooldown = .1f;
-        break;
-      case 1:
-        if ((*pl).powerUp != 2)
-          (*pl).cooldown = .1f;
-        else if ((*pl).powerUp == 2)
-         break;
-      case 2:
-        if ((*pl).powerUp != 2)
-          (*pl).cooldown = 1.3f;
-        else if ((*pl).powerUp == 2)
-          (*pl).cooldown = .13f;
-
-        break;
-      case 3:
-        if ((*pl).powerUp != 2)
-          (*pl).cooldown = 1.5f;
-        else if ((*pl).powerUp == 2)
-          (*pl).cooldown = .15f;
-        break;
-      }
+      pl->cooldown = pl->weapon->attackSpeed;
     }
   }
   for (int i = 0; i < KEY_COUNT; i++)
@@ -87,6 +64,10 @@ bool checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, 
     {
       switch (playerKeys[i])
       {
+      case KEY_R:
+        reloadFromReserves();
+        pl->weapon->reloadClock = pl->weapon->reloadTime;
+        break;
       case KEY_I:
         pl->powerUp = 5;
         pl->health = 300;
@@ -94,9 +75,15 @@ bool checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, 
         break;
       case KEY_Q:
         *wheelOpen = !*wheelOpen;
+        *InvOpen = false;
+        setContexts(false);
         break;
       case KEY_E:
+        if (*InvOpen)
+          setContexts(false);
         *InvOpen = !*InvOpen;
+        
+        *wheelOpen = false;
         break;
       case KEY_LEFT_SHIFT:
         if (*multiplier <= 1)
@@ -105,7 +92,7 @@ bool checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, 
         }
         break;
       case KEY_SPACE:
-        if ((*pl).weapon == 4)
+        if (pl->weapon->type == 2)
           playerFire((*pl), bullets);
         break;
       }
@@ -116,16 +103,16 @@ bool checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, 
       {
 
       case KEY_W:
-        (*pl).velocity[1] += velo;
+        pl->velocity[1] += velo;
         break;
       case KEY_A:
-        (*pl).velocity[0] += -velo;
+        pl->velocity[0] += -velo;
         break;
       case KEY_S:
-        (*pl).velocity[1] += -velo;
+        pl->velocity[1] += -velo;
         break;
       case KEY_D:
-        (*pl).velocity[0] += velo;
+        pl->velocity[0] += velo;
         break;
       case 256:
         if (isPaused)
@@ -134,124 +121,52 @@ bool checkKeys(player *pl, float *multiplier, bullet *bullets, int *playerKeys, 
           isPaused = 1;
         break;
       case KEY_SPACE:
-        if ((*pl).weapon == 4)
+        if (pl->weapon->type == 2)
           break;
-        if ((*pl).cooldown <= 0)
+        if (pl->cooldown <= 0)
         {
           playerFire((*pl), bullets);
-          switch ((*pl).weapon)
-          {
-          case 0:
-            if ((*pl).powerUp != 2)
-              (*pl).cooldown = .8f;
-            else if ((*pl).powerUp == 2)
-              (*pl).cooldown = .1f;
-            break;
-          case 1:
-            if ((*pl).powerUp != 2)
-              (*pl).cooldown = .1f;
-            else if ((*pl).powerUp == 2)
-              (*pl).cooldown = .0f;
-
-            break;
-          case 2:
-            if ((*pl).powerUp != 2)
-              (*pl).cooldown = 1.3f;
-            else if ((*pl).powerUp == 2)
-              (*pl).cooldown = .13f;
-
-            break;
-          case 3:
-            if ((*pl).powerUp != 2)
-              (*pl).cooldown = 1.5f;
-            else if ((*pl).powerUp == 2)
-              (*pl).cooldown = .15f;
-            break;
-          }
+          pl->cooldown = pl->weapon->attackSpeed;
         }
         break;
       }
     }
   }
   
-  (*pl).x += ((*pl).velocity[0] * *multiplier) * (check == 0 || check == 2 );
-  (*pl).y += ((*pl).velocity[1] * *multiplier) * (check == 0 || check == 1 );
+  pl->x += (pl->velocity[0] * *multiplier) * (check == 0 || check == 2 );
+  pl->y += (pl->velocity[1] * *multiplier) * (check == 0 || check == 1 );
   return errored;
 }
 
-int checkItems(item *items, player *pl, enemy *en, enemy *bosses, string *pickupText)
+int checkItems(item *items, player *pl, enemy *en, notiString *pickupText)
 {
   for (int i = 0; i < MAX_DROPS; i++)
   {
     if (items[i].active == 0)
       continue;
-    float distance = sqrtf((items[i].x - (*pl).x) * (items[i].x - (*pl).x) + (items[i].y - (*pl).y) * (items[i].y - (*pl).y));
-    if (distance < (*pl).playerRadius + items[i].radius)
+    float distance = sqrtf((items[i].x - pl->x) * (items[i].x - pl->x) + (items[i].y - pl->y) * (items[i].y - pl->y));
+    unsigned char id;
+    if (distance < pl->playerRadius + items[i].radius)
     {
       switch (items[i].type)
       {
-      case 0:
-        (*pl).health += items[i].containes;
+      case 0:;
+        id = (unsigned char)CP_Random_RangeInt(2, 4);
+        addItem(id, items[i].containes);
         break;
       case 1:;
-        unsigned char id = (unsigned char)items->containes;
-        int j = addItem(id);
+        id = (unsigned char)items->containes;
+        int j = addItem(id, 1);
         if (j == -1)
         {
           items[i].active = 0;
           return -1;
         }
-          
-
         break;
-      case 2:
-        switch (items[i].containes)
-        {
-        case 1:
-          if ((*pl).powerUpTimer <= 0)
-          {
-            (*pl).powerUp = items[i].containes;
-            (*pl).powerUpTimer = 5.0f;
-          }
-          break;
-        case 2:
-          if ((*pl).powerUpTimer <= 0)
-          {
-            (*pl).powerUp = items[i].containes;
-            (*pl).powerUpTimer = 5.0f;
-          }
-          break;
-        case 3:
-          (*pl).health = 200;
-          break;
-        case 4:
-          for (int k = 0; k < MAX_ENEMIES; k++)
-          {
-            if (en[k].active == 0)
-              continue;
-            en[k].active = 0;
-            (*pl).kills++;
-          }
-          for (int k = 0; k < MAX_BOSSESS; k++)
-          {
-            if (bosses[k].active == 0)
-              continue;
-            bosses[k].active = 0;
-            (*pl).kills++;
-          }
-          break;
-        case 5:
-          if ((*pl).powerUpTimer <= 0)
-          {
-
-            (*pl).powerUp = items[i].containes;
-            (*pl).powerUpTimer = 5.0f;
-          }
-          break;
-        }
-
+      case 2:;
+        id = (unsigned char)CP_Random_RangeInt(5, 7);
+        addItem(id, items[i].containes);
         break;
-
       }
       addPickup(items[i], pickupText);
       items[i].active = 0;
@@ -276,7 +191,7 @@ bool checkInsideBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...
       building* b = buildings + i;
       if (b->xLen == 0 || b->yLen == 0)
         continue;
-      if (b->x - p->x > CP_System_GetWindowWidth() / 2.0f || b->y - p->y > CP_System_GetWindowHeight() / 2.0f)
+      if (b->x - p->x > SCREEN_WIDTH / 2.0f || b->y - p->y > SCREEN_HEIGHT / 2.0f)
         continue;
       if (p->x < b->x - (b->xLen / 2.0f) ||
          p->x > b->x + (b->xLen / 2.0f) ||
@@ -294,7 +209,7 @@ bool checkInsideBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ...
       building* b = buildings + i;
       if (b->xLen == 0 || b->yLen == 0)
         continue;
-      if (b->x - e->x > CP_System_GetWindowWidth() / 2.0f || b->y - e->y > CP_System_GetWindowHeight() / 2.0f)
+      if (b->x - e->x > SCREEN_WIDTH / 2.0f || b->y - e->y > SCREEN_HEIGHT / 2.0f)
         continue;
       if (e->x < b->x - (b->xLen / 2.0f) ||
         e->x > b->x + (b->xLen / 2.0f) ||
@@ -325,7 +240,7 @@ bool checkAgainstBuilding(building buildings[NUMBER_OF_BUILDINGS], int which, ..
       building* b = buildings + i;
       if (b->xLen == 0 || b->yLen == 0)
         continue;
-      if (b->x - p->x > CP_System_GetWindowWidth() / 2.0f || b->y - p->y > CP_System_GetWindowHeight() / 2.0f)
+      if (b->x - p->x > SCREEN_WIDTH / 2.0f || b->y - p->y > SCREEN_HEIGHT / 2.0f)
         continue;
       float tX = p->x;
       float tY = p->y;

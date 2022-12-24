@@ -14,6 +14,7 @@
 #include "cprocessing.h"
 #include "spashScreen.h"
 #include "mainMenu.h"
+#include "structs.h"
 
 CP_Image logo;
 int alpha = 255;
@@ -32,8 +33,8 @@ void SplashInit(void)
 	CP_System_SetWindowTitle("Live to Survive");
 	logo = CP_Image_Load("./Assets/DigiPen_WHITE.png");
 	CP_Graphics_ClearBackground(CP_Color_CreateHex(0x000000));
-	imageX = CP_System_GetWindowWidth() / 2.0f;
-	imageY = CP_System_GetWindowHeight() / 2.0f;
+	imageX = SCREEN_WIDTH / 2.0f;
+	imageY = SCREEN_HEIGHT / 2.0f;
 	imageHeight = (float)CP_Image_GetHeight(logo);
 	imageWidth = (float)CP_Image_GetWidth(logo);
 }
