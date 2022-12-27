@@ -3,7 +3,8 @@
 
 void  initScrollable       (void);
 void  releaseScrollable    (void);
-void  drawBackGroundLayer  (void);
+void  drawObjectiveBoard   (void);
+void  drawBackGroundLayer  (player* p);
 void  setContexts          (bool ya);
 void  drawPlayer           (player pl, camera c);
 void  drawWeapon           (int weapon, float powerUpTimer, int powerUp);
@@ -16,5 +17,5 @@ void  drawWheel            (player* p);
 void  drawAmmo             (player* p, bool inv, bool wheel);
 void  drawWheelImages      (float x, float y, float radius);
 void  drawArc              (float startAngle, float endAngle, float x, float y, float radius);
-
+void  drawWords            (char* string, float x, float y, float textSize, CP_Color c);
 int   drawInventory        (InvItem* head);

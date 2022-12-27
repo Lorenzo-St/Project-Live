@@ -68,11 +68,14 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, int *playerKeys,
         reloadFromReserves();
         pl->weapon->reloadClock = pl->weapon->reloadTime;
         break;
+#ifdef _DEBUG
       case KEY_I:
+
         pl->powerUp = 5;
         pl->health = 300;
         pl->powerUpTimer = INFINITY;
         break;
+#endif
       case KEY_Q:
         *wheelOpen = !*wheelOpen;
         *InvOpen = false;

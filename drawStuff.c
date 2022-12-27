@@ -8,6 +8,7 @@
 #include "gameLoop.h"
 #include "colorStuff.h"
 #include "addStuff.h"
+#include "globalData.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -28,10 +29,34 @@ scrolllable lightWeapons = { 0 };
 scrolllable mediumWeapons = { 0 };
 scrolllable heavyWeapons = { 0 };
 
-void drawBackGroundLayer(void) 
+void drawObjectiveBoard(void) 
+{
+  float width = SCREEN_WIDTH / 10.0f;
+  float height = SCREEN_HEIGHT / 4.0f;
+  CP_Color c = GRAY_BUT;
+  CP_Settings_Fill(c);
+  CP_Graphics_DrawRect(width / 2.0f, height / 2.0f, width, height);
+  drawWords("Objectives", width / 2.0f, 30, 45 * (SCREEN_WIDTH / 1920.0f), BLACK);
+  objective* obs = returnObis();
+  drawWords("Primary:", width / 3.0f, 60, 20  * (SCREEN_WIDTH / 1920.0f), BLACK);
+  char buffer[10] = { 0 };
+  snprintf(buffer, sizeof buffer, "%f", getTime());
+  
+  for (int i = 0; i < MAX_OBJECTIVES; i++) 
+  {
+    float y = 80.0f + (30 * i);
+    if (y < height)
+      drawWords((obs + i)->title, width / 2.0f, y, 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    else
+      break;
+    if (i == 0)
+      drawWords(buffer, width / 2.0f, y + 20, 20 * (SCREEN_WIDTH / 1920.0f), BLACK);
+  }
+}
+
+void drawBackGroundLayer(player* p) 
 {
   CP_Image c = returnLand();
-  player* p = returnPlayer();
   float subX = p->x;
   float subY = -p->y;
   float subX2 = subX + SCREEN_WIDTH / 1.0f;
@@ -62,10 +87,10 @@ void initScrollable(void)
     switch (i) 
     {
     case 0:
-      snprintf(current->words, sizeof(current->words), "Pistol");
+      snprintf(current->words, sizeof(current->words), "Pistol x1");
       break;
     case 1:
-      snprintf(current->words, sizeof(current->words), "Assult Rifle V1");
+      snprintf(current->words, sizeof(current->words), "Assult Rifle V1 x5");
       break;
     }
     current++;
@@ -85,7 +110,7 @@ void initScrollable(void)
     switch (i)
     {
     case 0:
-      snprintf(current->words, sizeof(current->words), "Mini Shotty");
+      snprintf(current->words, sizeof(current->words), "Mini Shotty x10");
       break;
     case 1:
       snprintf(current->words, sizeof(current->words), "NAN");
@@ -95,7 +120,7 @@ void initScrollable(void)
   }
   mediumWeapons.scrollPosition = 0;
   
-  heavyWeapons.buttons = malloc(MEDIUM_WEAPONS * sizeof(button));
+  heavyWeapons.buttons = malloc(HEAVY_WEAPONS * sizeof(button));
   current = heavyWeapons.buttons;
   
   if (heavyWeapons.buttons == NULL)
@@ -106,7 +131,7 @@ void initScrollable(void)
     switch (i)
     {
     case 0:
-      snprintf(current->words, sizeof(current->words), "RPG M99LX");
+      snprintf(current->words, sizeof(current->words), "RPG M99LX x20");
       break;
     case 1:
       snprintf(current->words, sizeof(current->words), "NAN");
@@ -126,90 +151,19 @@ void releaseScrollable(void)
 
 void drawPlayer(player pl, camera c)
 {
-  CP_Settings_StrokeWeight(1.5f);
+  CP_Settings_StrokeWeight(1.5f * (SCREEN_WIDTH / 1920.0f));
   CP_Settings_Fill(CP_Color_CreateHex(0x22A3A4FF));
   CP_Graphics_DrawCircle((pl.x - c.x) + (SCREEN_WIDTH / 2.0f), -(pl.y - c.y) + (SCREEN_HEIGHT / 2.0f), pl.playerRadius * 2);
   CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-  CP_Graphics_DrawRectAdvanced(((pl.x - c.x) + ((pl.direction[0] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (SCREEN_WIDTH / 2.0f), (-(pl.y - c.y) + ((pl.direction[1] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (SCREEN_HEIGHT / 2.0f), pl.playerRadius / 1.25f, 10, pl.rot, 0.0f);
-}
+  CP_Graphics_DrawRectAdvanced(((pl.x - c.x) + ((pl.direction[0] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (SCREEN_WIDTH / 2.0f), (-(pl.y - c.y) + ((pl.direction[1] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (SCREEN_HEIGHT / 2.0f), pl.playerRadius / 1.25f, 10 * (SCREEN_WIDTH / 1920.0f), pl.rot, 0.0f);
+  
+  CP_Settings_Fill(CP_Color_CreateHex(0x832051FF));
+  CP_Graphics_DrawRect((pl.x - c.x) + SCREEN_WIDTH / 2.0f, -(pl.y - c.y) + SCREEN_HEIGHT /2.0f + pl.playerRadius * 2.0f, pl.playerRadius * 2, 20.0f * SCREEN_WIDTH / 1920);
+  CP_Settings_Fill(CP_Color_CreateHex(0x81a432FF));
+  CP_Settings_RectMode(CP_POSITION_CORNER);
+  CP_Graphics_DrawRect((pl.x - c.x) + SCREEN_WIDTH / 2.0f - pl.playerRadius, -(pl.y - c.y) + SCREEN_HEIGHT / 2.0f + pl.playerRadius * 1.5f, pl.playerRadius * 2.0f * (pl.health * 1.0f / MAX_HEALTH * 1.0f), 20.0f * SCREEN_WIDTH / 1920);
+  CP_Settings_RectMode(CP_POSITION_CENTER);
 
-void drawWeapon(int weapon, float powerUpTimer, int powerUp)
-{
-  float screen_center = SCREEN_WIDTH / 2.0f;
-  CP_Settings_Fill(CP_Color_Create(220, 220, 220, 100));
-  CP_Graphics_DrawRectAdvanced(screen_center, 50, 500, 200, 0, 45);
-  switch (weapon)
-  {
-  case 0:
-    CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center, 30, 100, 20, 0, 10);
-
-    CP_Settings_Fill(CP_Color_Create(60, 60, 60, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center + 30, 55, 30, 55, -15, 10);
-    CP_Settings_TextSize(40);
-    CP_Font_DrawText("Equiped", screen_center, 90);
-    CP_Font_DrawText("Pistol", screen_center, 120);
-    break;
-  case 4:
-    CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center, 30, 100, 20, 0, 10);
-    CP_Settings_Fill(CP_Color_Create(60, 60, 60, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center + 30, 55, 30, 55, -15, 10);
-    CP_Settings_TextSize(40);
-    CP_Font_DrawText("Equiped", screen_center, 90);
-    CP_Font_DrawText("Pistol (Semi-Auto)", screen_center, 120);
-    break;
-  case 1:
-    CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center - 20, 40, 140, 20, 0, 10);
-    CP_Graphics_DrawRectAdvanced(screen_center + 60, 50, 70, 20, 0, 10);
-    CP_Settings_Fill(CP_Color_Create(60, 60, 60, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center + 30, 60, 25, 50, -15, 10);
-    CP_Graphics_DrawRectAdvanced(screen_center - 10, 60, 25, 30, -10, 5);
-    CP_Settings_TextSize(40);
-    CP_Font_DrawText("Equiped", screen_center, 90);
-    CP_Font_DrawText("Auto Rifle", screen_center, 120);
-    break;
-  case 2:
-    CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center - 30, 40, 250, 20, 0, 10);
-    CP_Graphics_DrawRectAdvanced(screen_center + 70, 50, 90, 20, 0, 10);
-    CP_Settings_Fill(CP_Color_Create(60, 60, 60, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center - 25, 55, 60, 20, 0, 5);
-    CP_Graphics_DrawRectAdvanced(screen_center, 25, 60, 15, 0, 5);
-    CP_Settings_TextSize(40);
-    CP_Font_DrawText("Equiped", screen_center, 90);
-    CP_Font_DrawText("1.5\' Long boii Hours", screen_center, 120);
-    break;
-  case 3:
-    CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center - 20, 40, 140, 20, 0, 10);
-    CP_Graphics_DrawRectAdvanced(screen_center + 60, 50, 70, 20, 0, 10);
-    CP_Settings_Fill(CP_Color_Create(60, 60, 60, 255));
-    CP_Graphics_DrawRectAdvanced(screen_center + 30, 60, 25, 30, -25, 10);
-    CP_Graphics_DrawRectAdvanced(screen_center - 25, 55, 60, 20, 0, 5);
-    CP_Settings_TextSize(40);
-    CP_Font_DrawText("Equiped", screen_center, 90);
-    CP_Font_DrawText("Shoty 5k", screen_center, 120);
-    break;
-  }
-  char buffer[100];
-  if (powerUpTimer > 0)
-  {
-    switch (powerUp)
-    {
-    case 1:
-      snprintf(buffer, sizeof buffer, "Instal Kill: %f", powerUpTimer);
-      break;
-    case 2:
-      snprintf(buffer, sizeof buffer, "Rapid Fire: %f", powerUpTimer);
-      break;
-    case 5:
-      snprintf(buffer, sizeof buffer, "Invincibility: %f", powerUpTimer);
-      break;
-    }
-    CP_Font_DrawText(buffer, screen_center, 300);
-  }
 }
 
 void drawBullets(bullet* bullets, camera C)
@@ -266,7 +220,7 @@ void drawEnemies(enemy** en, camera C)
 
 void drawPickupText(notiString* pickupText, camera C)
 {
-  CP_Settings_TextSize(30);
+  CP_Settings_TextSize(30  * (SCREEN_WIDTH / 1920.0f));
   for (int i = 0; i < MAX_TEXT; i++)
   {
     if (pickupText[i].active == 0)
@@ -286,36 +240,17 @@ void drawPickupText(notiString* pickupText, camera C)
 void drawItems(item* items, camera C)
 {
   CP_Settings_StrokeWeight(0.0f);
+  CP_Settings_TextSize(10 * (SCREEN_WIDTH / 1920.0f));
+  CP_Image im = returnPickup();
+  float imageSize = 30.0f * SCREEN_WIDTH / 1920.0f;
   for (int i = 0; i < MAX_DROPS; i++)
   {
     if (items[i].active == 0)
       continue;
 
-    switch (items[i].type)
-    {
-    case 0:
-      CP_Settings_Fill(CP_Color_Create(19, 136, 8, 255));
-      CP_Graphics_DrawRectAdvanced((items[i].x - C.x) + (SCREEN_WIDTH / 2.0f), -(items[i].y - C.y) + (SCREEN_HEIGHT / 2.0f), items[i].radius, items[i].radius, 45.0f, 0.0f);
-      CP_Settings_TextSize(10);
-      CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-      CP_Font_DrawText("Health", (items[i].x - C.x) + (SCREEN_WIDTH / 2.0f), -(items[i].y - C.y) + (SCREEN_HEIGHT / 2.0f));
-      break;
-    case 1:
-      CP_Settings_Fill(CP_Color_Create(201, 242, 201, 255));
-      CP_Graphics_DrawRectAdvanced((items[i].x - C.x) + (SCREEN_WIDTH / 2.0f), -(items[i].y - C.y) + (SCREEN_HEIGHT / 2.0f), items[i].radius, items[i].radius, 0, 5);
-      CP_Settings_TextSize(10);
-      CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-      CP_Font_DrawText("Weapon", (items[i].x - C.x) + (SCREEN_WIDTH / 2.0f), -(items[i].y - C.y) + (SCREEN_HEIGHT / 2.0f));
-      break;
-    case 2:
-      CP_Settings_Fill(CP_Color_Create(250, 100, 255, 255));
-      CP_Graphics_DrawRectAdvanced((items[i].x - C.x) + (SCREEN_WIDTH / 2.0f), -(items[i].y - C.y) + (SCREEN_HEIGHT / 2.0f), items[i].radius, items[i].radius, 0, 5);
-      CP_Settings_TextSize(10);
-      CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-      CP_Font_DrawText("POWERUP", (items[i].x - C.x) + (SCREEN_WIDTH / 2.0f), -(items[i].y - C.y) + (SCREEN_HEIGHT / 2.0f));
-      break;
-    }
+    CP_Image_Draw(im, (items[i].x - C.x) + (SCREEN_WIDTH / 2.0f), -(items[i].y - C.y) + (SCREEN_HEIGHT / 2.0f), imageSize, imageSize, 255);
   }
+
 }
 
 void drawBuildings(building *buildings, camera c) 
@@ -339,9 +274,9 @@ void drawMicroWheel(int index)
   CP_Settings_Fill(C);
   C.a += 100;
   CP_Settings_Stroke(C);
-  CP_Settings_StrokeWeight(6);
+  CP_Settings_StrokeWeight(6 * (SCREEN_WIDTH / 1920.0f));
   CP_Graphics_DrawEllipseAdvanced(x, y, radius, radius, 0);
-  CP_Settings_StrokeWeight(1);
+  CP_Settings_StrokeWeight(1 * (SCREEN_WIDTH / 1920.0f));
   radius *= .5f;
 
   for (float angle = -1; angle <= 300; angle += 60)
@@ -349,6 +284,7 @@ void drawMicroWheel(int index)
     int i = (int)((angle + 1) / 60);
     if (checkMouseArcCollide(angle, angle + 61, x, y, radius))
     {
+      inContext = true;
       C = WHEEL_FG;
       if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
       {
@@ -376,9 +312,9 @@ void drawUpgradeMicro(int index, int count)
   CP_Settings_Fill(C);
   C.a += 100;
   CP_Settings_Stroke(C);
-  CP_Settings_StrokeWeight(6);
+  CP_Settings_StrokeWeight(6 * (SCREEN_WIDTH / 1920.0f));
   CP_Graphics_DrawEllipseAdvanced(x, y, radius, radius, 0);
-  CP_Settings_StrokeWeight(1);
+  CP_Settings_StrokeWeight(1 * (SCREEN_WIDTH / 1920.0f));
   radius *= .5f;
 
   for (float angle = -1; angle <= 300; angle += 60)
@@ -434,6 +370,12 @@ void checkClick(int click, int numb, int index)
     wd = *setStats(&wd, (*returnWheel())[returnSelected()]->itemId);
     if(wd.ammoType + 2 == item->itemId)
       reloadFromStorage(returnSelected());
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 4:
     if (item->count >= SMALL_T_MED_COMB && item->itemId != 4)
@@ -441,6 +383,12 @@ void checkClick(int click, int numb, int index)
       addItem(item->itemId + 1, 5);
       removeCount(item->itemId, SMALL_T_MED_COMB);
     }
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 5:
     subSub = true;
@@ -460,11 +408,15 @@ void checkClick(int click, int numb, int index)
     addItem(8, count);
     removeCount(item->itemId, count * BASE_KIT_COST);
     wepDestruct = true;
-    inContext = false;
     subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 9: // Creaft 1
-    if (item->count > BASE_KIT_COST) 
+    if (item->count >= BASE_KIT_COST) 
     {
       addItem(8, 1);
       removeCount(item->itemId, BASE_KIT_COST);
@@ -472,9 +424,15 @@ void checkClick(int click, int numb, int index)
       inContext = false;
       subSub = false;
     }
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 10: // Craft 10
-    if (item->count > BASE_KIT_COST * 10)
+    if (item->count >= BASE_KIT_COST * 10)
     {
       addItem(8, 10);
       removeCount(item->itemId, BASE_KIT_COST * 10);
@@ -482,9 +440,15 @@ void checkClick(int click, int numb, int index)
       inContext = false;
       subSub = false;
     }
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 11: // Craft 25
-    if (item->count > BASE_KIT_COST * 25)
+    if (item->count >= BASE_KIT_COST * 25)
     {
       addItem(8, 25);
       removeCount(item->itemId, BASE_KIT_COST * 25);
@@ -492,6 +456,12 @@ void checkClick(int click, int numb, int index)
       inContext = false;
       subSub = false;
     }
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 12:
     if(item->count >= SMALL_AMMO_COST)
@@ -500,6 +470,12 @@ void checkClick(int click, int numb, int index)
       if (removeCount(item->itemId, SMALL_AMMO_COST))
         wepDestruct = true;
     }
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 13:
     if (item->count >= MEDIU_AMMO_COST)
@@ -508,6 +484,12 @@ void checkClick(int click, int numb, int index)
       if (removeCount(item->itemId, MEDIU_AMMO_COST))
         wepDestruct = true;;
     }
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 14:
     if (item->count >= LARGE_AMMO_COST)
@@ -516,13 +498,19 @@ void checkClick(int click, int numb, int index)
       if (removeCount(item->itemId, LARGE_AMMO_COST))
         wepDestruct = true;
     }
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   case 15:
     count = item->count * HEALTH_PER_KIT;
     float difference = MAX_HEALTH - (float)returnPlayer()->health;
     if (returnPlayer()->health >= MAX_HEALTH)
       return;
-    if (count > difference) 
+    if (count >= difference) 
     {
       returnPlayer()->health = MAX_HEALTH;
       difference /= HEALTH_PER_KIT;
@@ -535,8 +523,17 @@ void checkClick(int click, int numb, int index)
       removeCount(item->itemId, item->count);
       wepDestruct = true;
     }
+    subSub = false;
+    subsubsub = false;
+    upgradeMicro = false;
+    microOpen = false;
+    showContext = false;
+    setInvSelected(-1);
     break;
   }
+
+
+
 }
 
 int checkContext(float x, float y, float width, float height) 
@@ -555,10 +552,9 @@ int checkContext(float x, float y, float width, float height)
   return 0;
 }
 
-void drawWords(char* string, float x, float y, float textSize) 
+void drawWords(char* string, float x, float y, float textSize, CP_Color c) 
 {
   CP_Settings_TextSize(textSize);
-  CP_Color c = BLACK;
   CP_Settings_Fill(c);
   CP_Font_DrawText(string, x, y);
 }
@@ -626,7 +622,7 @@ void drawSubSubContext(int type, float x, float y)
       if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), buttonWidth, buttonHeight)) 
       {
         c = WHITE;
-        int cost = (int)(4.5f * i);
+        int cost = (int)(4.5f * i) + 1;
         int count = returnItemAtPos(returnInvSelected())->count;
         if (count >= cost && CP_Input_MouseTriggered(MOUSE_BUTTON_1)) 
         {
@@ -649,7 +645,7 @@ void drawSubSubContext(int type, float x, float y)
       if (i >= LIGHT_WEAPONS)
         break;
       CP_Graphics_DrawRect(x, y, buttonWidth, buttonHeight);
-      drawWords((lightWeapons.buttons + i)->words, x, y, 30);
+      drawWords((lightWeapons.buttons + i)->words, x, y, 25  * (SCREEN_WIDTH / 1920.0f) , BLACK);
       y += (buttonHeight * 1.25f);
     }
 
@@ -698,7 +694,7 @@ void drawSubSubContext(int type, float x, float y)
       if (i >= MEDIUM_WEAPONS)
         break;
       CP_Graphics_DrawRect(x, y, buttonWidth, buttonHeight);
-      drawWords((mediumWeapons.buttons + i)->words, x, y, 30);
+      drawWords((mediumWeapons.buttons + i)->words, x, y, 25  * (SCREEN_WIDTH / 1920.0f), BLACK);
       y += (buttonHeight * 1.25f);
     }
 
@@ -747,7 +743,7 @@ void drawSubSubContext(int type, float x, float y)
       if (i >= HEAVY_WEAPONS)
         break;
       CP_Graphics_DrawRect(x, y, buttonWidth, buttonHeight);
-      drawWords((heavyWeapons.buttons + i)->words, x, y, 30);
+      drawWords((heavyWeapons.buttons + i)->words, x, y, 25  * (SCREEN_WIDTH / 1920.0f), BLACK);
       y += (buttonHeight * 1.25f);
     }
 
@@ -779,7 +775,7 @@ void drawSubContext(float baseLoc[2], int index)
   CP_Settings_Fill(c);
   c = GRAY;
   CP_Settings_Stroke(c);
-  CP_Settings_StrokeWeight(5);
+  CP_Settings_StrokeWeight(5  * (SCREEN_WIDTH / 1920.0f));
   CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
   if (checkMouseBoxCollide(baseLoc[0] - SCREEN_WIDTH / 2.0f, -(baseLoc[1] - SCREEN_HEIGHT / 2.0f), width, height))
     inContext = true;
@@ -796,13 +792,13 @@ void drawSubContext(float baseLoc[2], int index)
     baseLoc[1] -= height * 1.875f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Upgrade", baseLoc[0], baseLoc[1], 50);
+    drawWords("Upgrade", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 6, index);
     
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Craft Light", baseLoc[0], baseLoc[1], 40);
+    drawWords("Craft Light", baseLoc[0], baseLoc[1], 40  * (SCREEN_WIDTH / 1920.0f), BLACK);
     if (click)
       subNumb = 1;
     checkClick(click, 7, index);
@@ -810,7 +806,7 @@ void drawSubContext(float baseLoc[2], int index)
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Craft Medium", baseLoc[0], baseLoc[1], 35);
+    drawWords("Craft Medium", baseLoc[0], baseLoc[1], 35  * (SCREEN_WIDTH / 1920.0f), BLACK);
     if (click)
       subNumb = 2;
     checkClick(click, 7, index);
@@ -818,7 +814,7 @@ void drawSubContext(float baseLoc[2], int index)
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Craft Heavy", baseLoc[0], baseLoc[1], 40);
+    drawWords("Craft Heavy", baseLoc[0], baseLoc[1], 40  * (SCREEN_WIDTH / 1920.0f), BLACK);
     if (click)
       subNumb = 3;
     checkClick(click, 7, index);
@@ -831,25 +827,25 @@ void drawSubContext(float baseLoc[2], int index)
     baseLoc[1] -= height * 1.875f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Create Max", baseLoc[0], baseLoc[1], 50);
+    drawWords("Create Max", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 8, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Create 1", baseLoc[0], baseLoc[1], 40);
+    drawWords("Create 1 x4", baseLoc[0], baseLoc[1], 40  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 9, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Create 10", baseLoc[0], baseLoc[1], 35);
+    drawWords("Create 10 x40", baseLoc[0], baseLoc[1], 35  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 10, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Create 25", baseLoc[0], baseLoc[1], 40);
+    drawWords("Create 25 x100", baseLoc[0], baseLoc[1], 40  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 11, index);
 
     break;
@@ -860,19 +856,19 @@ void drawSubContext(float baseLoc[2], int index)
     baseLoc[1] -= height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Light", baseLoc[0], baseLoc[1], 50);
+    drawWords("Light x5", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 12, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Medium", baseLoc[0], baseLoc[1], 50);
+    drawWords("Medium x10", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 13, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Heavy", baseLoc[0], baseLoc[1], 50);
+    drawWords("Heavy x25", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 14, index);
     break;
   }
@@ -892,7 +888,7 @@ void drawContextMenu(float x, float y, int type, int index)
   CP_Settings_Fill(c);
   c = GRAY;
   CP_Settings_Stroke(c);
-  CP_Settings_StrokeWeight(5);
+  CP_Settings_StrokeWeight(5 * (SCREEN_WIDTH / 1920.0f));
   CP_Graphics_DrawRect(x, y, width, height);
  
   if (subSub)
@@ -901,8 +897,7 @@ void drawContextMenu(float x, float y, int type, int index)
     inContext = true;
   }
   if (subsubsub)
-  {
-    
+  { 
     drawSubSubContext(subNumb, x - width * 2.05f, SCREEN_HEIGHT / 3.5f);
     inContext = true;
   }
@@ -914,8 +909,12 @@ void drawContextMenu(float x, float y, int type, int index)
     else
       inContext = false;
   }
-
-  
+  c = BLACK;
+  c.a = 200;
+  CP_Settings_Fill(c);
+  CP_Graphics_DrawRect(x, y - height/2.0f * 1.25f, width, height * .25f);
+  InvItem* item = returnItemAtPos(index);
+  drawWords(item->name, x, y - height / 2.0f * 1.25f, 40, WHITE);
   int click = 0;
   CP_Settings_TextSize(50);
   c = GRAY_BUT;
@@ -931,19 +930,19 @@ void drawContextMenu(float x, float y, int type, int index)
     y -= height * 1.25f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Drop", x, y, 50);
+    drawWords("Drop", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 0, index);
 
     y += height * 1.25f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Equip", x, y, 50);
+    drawWords("Equip", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 1, index);
 
     y += height * 1.25f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Dismantle", x, y, 50);
+    drawWords("Dismantle", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 2, index);
     break;
   case 1:
@@ -953,13 +952,13 @@ void drawContextMenu(float x, float y, int type, int index)
     y -= height * 1.25f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Drop", x, y, 50);
+    drawWords("Drop", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 0, index);
 
     y += height * 1.25f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Refill", x, y, 50);
+    drawWords("Refill", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 3, index);
 
     y += height * 1.25f;
@@ -967,7 +966,7 @@ void drawContextMenu(float x, float y, int type, int index)
     {
       click = checkContext(x, y, width, height);
       CP_Graphics_DrawRect(x, y, width, height);
-      drawWords("Combine", x, y, 50);
+      drawWords("Combine", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
       checkClick(click, 4, index);
     }
     else 
@@ -983,13 +982,13 @@ void drawContextMenu(float x, float y, int type, int index)
     y -= height * .65f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Drop", x, y, 50);
+    drawWords("Drop", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 0, index);
 
     y += height * 1.3f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Combine", x, y, 50);
+    drawWords("Combine", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 5, index);
 
 
@@ -1001,13 +1000,13 @@ void drawContextMenu(float x, float y, int type, int index)
     y -= height * .65f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Drop", x, y, 50);
+    drawWords("Drop", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 0, index);
 
     y += height * 1.3f;
     click = checkContext(x, y, width, height);
     CP_Graphics_DrawRect(x, y, width, height);
-    drawWords("Use", x, y, 50);
+    drawWords("Use", x, y, 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 15, index);
 
     break;
@@ -1038,8 +1037,10 @@ int drawInventory(InvItem * const head)
   CP_Settings_Fill(INVENTORY);
   CP_Graphics_DrawRectAdvanced(centerX, centerY, pannelWidth, pannelHeight, 0, 20.0f);
   CP_Settings_Fill(BLACK);
-  CP_Settings_TextSize(90);
+  CP_Settings_TextSize(90  * (SCREEN_WIDTH / 1920.0f));
   CP_Font_DrawText("Inventory", centerX, itemHeight/1.5f);
+  float conPos[2] = { 0 };
+  int conData[2] = { 0 };
   while (currrr)
   {
     selectedLoop = false;
@@ -1108,7 +1109,7 @@ int drawInventory(InvItem * const head)
     if (currrr->count > 1)
     {
       char buff[10];
-      CP_Settings_TextSize(40);
+      CP_Settings_TextSize(40  * (SCREEN_WIDTH / 1920.0f));
       snprintf(buff, sizeof buff, "%i", currrr->count);
       CP_Font_DrawText(buff, pos[0] - itemWidth / 4.0f, pos[1] + itemHeight / 3.0f);
     }
@@ -1116,8 +1117,14 @@ int drawInventory(InvItem * const head)
     {
 
 
-      if (showContext)
-        drawContextMenu(pos[0], pos[1], currrr->type, h);
+      if (showContext) 
+      {
+        conPos[0] = pos[0];
+        conPos[1] = pos[1];
+        conData[0] = currrr->type;
+        conData[1] = h;
+      }
+
 
       if (CP_Input_MouseTriggered(MOUSE_BUTTON_1) && !inContext)
       {
@@ -1145,6 +1152,8 @@ int drawInventory(InvItem * const head)
     }
     h++;
   }
+  if(showContext)
+    drawContextMenu(conPos[0], conPos[1], conData[0], conData[1]);
   if (checkMouseBoxCollide(centerX - SCREEN_WIDTH / 2.0f, -(centerY - SCREEN_HEIGHT / 2.0f), pannelWidth, pannelHeight) || inContext) 
     return 1;
 
@@ -1199,9 +1208,9 @@ void drawWheel(player* p)
   CP_Settings_Fill(C);
   C.a += 100;
   CP_Settings_Stroke(C);
-  CP_Settings_StrokeWeight(10);
+  CP_Settings_StrokeWeight(10  * (SCREEN_WIDTH / 1920.0f));
   CP_Graphics_DrawEllipseAdvanced(x, y, radius, radius, 0);
-  CP_Settings_StrokeWeight(2);
+  CP_Settings_StrokeWeight(2  * (SCREEN_WIDTH / 1920.0f));
   radius *= .5f;
   
   for (float angle = -1; angle <= 300; angle += 60) 
@@ -1242,32 +1251,19 @@ void drawAmmo(player* p, bool inv, bool wheel)
   CP_Settings_Fill(c);
   c.a = 255;
   CP_Settings_Stroke(c);
-  CP_Settings_StrokeWeight(3);
+  CP_Settings_StrokeWeight(3  * (SCREEN_WIDTH / 1920.0f));
   CP_Graphics_DrawRect(width / 2.0f, SCREEN_HEIGHT - height / 2.0f, width, height);
   CP_Settings_Fill(WHITE);
-  CP_Settings_TextSize(100);
+  CP_Settings_TextSize(100  * (SCREEN_WIDTH / 1920.0f));
   CP_Font_DrawText(buffer, width / 2.0f, SCREEN_HEIGHT - height / 2.0f);
   cur = retAmmo()->reserves[returnSelected()];
   max = p->weapon->ammoReserves;
   snprintf(buffer, sizeof buffer, "%i/%i", cur, max);
-  CP_Settings_TextSize(25);
+  CP_Settings_TextSize(25  * (SCREEN_WIDTH / 1920.0f));
   CP_Font_DrawText(buffer, width / 2.0f, SCREEN_HEIGHT - height / 6.0f);
-  snprintf(buffer, sizeof buffer, "%f", (*returnWheel())[returnSelected()]->durability);
-  CP_Font_DrawText(buffer, width / 2.0f, SCREEN_HEIGHT - height + height / 4.0f);
-  if (inv) 
+  if ((*returnWheel())[returnSelected()]->durability != INFINITY) 
   {
-    c = BLACK;
-    c.a = 200;
-    CP_Settings_Fill(c);
-    CP_Settings_TextSize(50);
-    CP_Graphics_DrawRect(width / 2.0f + width, SCREEN_HEIGHT - height, width, height * 2);
-    c = WHITE;
-    CP_Settings_Fill(c);
-    snprintf(buffer, sizeof buffer, "light reservers: %i", retAmmo()->lightStorage);
-    CP_Font_DrawText(buffer, width / 2.0f + width, SCREEN_HEIGHT - height - height/1.5f);
-    snprintf(buffer, sizeof buffer, "medium reservers: %i", retAmmo()->mediumStorage);
-    CP_Font_DrawText(buffer, width / 2.0f + width, SCREEN_HEIGHT - height - height / 3.0f);
-    snprintf(buffer, sizeof buffer, "heavy reservers: %i", retAmmo()->heavyStorage);
-    CP_Font_DrawText(buffer, width / 2.0f + width, SCREEN_HEIGHT - height);
+    snprintf(buffer, sizeof buffer, "%f", (*returnWheel())[returnSelected()]->durability);
+    CP_Font_DrawText(buffer, width / 2.0f, SCREEN_HEIGHT - height + height / 4.0f);
   }
 }

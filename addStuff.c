@@ -61,15 +61,15 @@ enemy* setEnemyStats(enemy* e, camera c,int type)
     e->speed = 50;
     e->cooldown = 1.5f;
     e->health = 60;
-    e->radius = 25;
+    e->radius = 25 * (SCREEN_WIDTH / 1920.0f);
     break;
   case 1:
     e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
     e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
     e->speed = 50;
     e->cooldown = .3f;
-    e->health = 60;
-    e->radius = 25;
+    e->health = 50;
+    e->radius = 25 * (SCREEN_WIDTH / 1920.0f);
     break;
   case 2:
     e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
@@ -77,7 +77,7 @@ enemy* setEnemyStats(enemy* e, camera c,int type)
     e->speed = 25;
     e->cooldown = .2f;
     e->health = 300;
-    e->radius = 50;
+    e->radius = 50 * (SCREEN_WIDTH / 1920.0f);
     break;
   }
   return e;
@@ -98,7 +98,7 @@ int dropItem(float loc[], item* items)
     {
       items[i].x = loc[0];
       items[i].y = loc[1];
-      items[i].type = CP_Random_RangeInt(0, 2);
+      items[i].type = CP_Random_RangeInt(0, 4);
       switch (items[i].type)
       {
       case 0:
@@ -108,7 +108,12 @@ int dropItem(float loc[], item* items)
         items[i].containes = CP_Random_RangeInt(0, 1);
         break;
       case 2:
-        items[i].containes = CP_Random_RangeInt(1, 5);
+        /* Fall through */
+      case 3:
+        /* Fall through */
+      case 4:
+        items[i].type = 2;
+        items[i].containes = CP_Random_RangeInt(1, 10);
         break;
       }
       items[i].active = 1;

@@ -7,12 +7,16 @@
 #include <stdio.h>
 #include <math.h>
 
-InvItem*  head = NULL;
+static InvItem*  invhead = NULL;
 InvItem* (itemWheel[WHEEL_SIZE]) = { NULL };
 wheelAmmo ammo = { 0 };
 int selected = -1;
 int invSelected = -1;
 
+void resetHead(void) 
+{
+  invhead = NULL;
+}
 
 void initializeAmmo(player* p) 
 {
@@ -205,19 +209,27 @@ int addToWheel(InvItem* toAdd, int position, int index)
     return -1;
   if (itemWheel[position] != NULL)
   {
-    itemWheel[position]->next = head;
-    head = itemWheel[position];
+    if (toAdd != invhead)
+      itemWheel[position]->next = invhead;
+    else
+      itemWheel[position]->next = invhead->next;
+    invhead = itemWheel[position];
     itemWheel[position] = toAdd;
     toAdd->next = NULL;
-    removeItem(index + 1);
     reloadFromStorage(position);
+    if (position == selected)
+    {
+      selected = -1;
+      swatchActive(position, returnPlayer());
+    }
   }
   else 
   {
     itemWheel[position] = toAdd;
-    toAdd->next = NULL;
     removeItem(index);
+    toAdd->next = NULL;
     reloadFromStorage(position);
+    invSelected = -1;
   }
 
   
@@ -229,15 +241,15 @@ int removeFromWheel(int position)
   if (itemWheel[position] == NULL)
     return -1;
 
-  itemWheel[position]->next = head;
-  head = itemWheel[position];
+  itemWheel[position]->next = invhead;
+  invhead = itemWheel[position];
   itemWheel[position] = NULL;
   return 0;
 }
 
 int addItem(const char id, const int count)
 {
-  InvItem* newItem = head;
+  InvItem* newItem = invhead;
   while (newItem)
   {
     if (newItem->stackable && newItem->itemId == id)
@@ -255,8 +267,8 @@ int addItem(const char id, const int count)
   (*newItem) = returnStats(id);
   if (newItem->itemId == -1)
     return -1;
-  newItem->next = head;
-  head = newItem;
+  newItem->next = invhead;
+  invhead = newItem;
   if (count != 1)
     newItem->count = count;
   return 0;
@@ -298,8 +310,8 @@ int destructWeapon(InvItem* wep, int index)
 
 int removeCount(int id, int count) 
 {
-  InvItem* current = head;
-  InvItem* last = head;
+  InvItem* current = invhead;
+  InvItem* last = invhead;
   if (current == NULL)
     return -1;
   int i = 0;
@@ -312,8 +324,8 @@ int removeCount(int id, int count)
       {
         
         InvItem* this = current;
-        if (this == head)
-          head = current->next;
+        if (this == invhead)
+          invhead = current->next;
         last->next = current->next;
         current = current->next;
         freeItem(this);
@@ -329,8 +341,8 @@ int removeCount(int id, int count)
 
 int removeItem(int index) 
 {
-  InvItem* current = head;
-  InvItem* previos = head;
+  InvItem* current = invhead;
+  InvItem* previos = invhead;
   if (current == NULL)
     return -1;
   int i = 0; 
@@ -338,9 +350,9 @@ int removeItem(int index)
   {
     if (i++ == index)
     {
-      if (current == head)
+      if (current == invhead)
       {
-        head = current->next;
+        invhead = current->next;
       }
       else
       {
@@ -503,12 +515,12 @@ InvItem returnStats(const char id)
 
 InvItem* returnHead(void)
 {
-  return head;
+  return invhead;
 }
 
 InvItem* returnItemAtPos(int i)
 {
-  InvItem* temp = head;
+  InvItem* temp = invhead;
   for (int j = 0; j < i; j++)
   {
     if (temp->next != NULL)
@@ -535,7 +547,7 @@ weaponData* setStats(weaponData* w, int id)
   {
   case 0:
     w->pattern = 0;
-    w->damage = 5;
+    w->damage = 25;
     w->attackSpeed = .75f;
     w->ammoType = 0;
     w->ammo = 15;
@@ -546,7 +558,7 @@ weaponData* setStats(weaponData* w, int id)
     break;
   case 1:
     w->pattern = 0;
-    w->damage = 10;
+    w->damage = 30;
     w->attackSpeed = .2f;
     w->ammoType = 0;
     w->ammo = 50;
@@ -557,7 +569,7 @@ weaponData* setStats(weaponData* w, int id)
     break;
   case 9:
     w->pattern = 1;
-    w->damage = 20;
+    w->damage = 30;
     w->attackSpeed = 1.5f;
     w->ammoType = 1;
     w->ammo = 3;
@@ -568,7 +580,7 @@ weaponData* setStats(weaponData* w, int id)
     break;
   case 10:
     w->pattern = 0;
-    w->damage = 50;
+    w->damage = 200;
     w->attackSpeed = 3.0f;
     w->ammoType = 2;
     w->ammo = 1;

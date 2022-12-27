@@ -5,7 +5,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+bool initialized = false;
+
 CP_Image ground = { 0 };
+CP_Image pickup = { 0 };
 CP_Image weapons[WEAPON_IMAGES] = { 0 };
 CP_Image weaponsGrayScale[WEAPON_IMAGES] = { 0 };
 CP_Image ammoImages[AMMO_TYPES] = { 0 };
@@ -16,7 +19,7 @@ CP_Image grayScaleify(CP_Image c)
 {
   int size = CP_Image_GetWidth(c) * CP_Image_GetHeight(c);
   FILE* f; 
-  fopen_s(&f,"./shadetest.txt", "w");
+  fopen_s(&f,"./logs/shadetest.txt", "w");
   CP_Color* newData = (CP_Color*)malloc(size * sizeof(CP_Color));
   CP_Image result = NULL;
   if (newData == NULL)
@@ -57,8 +60,13 @@ CP_Image grayScaleify(CP_Image c)
 int initImages(void) 
 {
   CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
+  if (initialized)
+    return -1;
+
   
   ground = CP_Image_Load("./Assets/grass_mega_tile.png");
+
+  pickup = CP_Image_Load("./Assets/pickup_image.png");
 
   /* Weapons */
   weapons[0] = CP_Image_Load("./Assets/pistol_display.png");
@@ -83,7 +91,15 @@ int initImages(void)
   {
     weaponsGrayScale[i] =  grayScaleify(weapons[i]);
   }
+  
+  initialized = true;
+  
   return 0;
+}
+
+CP_Image returnPickup(void) 
+{
+  return pickup;
 }
 
 CP_Image returnLand(void) 
@@ -126,4 +142,6 @@ void freeImages(void)
   {
     CP_Image_Free(&(weapons[i]));
   }
+
+  initialized = false;
 }

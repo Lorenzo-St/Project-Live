@@ -23,8 +23,8 @@ int initPlayer(player *pl, float* multiplier, float* addTimer)
   *addTimer = 5.0f;
   pl->kills = 0;
   pl->weapon = 0;
-  pl->health = 200;
-  pl->playerRadius = 20;
+  pl->health = MAX_HEALTH;
+  pl->playerRadius = 20 * (SCREEN_WIDTH / 1920.0f);
   *multiplier = 1;
   setTime(0.0f);
   return 0;

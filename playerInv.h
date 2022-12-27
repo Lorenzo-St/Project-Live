@@ -11,6 +11,7 @@ int          addToWheel          (InvItem*,int,int);
 int          returnInvSelected   (void);
 int          setInvSelected      (int);
 int          destructWeapon      (InvItem*,int);
+void         resetHead           (void);
 void         wheelUpgrade        (int);
 void         swatchActive        (int,player*);
 void         initializeAmmo      (player*);

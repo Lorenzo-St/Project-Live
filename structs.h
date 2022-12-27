@@ -27,6 +27,8 @@
 #define HEAVY_WEAPONS 1
 #define MEDIUM_WEAPONS 1
 #define LIGHT_WEAPONS 2
+#define MAX_OBJECTIVES 1
+#define WINDOW_SIZE 1920, 1080
 
  /* Crafting numbers */
 #define SMALL_T_MED_COMB 25
@@ -35,7 +37,7 @@
 #define MEDIU_AMMO_COST 10
 #define LARGE_AMMO_COST 25
 #define BASE_KIT_COST 4
-#define HEALTH_PER_KIT 30
+#define HEALTH_PER_KIT 100
 #define MAX_HEALTH 250
 #define MISC_GRAPHICS 1
 
@@ -53,6 +55,11 @@
 /* |-----------------------  types   ---------------------------| */
 
 typedef unsigned int bool;
+
+typedef struct objective 
+{
+  char* title;
+}objective;
 
 typedef struct button
 {
@@ -174,6 +181,7 @@ typedef struct enemy
   float radius;
   int health;
   int type; /*0 is basic, 1 is rapid fire, 2 is boss*/
+  int lvl;
   /* Only Used with boses */
   int pattern;
   struct enemy* next;

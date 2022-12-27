@@ -15,6 +15,9 @@
 #include "spashScreen.h"
 #include "mainMenu.h"
 #include "structs.h"
+#include "globalData.h"
+
+#include <stdio.h>
 
 CP_Image logo;
 int alpha = 255;
@@ -29,14 +32,16 @@ float imageHeight = 0;
 void SplashInit(void)
 {
 	//CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
-	CP_System_SetWindowSize(1920, 1080);
-	CP_System_SetWindowTitle("Live to Survive");
-	logo = CP_Image_Load("./Assets/DigiPen_WHITE.png");
-	CP_Graphics_ClearBackground(CP_Color_CreateHex(0x000000));
+	CP_System_SetWindowSize(WINDOW_SIZE);
+	char buffer[40] = { 0 };
+	snprintf(buffer, sizeof buffer, "Simply Survive v%s", getVersion());
+	CP_System_SetWindowTitle(buffer);
+	logo = CP_Image_Load("./Assets/FMOD Logo Black - White Background.png");
+	CP_Graphics_ClearBackground(WHITE);
 	imageX = SCREEN_WIDTH / 2.0f;
 	imageY = SCREEN_HEIGHT / 2.0f;
-	imageHeight = (float)CP_Image_GetHeight(logo);
-	imageWidth = (float)CP_Image_GetWidth(logo);
+	imageHeight = (float)CP_Image_GetHeight(logo) * SCREEN_WIDTH / 1920.0f;
+	imageWidth = (float)CP_Image_GetWidth(logo) * SCREEN_WIDTH / 1920.0f;
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the update function
@@ -45,12 +50,7 @@ void SplashUpdate(void)
 {
 	if (counter > 4)
 	{
-		alpha -= 5;
-		imageHeight -= 5;
-		imageWidth -= 5;
-		if (imageWidth <= 0) imageWidth = 0;
-		if (imageHeight <= 0) imageHeight = 0;
-		imageY += 10;
+		alpha -= 5;	
 		if (alpha < -10) 
 			CP_Engine_SetNextGameStateForced(MainMenuInit, MainMenuUpdate, MainMenuExit);
 	}
@@ -60,7 +60,7 @@ void SplashUpdate(void)
 		alpha = -100;
 	}
 
-	CP_Graphics_ClearBackground(CP_Color_CreateHex(0x000000));
+	CP_Graphics_ClearBackground(WHITE);
 
 	CP_Image_DrawAdvanced(logo, imageX, imageY, imageWidth, imageHeight, alpha, angle);
 	counter += CP_System_GetDt();

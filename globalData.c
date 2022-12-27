@@ -1,7 +1,35 @@
+#include "structs.h"
 
 float time = 0;
 int highestBulletCount = 0;
+bool isPaused = false;
+bool inGame = false;
+const char *const version = "0.3.0";
 
+const char* getVersion(void) 
+{
+  return version;
+}
+
+bool getGame(void) 
+{
+  return inGame;
+}
+
+bool getPause(void) 
+{
+  return isPaused;
+}
+
+void setGame(bool a) 
+{
+  inGame = a;
+}
+
+void setPause(bool a) 
+{
+  isPaused = a;
+}
 
 float getTime(void) 
 {

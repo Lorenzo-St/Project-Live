@@ -13,12 +13,12 @@
 
 #pragma once
 #include "structs.h"
-void     gameLoopInit    (void);
-void     gameLoopUpdate  (void);
-void     gameLoopExit    (void);
-void     disableWheel    (void);
-bool      returnInvSel   (void);
-player*  returnPlayer    (void);
-camera*  retCam          (void);
-
+void        gameLoopInit    (void);
+void        gameLoopUpdate  (void);
+void        gameLoopExit    (void);
+void        disableWheel    (void);
+bool        returnInvSel    (void);
+player*     returnPlayer    (void);
+camera*     retCam          (void);
+objective*  returnObis      (void);
 

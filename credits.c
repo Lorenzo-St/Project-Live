@@ -14,6 +14,8 @@
 #include "cprocessing.h"
 #include "structs.h"
 #include "mainMenu.h"
+#include "drawStuff.h"
+
 #include <stdio.h>
 
 button returnButton;
@@ -23,7 +25,7 @@ void initButton(void)
 	returnButton.height = 100;
 	returnButton.width = 300;
 	returnButton.x = SCREEN_WIDTH / 2.0f;
-	returnButton.y = SCREEN_HEIGHT / 1.25f;
+	returnButton.y = SCREEN_HEIGHT  * .9f;
 	snprintf(returnButton.words, sizeof returnButton.words, "Return");
 }
 
@@ -31,26 +33,24 @@ void initButton(void)
 // this function will be called once at the beginning of the program
 void creditsInit(void)
 {
-
+  initButton();
 }
 
 void drawButton(void)
 {
+  CP_Color c;
   if (returnButton.selected == 1)
   {
-    CP_Settings_Fill(CP_Color_Create(255, 100, 255, 255));
-    CP_Graphics_DrawRect(returnButton.x, returnButton.y, returnButton.width, returnButton.height);
-    CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-    CP_Font_DrawText(returnButton.words, returnButton.x, returnButton.y);
+    c = GRAY;
   }
   else
   {
-    CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-    CP_Graphics_DrawRect(returnButton.x, returnButton.y, returnButton.width, returnButton.height);
-    CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-    CP_Font_DrawText(returnButton.words, returnButton.x, returnButton.y);
+    c = BLACK;
   }
-
+  CP_Settings_Fill(c);
+  CP_Graphics_DrawRect(returnButton.x, returnButton.y, returnButton.width, returnButton.height);
+  CP_Settings_Fill(WHITE);
+  CP_Font_DrawText(returnButton.words, returnButton.x, returnButton.y);
 }
 
 void checkButton(void)
@@ -76,6 +76,25 @@ void checkButton(void)
 
 }
 
+void drawCredits(void) 
+{
+  drawWords("Descent Studios", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 7.0f, 100 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Programming:", SCREEN_WIDTH / 4.0f, SCREEN_HEIGHT / 3.0f, 60 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Graphics:", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 3.0f, 60 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Producing:", SCREEN_WIDTH / 4.0f * 3.0f, SCREEN_HEIGHT / 3.0f, 60 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Lorenzo", SCREEN_WIDTH / 4.0f, SCREEN_HEIGHT / 3.0f + 40 * SCREEN_WIDTH / 1920.0f, 40 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Lorenzo", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 3.0f + 40 * SCREEN_WIDTH / 1920.0f, 40 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Lorenzo", SCREEN_WIDTH / 4.0f * 3.0f, SCREEN_HEIGHT / 3.0f + 40 * SCREEN_WIDTH / 1920.0f, 40 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Play Testing:", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 60 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Carter", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f + 50 * SCREEN_WIDTH / 1920.0f, 40 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Yakshin", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f + 100 * SCREEN_WIDTH / 1920.0f, 40 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Logan", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f + 150 * SCREEN_WIDTH / 1920.0f, 40 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Phillip", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f + 200 * SCREEN_WIDTH / 1920.0f, 40 * SCREEN_WIDTH / 1920.0f, BLACK);
+  drawWords("Jackson", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f + 250 * SCREEN_WIDTH / 1920.0f, 40 * SCREEN_WIDTH / 1920.0f, BLACK);
+
+  drawWords("Made with FMOD Studio by Firelight Technologies Pty Ltd.", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT * .8f, 50, BLACK);
+}
+
 // use CP_Engine_SetNextGameState to specify this function as the update function
 // this function will be called repeatedly every frame
 void creditsUpdate(void)
@@ -84,10 +103,7 @@ void creditsUpdate(void)
   drawButton();
 	CP_Settings_TextSize(40);
 	CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
-	CP_Font_DrawText("Create by: Lorenzo St. Luce", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 3.0f);
-	CP_Font_DrawText("Instructor: Andy Ellinger", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.5f);
-	CP_Font_DrawText("Special Thanks: My roommates for play testing.", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f);
-	CP_Font_DrawText("Copyright (c) 2020 DigiPen, All rights reserved.", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 1.75f);
+  drawCredits();
   checkButton();
 
 }

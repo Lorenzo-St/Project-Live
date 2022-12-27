@@ -3,6 +3,7 @@
 
 int       initImages       (void);
 void      freeImages       (void);
+CP_Image  returnPickup     (void);
 CP_Image  returnLand       (void);
 CP_Image  returnWeapon     (int id);
 CP_Image  returnWeaponGS   (int id);

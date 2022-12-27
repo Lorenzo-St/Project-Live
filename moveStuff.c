@@ -14,18 +14,26 @@ int moveEnemies(enemy* en, building *buildings)
 {
   while(en)
   {
-
-    
     if (en->dir[0] <= 10 && en->dir[1] <= 10)
     {
       en->dir[0] = CP_Random_RangeFloat(-100, 100);
       en->dir[1] = CP_Random_RangeFloat(-100, 100);
     }
     int check = /*checkAgainstBuilding( buildings, 1, en[i])*/0;
-    en->x += (en->dir[0] * CP_System_GetDt()) * (check == 0 || check == 2);
-    en->y += (en->dir[1] * CP_System_GetDt()) * (check == 0 || check == 1);
-    en->dir[0] += -en->dir[0] * CP_System_GetDt();
-    en->dir[1] += -en->dir[1] * CP_System_GetDt();
+    float dt = CP_System_GetDt();
+    float magnitude = sqrtf(en->dir[0] * en->dir[0] + en->dir[1] * en->dir[1]);
+    if (dt > 1)
+      dt = .3f;
+    float change = (en->dir[0] * dt) * (check == 0 || check == 2);
+    if (fabs(change) > 2)
+      change = .1f * en->dir[0] / magnitude;
+    en->x += change;
+    change = (en->dir[1] * dt) * (check == 0 || check == 1);
+    if (fabs(change) > 2)
+      change = .1f * en->dir[1] / magnitude;
+    en->y += change;
+    en->dir[0] += -en->dir[0] * dt;
+    en->dir[1] += -en->dir[1] * dt;
     //drawDebugLine(en->x, en->x + en->dir[0], en->y, en->y + en->dir[0]);
     en = en->next;
   }

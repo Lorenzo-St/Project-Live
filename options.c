@@ -15,6 +15,10 @@
 #include "options.h"
 #include "mainMenu.h"
 #include "structs.h"
+#include "drawStuff.h"
+#include "gameLoop.h"
+#include "globalData.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -22,9 +26,10 @@
 
 #define OPTIONSBUTTONS 5
 #define AUDIO_SLIDERS 2
+#define DISPLASY_BUTTONS 5
 
 button optionsButton[OPTIONSBUTTONS] = { 0 };
-button displayScreen[2] = { 0 };
+button displayScreen[DISPLASY_BUTTONS] = { 0 };
 int opsSubScreen = 0;
 slider audioSliders[AUDIO_SLIDERS] = { 0 };
 
@@ -56,66 +61,85 @@ void initSliders(void)
 void setupOptionsButtons(void)
 {
   CP_Settings_TextSize(50);
+
+  float width = 300.0f * SCREEN_WIDTH / 1920.0f;
+  float height = 100.0f  * (SCREEN_WIDTH / 1920.0f);
+
   for (int i = 0; i < OPTIONSBUTTONS; i++)
   {
     switch (i)
     {
     case 0:
       snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Display!");
-      optionsButton[i].x = (SCREEN_WIDTH / 6.0f);
+      optionsButton[i].x = (SCREEN_WIDTH / 4.5f);
       optionsButton[i].y = (SCREEN_HEIGHT / 10.0f);
-      optionsButton[i].width = 300;
-      optionsButton[i].height = 100;
+      optionsButton[i].width = width;
+      optionsButton[i].height = height;
       break;
     case 1:
-      snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Graphics!");
-      optionsButton[i].x = (SCREEN_WIDTH / 3.0f);
+      snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Controls!");
+      optionsButton[i].x = (SCREEN_WIDTH / 4.5f) +  (width * 1.16f);
       optionsButton[i].y = (SCREEN_HEIGHT /10.0f);
-      optionsButton[i].width = 300;
-      optionsButton[i].height = 100;
+      optionsButton[i].width = width;
+      optionsButton[i].height = height;
       break;
     case 2:
-      snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Controls!");
-      optionsButton[i].x = (SCREEN_WIDTH / 2.0f);
+      snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Audio!");
+      optionsButton[i].x = (SCREEN_WIDTH / 4.5f) + 2 * (width * 1.16f);
       optionsButton[i].y = (SCREEN_HEIGHT / 10.0f);
-      optionsButton[i].width = 300;
-      optionsButton[i].height = 100;
+      optionsButton[i].width = width;
+      optionsButton[i].height = height;
       break;
     case 3:
-      snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Audio!");
-      optionsButton[i].x = (SCREEN_WIDTH / 1.5f);
-      optionsButton[i].y = (SCREEN_HEIGHT / 10.0f);
-      optionsButton[i].width = 300;
-      optionsButton[i].height = 100;
-      break;
-    case 4:
       snprintf(optionsButton[i].words, sizeof optionsButton[i].words, "Exit!");
-      optionsButton[i].x = (SCREEN_WIDTH / 1.2f);
+      optionsButton[i].x = (SCREEN_WIDTH / 4.5f) + 3 * (width * 1.16f);
       optionsButton[i].y = (SCREEN_HEIGHT / 10.0f);
-      optionsButton[i].width = 300;
-      optionsButton[i].height = 100;
+      optionsButton[i].width = width;
+      optionsButton[i].height = height;
       break;
       
     }
    
   }
-  for (int i = 0; i < 2; i++) 
+  width = 250.0f * SCREEN_WIDTH / 1920.0f;
+  for (int i = 0; i < DISPLASY_BUTTONS; i++)
   {
     switch (i) 
     {
     case 0:
-      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "Set Fullscreen");
+      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "Fullscreen");
       displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
       displayScreen[i].y = (SCREEN_HEIGHT / 3.0f);
-      displayScreen[i].width = 300;
-      displayScreen[i].height = 150;
+      displayScreen[i].width = width;
+      displayScreen[i].height = height;
       break;
     case 1:
-      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "Set Windowed");
+      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "1920 x 1080");
       displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
-      displayScreen[i].y = (SCREEN_HEIGHT / 2.0f);
-      displayScreen[i].width = 300;
-      displayScreen[i].height = 150;
+      displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + (height * 1.10f);
+      displayScreen[i].width = width;
+      displayScreen[i].height = height;
+      break;
+    case 2:
+      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "1280 x 720");
+      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + 2 * (height * 1.10f);
+      displayScreen[i].width = width;
+      displayScreen[i].height = height;
+      break;
+    case 3:
+      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "800 x 600");
+      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + 3 * (height * 1.10f);
+      displayScreen[i].width = width;
+      displayScreen[i].height = height;
+      break;
+    case 4:
+      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "640 x 480");
+      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + 4 * (height * 1.10f);
+      displayScreen[i].width = width;
+      displayScreen[i].height = height;
       break;
     }
   }
@@ -126,6 +150,7 @@ void setupOptionsButtons(void)
 // this function will be called once at the beginning of the program
 void OptionsInit(void)
 {
+  setPause(false);
   initSliders();
   setupOptionsButtons();
   CP_Settings_RectMode(CP_POSITION_CENTER);
@@ -138,7 +163,7 @@ void drawSliders(void)
   for (int i = 0; i < AUDIO_SLIDERS; i++)
   {
     CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-    CP_Settings_TextSize(50);
+    CP_Settings_TextSize(50 * SCREEN_HEIGHT/1080.0f);
     CP_Font_DrawText(audioSliders[i].title, audioSliders[i].x, audioSliders[i].y - 50);
     CP_Graphics_DrawRect(audioSliders[i].x, audioSliders[i].y, audioSliders[i].length, 20);
     float x = (audioSliders[i].length * audioSliders[i].value);
@@ -194,16 +219,16 @@ void drawOptionsButtons(void)
   {
     if (optionsButton[i].selected == 1) 
     {
-      CP_Settings_Fill(CP_Color_Create(255, 100, 255, 255));
+      CP_Settings_Fill(GRAY);
       CP_Graphics_DrawRect(optionsButton[i].x, optionsButton[i].y, optionsButton[i].width, optionsButton[i].height);
-      CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+      CP_Settings_Fill(WHITE);
       CP_Font_DrawText(optionsButton[i].words, optionsButton[i].x, optionsButton[i].y);
     }
     else 
     {
-      CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+      CP_Settings_Fill(BLACK);
       CP_Graphics_DrawRect(optionsButton[i].x, optionsButton[i].y, optionsButton[i].width, optionsButton[i].height);
-      CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+      CP_Settings_Fill(WHITE);
       CP_Font_DrawText(optionsButton[i].words, optionsButton[i].x, optionsButton[i].y);
     }
   }
@@ -234,16 +259,18 @@ void checkOptionsButtons(void)
           opsSubScreen = 0;
           break;
         case 1:
-          opsSubScreen = 1;
-          break;
-        case 2:
           opsSubScreen = 2;
           break;
-        case 3:
+        case 2:
           opsSubScreen = 3;
           break;
-        case 4:
-          CP_Engine_SetNextGameState(MainMenuInit, MainMenuUpdate, MainMenuExit);
+        case 3:
+          if (getGame()) 
+          {
+            CP_Engine_SetNextGameStateForced(gameLoopInit, gameLoopUpdate, gameLoopExit);
+          }
+          else
+           CP_Engine_SetNextGameState(MainMenuInit, MainMenuUpdate, MainMenuExit);
           break;
         }
       }
@@ -259,9 +286,9 @@ void drawSubScreen(void)
   switch (opsSubScreen)
   {
   case 0:
-    snprintf(buffer, sizeof buffer, "The current screen resolution is %i by %i", SCREEN_WIDTH, SCREEN_HEIGHT);
-    CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, 250.0f);
-    for (int i = 0; i < 2; i++)
+    snprintf(buffer, sizeof buffer, "The current window size is %i by %i", SCREEN_WIDTH, SCREEN_HEIGHT);
+    CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT * .20f);
+    for (int i = 0; i < DISPLASY_BUTTONS; i++)
     {
       if (mX > displayScreen[i].x + (.5 * displayScreen[i].width) || mX < displayScreen[i].x - (.5 * displayScreen[i].width) || mY > displayScreen[i].y + (.5 * displayScreen[i].height) || mY < displayScreen[i].y - (.5 * displayScreen[i].height))
       {
@@ -273,16 +300,16 @@ void drawSubScreen(void)
       }
       if (displayScreen[i].selected == 1)
       {
-        CP_Settings_Fill(CP_Color_Create(255, 100, 255, 255));
+        CP_Settings_Fill(GRAY);
         CP_Graphics_DrawRect(displayScreen[i].x, displayScreen[i].y, displayScreen[i].width, displayScreen[i].height);
-        CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+        CP_Settings_Fill(WHITE);
         CP_Font_DrawText(displayScreen[i].words, displayScreen[i].x, displayScreen[i].y);
       }
       else
       {
-        CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
+        CP_Settings_Fill(BLACK);
         CP_Graphics_DrawRect(displayScreen[i].x, displayScreen[i].y, displayScreen[i].width, displayScreen[i].height);
-        CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+        CP_Settings_Fill(WHITE);
         CP_Font_DrawText(displayScreen[i].words, displayScreen[i].x, displayScreen[i].y);
       }
       if (displayScreen[i].selected) 
@@ -293,13 +320,22 @@ void drawSubScreen(void)
           {
           case 0:
             CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
-            setupOptionsButtons();
             break;
           case 1:
             CP_System_SetWindowSize(1920, 1080);
-            setupOptionsButtons();
+
+            break;
+          case 2:
+            CP_System_SetWindowSize(1080, 720);
+            break;
+          case 3:
+            CP_System_SetWindowSize(800, 600);
+            break;
+          case 4:
+            CP_System_SetWindowSize(640, 480);
             break;
           }
+          setupOptionsButtons();
         }
       }
     }
@@ -309,34 +345,63 @@ void drawSubScreen(void)
     CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, 250.0f);
     break;
   case 2:;
-    float xpos = SCREEN_WIDTH / 3.0f;
+    float xpos = SCREEN_WIDTH / 4.0f;
     float ypos = SCREEN_HEIGHT / 3.0f;
+   
+   
     CP_Settings_Fill(CP_Color_Create(50, 50, 50, 255));
+    /* Left Side */
     CP_Graphics_DrawRect(xpos, ypos, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
-    CP_Graphics_DrawRect(xpos, ypos + 100, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
-    CP_Graphics_DrawRect(xpos, ypos + 200, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
-    CP_Graphics_DrawRect(xpos, ypos + 300, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
-    CP_Graphics_DrawRect(xpos, ypos + 400, SCREEN_WIDTH / 15.0f, SCREEN_HEIGHT / 20.0f);
-    CP_Graphics_DrawEllipse(xpos - 150, ypos + 400, 100, 150);
-    CP_Graphics_DrawEllipse(xpos, ypos + 550, 100, 150);
+    CP_Graphics_DrawRect(xpos, ypos + 100 * SCREEN_WIDTH / 1920.0f, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos, ypos + 200 * SCREEN_WIDTH / 1920.0f, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos, ypos + 300 * SCREEN_WIDTH / 1920.0f, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos, ypos + 400 * SCREEN_WIDTH / 1920.0f, SCREEN_WIDTH / 15.0f, SCREEN_HEIGHT / 20.0f);
+    
+    /* Right Side */
+    CP_Graphics_DrawRect(xpos * 3, ypos, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos * 3, ypos + 100 * SCREEN_WIDTH / 1920.0f, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos * 3, ypos + 200 * SCREEN_WIDTH / 1920.0f, SCREEN_WIDTH / 35.0f, SCREEN_HEIGHT / 20.0f);
+    CP_Graphics_DrawRect(xpos * 3, ypos + 300 * SCREEN_WIDTH / 1920.0f, SCREEN_WIDTH / 10.0f, SCREEN_HEIGHT / 20.0f);
+
+
+
+    CP_Graphics_DrawEllipse(xpos - 150 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f, 100 * SCREEN_WIDTH / 1920.0f, 150 * SCREEN_WIDTH / 1920.0f);
+    CP_Graphics_DrawEllipse(xpos, ypos + 550 * SCREEN_WIDTH / 1920.0f, 100 * SCREEN_WIDTH / 1920.0f, 150 * SCREEN_WIDTH / 1920.0f);
+
     CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-    CP_Graphics_DrawEllipse(xpos - 150, ypos + 357, 20, 50);
-    CP_Graphics_DrawEllipse(xpos, ypos + 507, 20, 50);
+    CP_Graphics_DrawEllipse(xpos - 150 * SCREEN_WIDTH / 1920.0f, ypos + 357 * SCREEN_WIDTH / 1920.0f, 20 * SCREEN_WIDTH / 1920.0f, 50 * SCREEN_WIDTH / 1920.0f);
+    CP_Graphics_DrawEllipse(xpos, ypos + 507 * SCREEN_WIDTH / 1920.0f, 20 * SCREEN_WIDTH / 1920.0f, 50 * SCREEN_WIDTH / 1920.0f);
+    
     CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-    CP_Graphics_DrawEllipse(xpos - 175, ypos + 357, 30, 30);
+    CP_Graphics_DrawEllipse(xpos - 175 * SCREEN_WIDTH / 1920.0f, ypos + 357 * SCREEN_WIDTH / 1920.0f, 30 * SCREEN_WIDTH / 1920.0f, 30 * SCREEN_WIDTH / 1920.0f);
+
     CP_Font_DrawText("W", xpos, ypos);
-    CP_Font_DrawText("Move up", xpos + 300, ypos);
-    CP_Font_DrawText("A", xpos, ypos + 100);
-    CP_Font_DrawText("Move left", xpos + 300, ypos + 100);
-    CP_Font_DrawText("S", xpos, ypos + 200);
-    CP_Font_DrawText("Move down", xpos + 300, ypos + 200);
-    CP_Font_DrawText("D", xpos, ypos + 300);
-    CP_Font_DrawText("Move right", xpos + 300, ypos + 300);
-    CP_Font_DrawText("Space", xpos, ypos + 400);
-    CP_Font_DrawText("Shoot", xpos + 300, ypos + 400);
-    CP_Font_DrawText("Aim", xpos + 300, ypos + 550);
-    CP_Settings_TextSize(20);
-    CP_Font_DrawText("Left Mouse", xpos - 150, ypos + 400);
+    CP_Font_DrawText("Move up", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos);
+    CP_Font_DrawText("A", xpos, ypos + 100 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Move left", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 100 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("S", xpos, ypos + 200 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Move down", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 200 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("D", xpos, ypos + 300 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Move right", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 300 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Space", xpos, ypos + 400 * SCREEN_WIDTH / 1920.0f);
+
+
+
+    CP_Font_DrawText("R", xpos * 3, ypos);
+    CP_Font_DrawText("Reload", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos);
+    CP_Font_DrawText("Q", xpos * 3, ypos + 100 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Switch Weapons", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 100 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("E", xpos * 3, ypos + 200 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Open Inventory", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 200 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Shift", xpos * 3, ypos + 300 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Dash", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 300 * SCREEN_WIDTH / 1920.0f);
+
+    CP_Font_DrawText("Shoot", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Aim", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 550 * SCREEN_WIDTH / 1920.0f);
+    CP_Settings_TextSize(20 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Left Mouse", xpos - 150 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f);
+
+    drawWords("Rebinding to be added at a later date", xpos * 3, ypos * 2.25f, 50 * SCREEN_WIDTH / 1920.0f, WHITE);
     break;
   case 3:
     drawSliders();
@@ -348,7 +413,7 @@ void drawSubScreen(void)
 // this function will be called repeatedly every frame
 void OptionsUpdate(void)
 {
-  CP_Settings_TextSize(40);
+  CP_Settings_TextSize(40  * (SCREEN_WIDTH / 1920.0f));
   CP_Graphics_ClearBackground(CP_Color_CreateHex(0x111111ff));
   drawOptionsButtons();
   checkSliders();

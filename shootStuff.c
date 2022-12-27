@@ -8,7 +8,7 @@
 
 bullet* setBulletStats(bullet* thisOne, float dir[2], int user, float pl[2])
 {
-  thisOne->radius = 10;
+  thisOne->radius = 10 * (SCREEN_WIDTH / 1920.0f);
   thisOne->x = pl[0];
   thisOne->y = pl[1];
   thisOne->dir[0] = dir[0];
@@ -156,7 +156,7 @@ int playerFire(player pl, bullet **bullets)
   case 1:
     for (int k = 0; k < SPREAD_COUNT; k++)
     {
-      angle = CP_Random_RangeFloat(-50, 50);
+      angle = CP_Random_RangeFloat(-25, 25);
       dir[0] = (CP_Input_GetMouseX() - SCREEN_WIDTH / 2.0f) + angle;
       dir[1] = -(CP_Input_GetMouseY() - SCREEN_HEIGHT / 2.0f) + angle;
       magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
