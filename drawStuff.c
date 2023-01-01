@@ -827,25 +827,25 @@ void drawSubContext(float baseLoc[2], int index)
     baseLoc[1] -= height * 1.875f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Create Max", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("Create Max", baseLoc[0], baseLoc[1], 40  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 8, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Create 1 x4", baseLoc[0], baseLoc[1], 40  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("1 Medkits x4", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 9, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Create 10 x40", baseLoc[0], baseLoc[1], 35  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("10 Medkits x40", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 10, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Create 25 x100", baseLoc[0], baseLoc[1], 40  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("25 Medkits x100", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 11, index);
 
     break;
@@ -856,19 +856,19 @@ void drawSubContext(float baseLoc[2], int index)
     baseLoc[1] -= height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Light x5", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("5 Light x5", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 12, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Medium x10", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("3 Medium x10", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 13, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("Heavy x25", baseLoc[0], baseLoc[1], 50  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("5 Heavy x25", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 14, index);
     break;
   }
@@ -914,7 +914,17 @@ void drawContextMenu(float x, float y, int type, int index)
   CP_Settings_Fill(c);
   CP_Graphics_DrawRect(x, y - height/2.0f * 1.25f, width, height * .25f);
   InvItem* item = returnItemAtPos(index);
-  drawWords(item->name, x, y - height / 2.0f * 1.25f, 40, WHITE);
+  if (item->type == 0) 
+  {
+    char buffer[30] = { 0 };
+    snprintf(buffer, sizeof buffer, "%s lvl: %i", item->name, item->subID);
+    drawWords(buffer, x, y - height / 2.0f * 1.25f, 30 * (SCREEN_WIDTH / 1920.0f), WHITE);
+  }
+  else 
+  {
+    drawWords(item->name, x, y - height / 2.0f * 1.25f, 30 * (SCREEN_WIDTH / 1920.0f), WHITE);
+  }
+  
   int click = 0;
   CP_Settings_TextSize(50);
   c = GRAY_BUT;

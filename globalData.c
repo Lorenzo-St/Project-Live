@@ -4,7 +4,7 @@ float time = 0;
 int highestBulletCount = 0;
 bool isPaused = false;
 bool inGame = false;
-const char *const version = "0.3.0";
+const char* const version = "0.4.10";
 
 const char* getVersion(void) 
 {
