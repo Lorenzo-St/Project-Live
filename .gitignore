@@ -1,4 +1,6 @@
-/.vs/*.*
+\.vs\*.*
 *.vsidx
 *.vsidx
-/Debug/*.*
+\Debug\*.*
+\Release\*
+*.ipch
