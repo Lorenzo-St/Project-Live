@@ -26,7 +26,7 @@ int initPlayer(player *pl, float* multiplier, float* addTimer)
   pl->health = MAX_HEALTH;
   pl->playerRadius = 20 * (SCREEN_WIDTH / 1920.0f);
   *multiplier = 1;
-  setTime(0.0f);
+  setTime(100.0f);
   return 0;
 }
 

@@ -158,9 +158,9 @@ void drawPlayer(player pl, camera c)
   CP_Graphics_DrawRectAdvanced(((pl.x - c.x) + ((pl.direction[0] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (SCREEN_WIDTH / 2.0f), (-(pl.y - c.y) + ((pl.direction[1] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (SCREEN_HEIGHT / 2.0f), pl.playerRadius / 1.25f, 10 * (SCREEN_WIDTH / 1920.0f), pl.rot, 0.0f);
   
   CP_Settings_Fill(CP_Color_CreateHex(0x832051FF));
-  CP_Graphics_DrawRect((pl.x - c.x) + SCREEN_WIDTH / 2.0f, -(pl.y - c.y) + SCREEN_HEIGHT /2.0f + pl.playerRadius * 2.0f, pl.playerRadius * 2, 20.0f * SCREEN_WIDTH / 1920);
-  CP_Settings_Fill(CP_Color_CreateHex(0x81a432FF));
   CP_Settings_RectMode(CP_POSITION_CORNER);
+  CP_Graphics_DrawRect((pl.x - c.x) + SCREEN_WIDTH / 2.0f - pl.playerRadius, -(pl.y - c.y) + SCREEN_HEIGHT /2.0f + pl.playerRadius * 1.5f, pl.playerRadius * 2, 20.0f * SCREEN_WIDTH / 1920);
+  CP_Settings_Fill(CP_Color_CreateHex(0x81a432FF));
   CP_Graphics_DrawRect((pl.x - c.x) + SCREEN_WIDTH / 2.0f - pl.playerRadius, -(pl.y - c.y) + SCREEN_HEIGHT / 2.0f + pl.playerRadius * 1.5f, pl.playerRadius * 2.0f * (pl.health * 1.0f / MAX_HEALTH * 1.0f), 20.0f * SCREEN_WIDTH / 1920);
   CP_Settings_RectMode(CP_POSITION_CENTER);
 
@@ -213,6 +213,13 @@ void drawEnemies(enemy** en, camera C)
       continue;
     }
     CP_Graphics_DrawCircle((curr->x - C.x) + (SCREEN_WIDTH / 2.0f), -(curr->y - C.y) + (SCREEN_HEIGHT / 2.0f), curr->radius);
+    CP_Settings_RectMode(CP_POSITION_CORNER);
+    CP_Settings_Fill(CP_Color_CreateHex(0x832051FF));
+    CP_Graphics_DrawRect((curr->x - C.x) + (SCREEN_WIDTH / 2.0f) - curr->radius, -(curr->y - C.y) + (SCREEN_HEIGHT / 2.0f) + curr->radius, curr->radius * 2, 20.0f * SCREEN_WIDTH / 1920);
+    CP_Settings_Fill(CP_Color_CreateHex(0x81a432FF));
+    CP_Graphics_DrawRect((curr->x - C.x) + (SCREEN_WIDTH / 2.0f) - curr->radius, -(curr->y - C.y) + (SCREEN_HEIGHT / 2.0f) + curr->radius, curr->radius * 2.0f * (curr->health * 1.0f / curr->MaxHealth * 1.0f), 20.0f * SCREEN_WIDTH / 1920);
+    CP_Settings_RectMode(CP_POSITION_CENTER);
+    
     prev = curr;
     curr = curr->next;
   }

@@ -80,6 +80,7 @@ enemy* setEnemyStats(enemy* e, camera c,int type)
     e->radius = 50 * (SCREEN_WIDTH / 1920.0f);
     break;
   }
+  e->MaxHealth = e->health;
   return e;
 }
 

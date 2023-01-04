@@ -28,6 +28,8 @@
 // CP_Engine_Run() is the core function that starts the simulation
 int playerInput[KEY_COUNTS] = { KEY_ESCAPE };
 
+
+
 void preUpdate(void)
 {
   for (int i = 0; i < KEY_COUNT; i++)
@@ -37,7 +39,7 @@ void preUpdate(void)
       switch (playerInput[i])
       {
       case KEY_ESCAPE:
-        if(getGame())
+        if(getGame() && !getOptions())
           setPause(!getPause());
         break;
       }
@@ -85,8 +87,12 @@ void postUpdate(void)
   if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), width, height))
   {
     C = GRAY;
-    if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
+    if (CP_Input_MouseTriggered(MOUSE_BUTTON_1)) 
+    {
       CP_Engine_SetNextGameStateForced(OptionsInit, OptionsUpdate, OptionsExit);
+      setOptions(true);
+    }
+
   }
   else
     C = WHITE;
@@ -100,6 +106,7 @@ void postUpdate(void)
     C = GRAY;
     if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
     {
+      setGame(false);
       CP_Engine_SetNextGameStateForced(MainMenuInit, MainMenuUpdate, MainMenuExit);
       setPause(false);
     }

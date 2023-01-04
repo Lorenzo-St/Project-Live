@@ -265,9 +265,11 @@ void checkOptionsButtons(void)
           opsSubScreen = 3;
           break;
         case 3:
-          if (getGame()) 
+          if (getGame())
           {
             CP_Engine_SetNextGameStateForced(gameLoopInit, gameLoopUpdate, gameLoopExit);
+            setOptions(false);
+            setPause(true);
           }
           else
            CP_Engine_SetNextGameState(MainMenuInit, MainMenuUpdate, MainMenuExit);

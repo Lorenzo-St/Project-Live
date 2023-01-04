@@ -180,6 +180,7 @@ typedef struct enemy
   float speed;
   float radius;
   int health;
+  int MaxHealth;
   int type; /*0 is basic, 1 is rapid fire, 2 is boss*/
   int lvl;
   /* Only Used with boses */

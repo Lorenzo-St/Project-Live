@@ -111,6 +111,7 @@ void gameLoopInit(void)
   while (returnHead())
   {
     InvItem* oldHead = returnHead();
+    
     removeItem(0);
     freeItem(oldHead);
   }
@@ -242,6 +243,9 @@ void gameLoopUpdate(void)
 // this function will be called once just before leaving the current gamestate
 void gameLoopExit(void)
 {
+  if (getGame())
+    return;
+
   for (int i = 0; i < AUDIOS; i++) 
   {
     CP_Sound_Free(&bulletSounds[i]);
@@ -250,13 +254,16 @@ void gameLoopExit(void)
   releaseScrollable();
   
   InvItem* i = returnHead();
-  InvItem* next = i->next;
-  while (i) 
+  if (i != NULL)
   {
-    next = i->next;
-    freeItem(i);
-    i = next;
+    InvItem* next = i->next;
+    while (i)
+    {
+      next = i->next;
+      freeItem(i);
+      i = next;
+    }
+
   }
   resetHead();
-
 }
