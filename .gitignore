@@ -1,6 +1,6 @@
 \.vs\*
 *.vsidx
 *.vsidx
-\Debug\*.*
-\Release\*
+x64\Debug\*
+x64\Release\*
 *.ipch
