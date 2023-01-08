@@ -1,8 +1,8 @@
-\.vs\*
+.vs/*
 *.vsidx
 *.vsidx
-x64\Debug\*
-x64\Release\*
+x64/Debug/*
+x64/Release/*
 *.ipch
 *.obj
 *.pdb
@@ -10,3 +10,7 @@ x64\Release\*
 *.obj
 *.tlog
 *.ilk
+*.db-shm
+*.db-wal
+*.opendb
+.vs/Live to Surivive/v17/.suo
