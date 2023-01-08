@@ -26,6 +26,7 @@
 #include "debugInfo.h"
 #include "playerInv.h"
 #include "globalImages.h"
+#include "worldSystems.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -60,7 +61,7 @@ objective obis[MAX_OBJECTIVES] = { 0 };
 
 player pl = { 0 };
 camera c = { 0 };
-building buildings[NUMBER_OF_BUILDINGS] = { 0 };
+building* buildings = NULL;
 
 camera *retCam(void) 
 {
@@ -97,8 +98,12 @@ void gameLoopInit(void)
   obis[0].title = "Survive";
   setGame(true);
   bossesEnabled = 0;
+  if(getWorldName() == NULL)
+    generateWorld();
+  else
+    loadWorld(getWorldName());
 
-  //initBuildings(buildings);
+  buildings = returnBuildings();
   initAudio(bulletSounds);
   initPlayer(&pl, &multiplier, &addTimer);
   initDrops(items);
@@ -133,11 +138,11 @@ void gameLoopInit(void)
   initializeAmmo(&pl);
   addItem(2, retAmmo()->lightStorage);
 
-  /*while (checkInsideBuilding(buildings, 0, pl) != 0)
+  while (checkInsideBuilding(buildings, 0, pl) != 0)
   {
     pl.x = CP_Random_RangeFloat(-1000, 1000);
     pl.y = CP_Random_RangeFloat(-1000, 1000);
-  }*/
+  }
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the update function
@@ -163,13 +168,14 @@ void gameLoopUpdate(void)
   c.y = pl.y;
 
   /* Draw all on screen items */
+  drawBuildings(buildings, c);
   drawBullets(head,c);
   drawPlayer(pl,c);
   drawEnemies(&enHead, c);
   drawItems(items,c);;
   drawPickupText(pickupText,c);
   drawObjectiveBoard();
-  //drawBuildings(buildings,c);
+
 
   if (invOpen)
     invHovered = drawInventory(returnHead());
@@ -190,7 +196,7 @@ void gameLoopUpdate(void)
   moveEnemies(enHead, buildings);
   moveBullets(&head, &enHead,  &pl, items, buildings);
 
-  int check = /*checkAgainstBuilding(buildings, 0, &pl)*/0;
+  int check = checkAgainstBuilding(buildings, 0, &pl);
 
   /* Check user input and collisions */
   checkKeys(&pl, &multiplier, &head, playerKeys, &invOpen, &wheelOpen, getPause(), check);
@@ -266,4 +272,6 @@ void gameLoopExit(void)
 
   }
   resetHead();
+  if(getGenerated())
+    free(getWorldName());
 }

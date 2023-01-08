@@ -4,3 +4,9 @@
 x64\Debug\*
 x64\Release\*
 *.ipch
+*.obj
+*.pdb
+*.idb
+*.obj
+*.tlog
+*.ilk

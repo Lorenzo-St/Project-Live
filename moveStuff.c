@@ -19,7 +19,7 @@ int moveEnemies(enemy* en, building *buildings)
       en->dir[0] = CP_Random_RangeFloat(-100, 100);
       en->dir[1] = CP_Random_RangeFloat(-100, 100);
     }
-    int check = /*checkAgainstBuilding( buildings, 1, en[i])*/0;
+    int check = checkAgainstBuilding(buildings, 1, en);
     float dt = CP_System_GetDt();
     float magnitude = sqrtf(en->dir[0] * en->dir[0] + en->dir[1] * en->dir[1]);
     if (dt > 1)
@@ -54,7 +54,7 @@ int moveBullets(bullet** bullets, enemy** en, player *pl, item *items, building 
   {
     count++;
     freed = false;
-    int check = /*checkAgainstBuilding(buildings, 2, current)*/ 0;
+    int check = checkAgainstBuilding(buildings, 2, current);
     current->x += (current->dir[0] * current->speed);
     current->y += (current->dir[1] * current->speed);
     current->life -= CP_System_GetDt();

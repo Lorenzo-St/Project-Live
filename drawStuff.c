@@ -216,7 +216,7 @@ void drawEnemies(enemy** en, camera C)
     CP_Settings_RectMode(CP_POSITION_CORNER);
     CP_Settings_Fill(CP_Color_CreateHex(0x832051FF));
     CP_Graphics_DrawRect((curr->x - C.x) + (SCREEN_WIDTH / 2.0f) - curr->radius, -(curr->y - C.y) + (SCREEN_HEIGHT / 2.0f) + curr->radius, curr->radius * 2, 20.0f * SCREEN_WIDTH / 1920);
-    CP_Settings_Fill(CP_Color_CreateHex(0x81a432FF));
+    CP_Settings_Fill(CP_Color_CreateHex(0x81A432FF));
     CP_Graphics_DrawRect((curr->x - C.x) + (SCREEN_WIDTH / 2.0f) - curr->radius, -(curr->y - C.y) + (SCREEN_HEIGHT / 2.0f) + curr->radius, curr->radius * 2.0f * (curr->health * 1.0f / curr->MaxHealth * 1.0f), 20.0f * SCREEN_WIDTH / 1920);
     CP_Settings_RectMode(CP_POSITION_CENTER);
     
@@ -262,13 +262,17 @@ void drawItems(item* items, camera C)
 
 void drawBuildings(building *buildings, camera c) 
 {
-  CP_Settings_Fill(CP_Color_Create(10, 10, 10, 255));
-  for (int i = 0; i < NUMBER_OF_BUILDINGS; i++) 
+  int buildingNum = grabBuildingNumb();
+  for (int i = 0; i < buildingNum; i++)
   {
-    if (fabsf(buildings[i].x - c.x) > fabsf(SCREEN_WIDTH / 2.0f) + (buildings[i].xLen / 2.0f) || fabsf(buildings[i].y - c.y) > fabsf(SCREEN_HEIGHT / 2.0f) + (buildings[i].yLen / 2.0f))
+    if (buildings[i].w == 0 || buildings[i].h == 0)
       continue;
-
-    CP_Graphics_DrawRect((buildings[i].x - c.x) + (SCREEN_WIDTH / 2.0f), -(buildings[i].y - c.y) + (SCREEN_HEIGHT / 2.0f),  buildings[i].xLen, buildings[i].yLen);
+    if (fabsf(buildings[i].x - c.x) > fabsf(SCREEN_WIDTH / 2.0f) + (buildings[i].w / 2.0f) || fabsf(buildings[i].y - c.y) > fabsf(SCREEN_HEIGHT / 2.0f) + (buildings[i].h / 2.0f))
+      continue;
+    CP_Settings_Fill(CP_Color_Create(10, 10, 10, 255));
+    CP_Graphics_DrawRect((buildings[i].x - c.x) + (SCREEN_WIDTH / 2.0f), -(buildings[i].y - c.y) + (SCREEN_HEIGHT / 2.0f),  buildings[i].w, buildings[i].h);
+    CP_Settings_Fill(CP_Color_CreateHex(0xBBE116FF));
+    CP_Graphics_DrawRect((buildings[i].x - c.x) + (SCREEN_WIDTH / 2.0f), -(buildings[i].y - c.y) + (SCREEN_HEIGHT / 2.0f), 10, 10);
   }
 }
 
@@ -1210,9 +1214,9 @@ void drawWheelImages(float x, float y, float radius)
     float y2 = y + radius * sinf(degrees * 3.1415f / 180.0f);
     float imageSize = x / 5.0f;
     CP_Image_Draw(c, x2, y2, imageSize, imageSize, 255);
-    CP_Settings_Fill(BLACK);
-    CP_Settings_TextSize(imageSize/3.0f);
-    CP_Font_DrawText(curItem->name, x2, y2 + imageSize/2.0f);
+    char buffer[30] = { 0 };
+    snprintf(buffer, sizeof buffer, "%s lvl: %i", curItem->name, curItem->subID);
+    drawWords(buffer, x2, y2 + imageSize / 2.0f, imageSize / 4.0f, BLACK);
   }
 }
 
@@ -1252,6 +1256,7 @@ void drawWheel(player* p)
     drawArc(angle, angle + 61, x, y, radius);
   }
   drawWheelImages(x, y, radius);
+
   
 }
 

@@ -3,5 +3,9 @@ What you were working on last
    - more graphics
    - new font?
 
+ - Map Loading
+   - Buildings
+   - Spawn points
+
  - Weapons
     - Syringe

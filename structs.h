@@ -51,6 +51,7 @@
 #define GRAY      CP_Color_CreateHex(0x3A3A3AFF)
 #define GRAY_BUT  CP_Color_CreateHex(0x5A5A5AFF)
 #define BAD_BUTT  CP_Color_CreateHex(0xF03636FF)
+#define RED       CP_Color_CreateHex(0xFA1212FF)
 
 /* |-----------------------  types   ---------------------------| */
 
@@ -127,10 +128,12 @@ typedef struct slider{
 
 typedef struct building 
 {
-  float x, y;
-  float xLen, yLen;
   bool hasInterior;
-  int doorSide;
+  char type;
+  char doorSide;
+  float x, y;
+  float w, h;
+
 }building;
 
 

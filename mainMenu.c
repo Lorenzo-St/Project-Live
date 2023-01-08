@@ -20,8 +20,10 @@
 #include "drawStuff.h"
 #include "globalImages.h"
 #include "globalData.h"
+#include "checkStuff.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -30,6 +32,198 @@
 button buttons[BUTTONS] = { 0 };
 
 static player p = { 0 };
+static int screen = 0;
+static bool inWorlds = false;
+
+
+
+struct worldButton
+{
+  char name[30];
+};
+
+int worldsCount = 0;
+int worldsScreen = 0;
+static struct worldButton* first;
+
+void loadWorldNames(void) 
+{
+  if (first != NULL)
+    return;
+  FILE* fp;
+  errno_t a = fopen_s(&fp, "./Managed/worlds.dat", "r");
+  if (a != 0)
+    return;
+  a = fscanf_s(fp, "%i", &worldsCount);
+  int places = 0;
+  int base = 1;
+  first = malloc(sizeof(struct worldButton) * worldsCount);
+  if (first == NULL)
+    return;
+
+  while (worldsCount % base != worldsCount)
+  {
+    base *= 10;
+    places++;
+  }
+  fseek(fp, places + 1 , SEEK_SET);
+  for (int i = 0; i < worldsCount; i++) 
+  {
+    *(first + i) = (struct worldButton){ 0 };
+    struct worldButton* o = first + i;
+
+    fgets((o->name), sizeof((first + i)->name), fp);
+  }
+  fclose(fp);
+}
+
+
+void drawWorlds(void) 
+{
+  if (CP_Input_KeyTriggered(KEY_ESCAPE)) 
+  {
+    inWorlds = false;
+    return;
+  }
+
+  if (checkMouseBoxCollide(SCREEN_WIDTH - 60 - SCREEN_WIDTH / 2.0f, -(60.0f - SCREEN_HEIGHT / 2.0f), 100, 100))
+  {
+    if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
+    {
+      inWorlds = false;
+      return;
+    }
+    CP_Settings_Fill(RED);
+  }
+  else
+  {
+    CP_Settings_Fill(WHITE);
+  }
+  CP_Graphics_DrawRect(SCREEN_WIDTH - 60.0f, 60.0f, 100, 100);
+  CP_Settings_Fill(BLACK);
+  CP_Settings_TextSize(25);
+  CP_Font_DrawText("Return", SCREEN_WIDTH - 60.0f, 60.0f);
+
+  float buttonWidth = SCREEN_WIDTH / 4.0f;
+  float buttonHeight = SCREEN_HEIGHT / 6.0f;
+  float baseX = SCREEN_WIDTH / 3.0f;
+  float baseY = SCREEN_HEIGHT / 4.0f;
+
+  int currentButton = worldsScreen * 6;
+  CP_Settings_TextSize(50);
+  for (int i = 0; i < 3; i++) 
+  {
+    if (currentButton >= worldsCount )
+      break;
+    if (checkMouseBoxCollide(baseX - SCREEN_WIDTH / 2.0f, -(baseY + (baseY * i) - SCREEN_HEIGHT/2.0f), buttonWidth, buttonHeight)) 
+    {
+      if (CP_Input_MouseTriggered(MOUSE_BUTTON_1)) 
+      {
+        inWorlds = false;
+        setWorldName((first + currentButton)->name);
+        CP_Engine_SetNextGameState(gameLoopInit, gameLoopUpdate, gameLoopExit);
+
+      }
+    
+      CP_Settings_Fill(GRAY_BUT);
+    }else
+      CP_Settings_Fill(GRAY);
+
+    CP_Graphics_DrawRect(baseX, baseY + (baseY * i), buttonWidth, buttonHeight);
+    CP_Settings_Fill(WHITE);
+    CP_Font_DrawText((first + currentButton)->name, baseX, baseY + (baseY * i));
+    currentButton++;
+  }
+
+  for (int i = 0; i < 3; i++)
+  {
+    if (currentButton >= worldsCount)
+      break;
+    if (checkMouseBoxCollide(2 * baseX - SCREEN_WIDTH / 2.0f, -(baseY + (baseY * i) - SCREEN_HEIGHT / 2.0f), buttonWidth, buttonHeight))
+    {
+      if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
+      {
+        inWorlds = false;
+        setWorldName((first + currentButton)->name);
+        CP_Engine_SetNextGameState(gameLoopInit, gameLoopUpdate, gameLoopExit);
+      }
+
+      CP_Settings_Fill(GRAY_BUT);
+    }
+    else
+      CP_Settings_Fill(GRAY);
+    CP_Graphics_DrawRect(2 * baseX, baseY + (baseY * i), buttonWidth, buttonHeight);
+    CP_Settings_Fill(WHITE);
+    CP_Font_DrawText((first + currentButton)->name, 2 * baseX, baseY + (baseY * i));
+    currentButton++;
+  }
+  if (worldsScreen + 1 < worldsCount) 
+  {
+    if (checkMouseBoxCollide(SCREEN_WIDTH / 2.0f - 40, 0, 50, 100))
+    {
+      if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
+      {
+        worldsScreen++;
+      }
+
+      CP_Settings_Fill(GRAY_BUT);
+    }
+    else
+      CP_Settings_Fill(GRAY);
+    CP_Graphics_DrawRect(SCREEN_WIDTH - 40.0f, SCREEN_HEIGHT / 2.0f, 50, 100);
+    CP_Settings_Fill(WHITE);
+    CP_Font_DrawText("->", SCREEN_WIDTH - 40.0f, SCREEN_HEIGHT / 2.0f);
+  }
+  else
+  {
+    CP_Settings_Fill(GRAY);
+    CP_Graphics_DrawRect(40.0f, SCREEN_HEIGHT / 2.0f, 50, 100);
+    CP_Settings_Fill(GRAY_BUT);
+    CP_Font_DrawText("->", 40.0f, SCREEN_HEIGHT / 2.0f);
+  }
+  if (worldsScreen != 0)
+  {
+    if (checkMouseBoxCollide(-SCREEN_WIDTH / 2.0f + 40, 0, 50, 100))
+    {
+      if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
+      {
+        worldsScreen--;
+      }
+
+      CP_Settings_Fill(GRAY_BUT);
+    }
+    else
+      CP_Settings_Fill(GRAY);
+    CP_Graphics_DrawRect(40.0f, SCREEN_HEIGHT / 2.0f, 50, 100);
+    CP_Settings_Fill(WHITE);
+    CP_Font_DrawText("<-", 40.0f, SCREEN_HEIGHT / 2.0f);
+  }
+  else 
+  {
+    CP_Settings_Fill(GRAY);
+    CP_Graphics_DrawRect(40.0f, SCREEN_HEIGHT / 2.0f, 50, 100);
+    CP_Settings_Fill(GRAY_BUT);
+    CP_Font_DrawText("<-", 40.0f, SCREEN_HEIGHT / 2.0f);
+  }
+
+  if (checkMouseBoxCollide(0, -(SCREEN_HEIGHT - 40.0f - SCREEN_HEIGHT/2.0f), SCREEN_WIDTH / 4.0f, 50.0f))
+  {
+    if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
+    {
+      inWorlds = false;
+      setWorldName(NULL);
+      CP_Engine_SetNextGameState(gameLoopInit, gameLoopUpdate, gameLoopExit);
+    }
+
+    CP_Settings_Fill(GRAY_BUT);
+  }
+  else
+    CP_Settings_Fill(GRAY);
+  CP_Graphics_DrawRect(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT - 40.0f, SCREEN_WIDTH / 4.0f, 50.0f);
+  CP_Settings_Fill(WHITE);
+  CP_Font_DrawText("New World", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT - 40.0f);
+}
+
 
 void setupButtons()
 {
@@ -79,6 +273,13 @@ void setupButtons()
 // this function will be called once at the beginning of the program
 void MainMenuInit(void)
 {
+  if (getGenerated())
+  {
+    free(first);
+    first = NULL;
+  }  
+
+  loadWorldNames();
   initImages();
   setupButtons();
   setGame(false);
@@ -129,7 +330,7 @@ void checkButtons()
     {
 
     case 0:
-      CP_Engine_SetNextGameStateForced(gameLoopInit, gameLoopUpdate, gameLoopExit);
+      inWorlds = true;
       break;
     case 1:
       CP_Engine_SetNextGameStateForced(OptionsInit, OptionsUpdate, OptionsExit);
@@ -152,6 +353,11 @@ void MainMenuUpdate(void)
 {
   CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
   drawBackGroundLayer(&p);
+  if (inWorlds) 
+  {
+    drawWorlds();
+    return;
+  }
   drawWords("Simply Survive", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 5.0f, 205  * (SCREEN_WIDTH / 1920.0f), BLACK);
   drawButtons();
   float textSize = 70.0f * SCREEN_WIDTH / 1920;

@@ -1,11 +1,26 @@
 #include "structs.h"
+#include "worldSystems.h"
 
 float time = 0;
 int highestBulletCount = 0;
 bool isPaused = false;
 bool inGame = false;
 bool inOptions = false;
-const char* const version = "0.4.10";
+bool generated = false;
+const char* const version = "0.4.21";
+char* worldName = NULL;
+
+
+
+int grabBuildingNumb(void) 
+{
+  return getNumOfBuildings();
+}
+
+char* getWorldName(void) 
+{
+  return worldName;
+}
 
 const char* getVersion(void) 
 {
@@ -27,6 +42,11 @@ bool getPause(void)
   return isPaused;
 }
 
+bool getGenerated(void) 
+{
+  return generated;
+}
+
 void setGame(bool a) 
 {
   inGame = a;
@@ -37,9 +57,19 @@ void setPause(bool a)
   isPaused = a;
 }
 
+void setWorldName(char* name) 
+{
+  worldName = name;
+}
+
 void setOptions(bool a)
 {
   inOptions = a;
+}
+
+void setGenerated(bool a) 
+{
+  generated = a;
 }
 
 float getTime(void) 

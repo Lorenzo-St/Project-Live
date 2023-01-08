@@ -4,15 +4,6 @@
 #include "globalData.h"
 #include "checkStuff.h"
 
-int initBuildings(building* buildings)
-{
-  for (int i = 0; i < NUMBER_OF_BUILDINGS; i++) 
-  {
-    buildings[i] = (building){ CP_Random_RangeFloat(-10000, 10000),CP_Random_RangeFloat(-1000, 1000),CP_Random_RangeFloat(100, 2000), CP_Random_RangeFloat(100, 2000),CP_Random_RangeInt(0, 1), CP_Random_RangeInt(0, 3) };
-  }
-  return 0;
-}
-
 int initPlayer(player *pl, float* multiplier, float* addTimer)
 {
   pl->powerUp = 0;
@@ -26,7 +17,7 @@ int initPlayer(player *pl, float* multiplier, float* addTimer)
   pl->health = MAX_HEALTH;
   pl->playerRadius = 20 * (SCREEN_WIDTH / 1920.0f);
   *multiplier = 1;
-  setTime(100.0f);
+  setTime(0.0f);
   return 0;
 }
 
