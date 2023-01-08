@@ -157,7 +157,7 @@ void drawWorlds(void)
     CP_Font_DrawText((first + currentButton)->name, 2 * baseX, baseY + (baseY * i));
     currentButton++;
   }
-  if (worldsScreen + 1 < worldsCount) 
+  if ((worldsScreen  + 1) * 6 < worldsCount) 
   {
     if (checkMouseBoxCollide(SCREEN_WIDTH / 2.0f - 40, 0, 50, 100))
     {
@@ -177,10 +177,11 @@ void drawWorlds(void)
   else
   {
     CP_Settings_Fill(GRAY);
-    CP_Graphics_DrawRect(40.0f, SCREEN_HEIGHT / 2.0f, 50, 100);
+    CP_Graphics_DrawRect(SCREEN_WIDTH - 40.0f, SCREEN_HEIGHT / 2.0f, 50, 100);
     CP_Settings_Fill(GRAY_BUT);
-    CP_Font_DrawText("->", 40.0f, SCREEN_HEIGHT / 2.0f);
+    CP_Font_DrawText("->", SCREEN_WIDTH - 40.0f, SCREEN_HEIGHT / 2.0f);
   }
+
   if (worldsScreen != 0)
   {
     if (checkMouseBoxCollide(-SCREEN_WIDTH / 2.0f + 40, 0, 50, 100))
