@@ -1,16 +1,3 @@
-//---------------------------------------------------------
-// file:	gamestate_template.c
-// author:	Lorenzo St. Luce
-// email:	 lorenzo.stluce@digipen.edu
-//
-// brief:	template file for holding gamestate functions
-//
-// documentation link:
-// https://github.com/DigiPen-Faculty/CProcessing/wiki
-//
-// Copyright © 2020 DigiPen, All rights reserved.
-//---------------------------------------------------------
-
 #include "cprocessing.h"
 #include "spashScreen.h"
 #include "mainMenu.h"
@@ -19,14 +6,15 @@
 
 #include <stdio.h>
 
-CP_Image logo;
-int alpha = 255;
-float counter;
-float angle = 0;
-float imageX = 0;
-float imageY = 0;
-float imageWidth = 0;
-float imageHeight = 0;
+static CP_Image logo;
+static int alpha = 255;
+static float counter;
+static float angle = 0;
+static float imageX = 0;
+static float imageY = 0;
+static float imageWidth = 0;
+static float imageHeight = 0;
+
 // use CP_Engine_SetNextGameState to specify this function as the initialization function
 // this function will be called once at the beginning of the program
 void SplashInit(void)
@@ -71,5 +59,5 @@ void SplashUpdate(void)
 // this function will be called once just before leaving the current gamestate
 void SplashExit(void)
 {
-
+	CP_Image_Free(&logo);
 }

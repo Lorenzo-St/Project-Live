@@ -8,7 +8,19 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+
+typedef struct returnStruct 
+{
+  bool value;
+  float x1;
+  float y1;
+  float x2;
+  float y2;
+}returnStruct;
+
+returnStruct wallsChecks[5] = { 0 };
 
 bool checkMouseBoxCollide(float x, float y, float width, float height) 
 {
@@ -25,6 +37,28 @@ bool checkMouseBoxCollide(float x, float y, float width, float height)
   return 1;
 }
 
+returnStruct checkCircleXRectCollision(float rectX, float rectY, float rectW, float rectH, float circX, float circY,float radius) 
+{
+  float tX = circX;
+  float tY = circY;
+  if (circX < rectX - (rectW / 2.0f))
+    tX = rectX - (rectW / 2);
+  else if (circX > rectX + (rectW / 2))
+    tX = rectX + (rectW / 2);
+  if (circY < rectY - (rectH / 2.0f))
+    tY = rectY - (rectH / 2.0f);
+  else if (circY > rectY + (rectH / 2.0f))
+    tY = rectY + (rectH / 2.0f);
+
+  float tX2 = circX - tX;
+  float tY2 = circY - tY;
+  float distance = sqrtf(tX2 * tX2 + tY2 * tY2);
+  if (distance < radius)
+    return (returnStruct) {true, tX, tY, tX2, tY2};
+
+  return (returnStruct) {false};
+}
+
 bool checkMouseArcCollide(float startAngle, float endAngle, float centerX, float centerY, float radius) 
 {
   float mouse[2] = { CP_Input_GetMouseX(), CP_Input_GetMouseY() };
@@ -38,7 +72,37 @@ bool checkMouseArcCollide(float startAngle, float endAngle, float centerX, float
   return true;
 }
 
-bool checkKeys(player *pl, float *multiplier, bullet **bullets, int *playerKeys, bool *InvOpen, bool* wheelOpen,int isPaused, int check)
+void checkAlphanumericKeys(char* dest, int* pos, int max)
+{
+  int key;
+  bool pressed;
+  for (key = 'A'; key <= 'Z'; key++) // loop through all uppercase letters
+  { 
+    pressed = CP_Input_KeyTriggered(key);
+    if (pressed) 
+    {
+      if((*pos) < max)
+        dest[(*pos)++] = (char)key;
+    }
+  }
+  for (key = '0'; key <= '9'; key++) // loop through all numbers
+  { 
+    pressed = CP_Input_KeyTriggered(key);
+    if (pressed) 
+    {
+      if ((*pos) < max)
+        dest[(*pos)++] = (char)key;
+    }
+  }
+  key = KEY_BACKSPACE;
+  pressed = CP_Input_KeyDown(key);
+  if (pressed) 
+  {
+    dest[--(*pos)] = '\0';
+  }
+}
+
+bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, bool* wheelOpen, int isPaused, int check)
 {
   pl->velocity[0] = 0.0f;
   pl->velocity[1] = 0.0f;
@@ -105,16 +169,19 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, int *playerKeys,
     {
       switch (playerKeys[i])
       {
-
+      case KEY_UP:
       case KEY_W:
         pl->velocity[1] += velo;
         break;
+      case KEY_LEFT:
       case KEY_A:
         pl->velocity[0] += -velo;
         break;
+      case KEY_DOWN:
       case KEY_S:
         pl->velocity[1] += -velo;
         break;
+      case KEY_RIGHT:
       case KEY_D:
         pl->velocity[0] += velo;
         break;
@@ -191,17 +258,14 @@ bool checkInsideBuilding(building* buildings, int which, ...)
   {
   case 0:;
     player* p = va_arg(v, player*);
-
+    returnStruct rc;
     for (int i = 0; i < buil; i++)
     {
       building* b = buildings + i;
       if (b->w == 0 || b->h == 0)
         continue;
-      if (p->x < b->x - (b->w / 2.0f) ||
-         p->x > b->x + (b->w / 2.0f) ||
-         p->y < b->y - (b->h / 2.0f) ||
-         p->y > b->y + (b->h / 2.0f));
-      else
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, p->x, p->y, p->playerRadius);
+      if (rc.value)
         return 1;
     
     }
@@ -215,11 +279,8 @@ bool checkInsideBuilding(building* buildings, int which, ...)
         continue;
       if (b->x - e->x > SCREEN_WIDTH / 2.0f || b->y - e->y > SCREEN_HEIGHT / 2.0f)
         continue;
-      if (e->x < b->x - (b->w / 2.0f) ||
-        e->x > b->x + (b->w / 2.0f) ||
-        e->y < b->y - (b->h / 2.0f) ||
-        e->y > b->y + (b->h / 2.0f));
-      else
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, e->x, e->y, e->radius);
+      if (rc.value)
         return 1;
 
     }
@@ -228,13 +289,59 @@ bool checkInsideBuilding(building* buildings, int which, ...)
   return 0;
 }
 
+void CheckCollsionWithBuilding(building* b, float x, float y, float r) 
+{
+  const float radConvert = 3.14159f / 180.0f;
+  float dorX = roundFloat(cosf((b->doorSide * 90.0f) *  radConvert));
+  float dorY = roundFloat(sinf((b->doorSide * 90.0f) * -radConvert));
+  // Get both sides of door positioning and account for rotation
+  float doorLeft   = (b->x + ((b->w / 2.0f) * dorX));
+  float doorRight  = (b->x + ((b->w / 2.0f) * dorX));
+  float doorBottom = (b->y + ((b->h / 2.0f) * dorY));
+  float doorTop    = (b->y + ((b->h / 2.0f) * dorY));
+
+  doorLeft   -= (b->w * .320f * fabsf(dorY));
+  doorRight  += (b->w * .320f * fabsf(dorY));
+  doorTop    += (b->h * .320f * fabsf(dorX));
+  doorBottom -= (b->h * .320f * fabsf(dorX));
+
+  float width  = b->w * .05f + (b->w * .355f * fabsf(dorY));
+  float height = b->h * .05f + (b->h * .355f * fabsf(dorX));
+  
+
+  wallsChecks[0] = checkCircleXRectCollision(doorLeft, doorTop, width, height, x, y, r);
+    
+  wallsChecks[1] = checkCircleXRectCollision(doorRight, doorBottom, width, height, x, y, r);
+  float widthMod =  (dorY != 0) ? .05f * fabsf(dorY) : 1.0f;
+  float heightMod = (dorX != 0) ? .05f * fabsf(dorX) : 1.0f;
+
+  bool xAlligned = (dorY != 0) ? 1 : 0;
+  bool yAlligned = (dorX != 0) ? 1 : 0;
+
+  float cXL = b->x - ((b->w / 2.0f) * xAlligned);
+  float cYL = b->y - ((b->h / 2.0f) * yAlligned);
+  float cXR = b->x + ((b->w / 2.0f) * xAlligned);
+  float cYR = b->y + ((b->h / 2.0f) * yAlligned);
+
+  wallsChecks[2] = checkCircleXRectCollision(cXL, cYL, b->w * widthMod, b->h * heightMod, x, y, r);
+  
+  wallsChecks[3] = checkCircleXRectCollision(cXR, cYR, b->w * widthMod, b->h * heightMod, x, y, r);
+  widthMod =  (dorY != 0) ? .05f * fabsf(dorY) : 1.0f;
+  heightMod = (dorX != 0) ? .05f * fabsf(dorX) : 1.0f;
+  float cX = b->x + ((b->w / 2.0f) * yAlligned * -dorX);
+  float cY = b->y - ((b->h / 2.0f) * xAlligned * -dorY);
+
+  wallsChecks[4] = checkCircleXRectCollision(cX, cY, b->w * heightMod, b->h * widthMod, x, y, r);
+
+}
+
 bool checkAgainstBuilding(building* buildings, int which, ...)
 {
   int buil = grabBuildingNumb();
   va_list v;
   va_start(v, which);
   int result = 0;
-  switch (which) 
+  switch (which)
   {
   case 0:;
     player* p = va_arg(v, player*);
@@ -243,27 +350,18 @@ bool checkAgainstBuilding(building* buildings, int which, ...)
       building* b = buildings + i;
       if (b->w == 0 || b->h == 0)
         continue;
-      float tX = p->x;
-      float tY = p->y;
-      if (p->x < b->x - (b->w / 2.0f))
-        tX = b->x - (b->w / 2);
-      else if (p->x > b->x + (b->w / 2))
-        tX = b->x + (b->w / 2);
-      if (p->y < b->y - (b->h / 2.0f))
-        tY = b->y - (b->h / 2.0f);
-      else if (p->y > b->y + (b->h / 2.0f))
-        tY = b->y + (b->h / 2.0f);
+      returnStruct rc;
 
-      float tX2 = p->x - tX;
-      float tY2 = p->y - tY;
-      float distance = sqrtf(tX2 * tX2 + tY2 * tY2);
-      if (distance < p->playerRadius)
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, p->x, p->y, p->playerRadius);
+      if (rc.value == true)
       {
-        if (sqrtf(((p->x + (p->velocity[0])) - tX) * ((p->x + (p->velocity[0])) - tX) + tY2 * tY2) < distance)
-           result += 1;
-        if (sqrtf(((p->y + (p->velocity[1])) - tY) * ((p->y + (p->velocity[1])) - tY) + tX2 * tX2) < distance)
+        float distance = sqrtf(rc.x2 * rc.x2 + rc.y2 * rc.y2);
+        if (sqrtf(((p->x + (p->velocity[0])) - rc.x1) * ((p->x + (p->velocity[0])) - rc.x1) + rc.y2 * rc.y2) < distance)
+          result += 1;
+        if (sqrtf(((p->y + (p->velocity[1])) - rc.y1) * ((p->y + (p->velocity[1])) - rc.y1) + rc.x2 * rc.x2) < distance)
           result += 2;
       }
+
     }
     break;
   case 1:;
@@ -273,27 +371,17 @@ bool checkAgainstBuilding(building* buildings, int which, ...)
       building* b = buildings + i;
       if (b->w == 0 || b->h == 0)
         continue;
-      float tX = e->x;
-      float tY = e->y;
-      if (e->x < b->x - (b->w / 2.0f))
-        tX = b->x - (b->w / 2);
-      else if (e->x > b->x + (b->w / 2))
-        tX = b->x + (b->w / 2);
-      if (e->y < b->y - (b->h / 2.0f))
-        tY = b->y - (b->h / 2.0f);
-      else if (e->y > b->y + (b->h / 2.0f))
-        tY = b->y + (b->h / 2.0f);
+      returnStruct rc;
 
-      float tX2 = e->x - tX;
-      float tY2 = e->y - tY;
-      float distance = sqrtf(tX2 * tX2 + tY2 * tY2);
-      if (distance < e->radius/2.0f)
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, e->x, e->y, e->radius / 2.0f);
+      if (rc.value == true)
       {
-        if (sqrtf(((e->x + e->dir[0] * CP_System_GetDt()) - tX) * ((e->x + e->dir[0] * CP_System_GetDt() - tX) + tY2 * tY2)) < distance)
+        float distance = sqrtf(rc.x2 * rc.x2 + rc.y2 * rc.y2);
+        if (sqrtf(((e->x + e->dir[0] * CP_System_GetDt()) - rc.x1) * ((e->x + e->dir[0] * CP_System_GetDt() - rc.x1) + rc.y2 * rc.y2)) < distance)
           result += 1;
-        if (sqrtf(((e->y + e->dir[1] * CP_System_GetDt()) - tY) * ((e->y + e->dir[1] * CP_System_GetDt() - tY) + tX2 * tX2)) < distance)
+        if (sqrtf(((e->y + e->dir[1] * CP_System_GetDt()) - rc.y1) * ((e->y + e->dir[1] * CP_System_GetDt() - rc.y1) + rc.x2 * rc.x2)) < distance)
           result += 2;
-        
+
       }
     }
     break;
@@ -304,28 +392,21 @@ bool checkAgainstBuilding(building* buildings, int which, ...)
       building* b = buildings + i;
       if (b->w == 0 || b->h == 0)
         continue;
-      float tX = bl->x;
-      float tY = bl->y;
-      if (bl->x < b->x - (b->w / 2.0f))
-        tX = b->x - (b->w / 2);
-      else if (bl->x > b->x + (b->w / 2))
-        tX = b->x + (b->w / 2);
-      if (bl->y < b->y - (b->h / 2.0f))
-        tY = b->y - (b->h / 2.0f);
-      else if (bl->y > b->y + (b->h / 2.0f))
-        tY = b->y + (b->h / 2.0f);
+      returnStruct rc;
 
-      float tX2 = bl->x - tX;
-      float tY2 = bl->y - tY;
-      float distance = sqrtf(tX2 * tX2 + tY2 * tY2);
-      if (distance < bl->radius)
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, bl->x, bl->y, bl->radius / 2.0f);
+      if (rc.value == true)
       {
         return 1;
       }
+
+
     }
     break;
   }
   va_end(v);
+
+  if (result > 3)
+    result = 3;
   return result;
 }
-

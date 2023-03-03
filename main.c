@@ -1,17 +1,3 @@
-//---------------------------------------------------------
-// file:	main.c
-// author:	Lorenzo St. Luce	
-// email:	 lorenzo.stluce@digipen.edu
-//
-// brief:	Main entry point for the sample project
-//			of the CProcessing library
-//
-// documentation link:
-// https://github.com/DigiPen-Faculty/CProcessing/wiki
-//
-// Copyright © 2020 DigiPen, All rights reserved.
-//---------------------------------------------------------
-
 #include "cprocessing.h"
 #include "spashScreen.h"
 #include "globalData.h"

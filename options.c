@@ -28,10 +28,10 @@
 #define AUDIO_SLIDERS 2
 #define DISPLASY_BUTTONS 5
 
-button optionsButton[OPTIONSBUTTONS] = { 0 };
-button displayScreen[DISPLASY_BUTTONS] = { 0 };
-int opsSubScreen = 0;
-slider audioSliders[AUDIO_SLIDERS] = { 0 };
+static button optionsButton[OPTIONSBUTTONS] = { 0 };
+static button displayScreen[DISPLASY_BUTTONS] = { 0 };
+static int opsSubScreen = 0;
+static slider audioSliders[AUDIO_SLIDERS] = { 0 };
 
 
 void initSliders(void) 

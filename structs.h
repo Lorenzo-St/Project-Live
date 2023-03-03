@@ -1,11 +1,14 @@
 #pragma once
 #include "cprocessing.h"
+#include <stdlib.h>
+static int playerKeys[] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q, KEY_R, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN };
+
 /* |----------------------- Defines  ---------------------------| */
 #define MAX_ENEMIES 100
 #define MAX_BULLETS 500
 #define MAX_DROPS 10
 #define MAX_ITEMS 6
-#define KEY_COUNT 10
+#define KEY_COUNT _countof(playerKeys)
 #define SPREAD_COUNT 10
 #define BULLET_SPEED 10
 #define MAX_BOSSESS 10
@@ -212,3 +215,18 @@ typedef struct wheelAmmo
 
 /* |----------------------- Gloabals ---------------------------| */
 
+
+static float roundFloat(float x)
+{
+  if (x < 0)
+  {
+    x -= .5f;
+    x = (float)((int)x);
+  }
+  else
+  {
+    x += .5f;
+    x = (float)((int)x);
+  }
+  return x;
+}

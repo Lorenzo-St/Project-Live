@@ -15,21 +15,26 @@
 #include "structs.h"
 #include "mainMenu.h"
 #include "globalData.h"
+#include "checkStuff.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <windows.h>
+#include <ShlObj_core.h>
+#include <fileapi.h>
+#include <shtypes.h>
 
 #define MAX_CHARS 100
 #define MAX_LINES 100
 
-int inputs[28] = { 32, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 259 };
-int pos = 0;
-int userWritten = 0;
-button submitButton;
-FILE* leaderboard;
-char buffer[MAX_CHARS] = { 0 };;
-char names[MAX_LINES][MAX_CHARS] = { 0 };
-char times[MAX_LINES][MAX_CHARS] = { 0 };;
-char userInput[MAX_CHARS] = { 0 };;
+static char path[100] = { 0 };
+static int pos = 0;
+static int userWritten = 0;
+static button submitButton;
+static FILE* leaderboard;
+static char buffer[MAX_CHARS] = { 0 };;
+static char names[MAX_LINES][MAX_CHARS] = { 0 };
+static char times[MAX_LINES][MAX_CHARS] = { 0 };;
+static char userInput[MAX_CHARS] = { 0 };;
 void readLeaderBoard(void)
 {
 
@@ -76,7 +81,20 @@ void scoresInit(void)
 {
   initInputStrings();
   initsButtons();
-  fopen_s(&leaderboard, "./Leaderboard.txt", "r");
+  wchar_t* loc = 0;
+  SHGetKnownFolderPath(&FOLDERID_Documents, 0, NULL, &loc);
+  size_t a;
+  wcstombs_s(&a, path, _countof(path), loc, _countof(path) - 1);
+  CoTaskMemFree((void*)loc);
+  strcat_s(path, _countof(path), "\\DescentGames");
+  CreateDirectory(path, NULL);
+  strcat_s(path, _countof(path), "\\Simply_Survive");
+  CreateDirectory(path, NULL);
+  strcat_s(path, _countof(path), "\\Leaderboard.txt");
+
+  fopen_s(&leaderboard, path, "r");
+  if (leaderboard == NULL)
+    return;
   readLeaderBoard();
   //fopen_s(&leaderboardWrite, "./Leaderboard", "ax");
 }
@@ -113,30 +131,13 @@ void drawButtonss(void)
 }
 void readInput(void) 
 {
-  for (int i = 0; i < 28; i++) 
-  {
-    if (pos >= MAX_CHARS)
-      break;
-    if (CP_Input_KeyTriggered(inputs[i]))
-    {
-      if (inputs[i] == 259)
-      {
-        pos--;
-        userInput[pos] = (char)0;
-      }
-      else 
-      {
 
-        userInput[pos] = (char)inputs[i];
-        pos++;
-      }
-    }
-  }
+  checkAlphanumericKeys(userInput, &pos, MAX_CHARS);
 }
 
 int saveScore(void) 
 {
-  if (fopen_s(&leaderboard, "./Leaderboard.txt", "w") != 0)
+  if (fopen_s(&leaderboard, path, "w") != 0)
     return 100;
   char buf[100] = { 0 };
   for (int i = 0; i < MAX_LINES; i++) 

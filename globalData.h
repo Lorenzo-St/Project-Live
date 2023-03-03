@@ -7,6 +7,7 @@ int    grabBuildingNumb  (void);
 float  getTime           (void);
 char*  getVersion        (void);
 char*  getWorldName      (void);
+char*  getNewName        (void);
 void   setBulletCount    (int);
 void   setTime           (float);
 void   addTime           (float);

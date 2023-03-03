@@ -170,10 +170,8 @@ void drawBullets(bullet* bullets, camera C)
 {
   while(bullets)
   {
-    if (bullets->users == 0)
-      CP_Settings_Fill(CP_Color_Create(10, 10, 25, 255));
-    else if (bullets->users == 1)
-      CP_Settings_Fill(CP_Color_Create(201, 254, 255, 255));
+
+    CP_Settings_Fill(CP_Color_Create(10, 10, 25, 255));
 
     CP_Settings_StrokeWeight(0.0f);
     CP_Graphics_DrawCircle((bullets->x - C.x) + (SCREEN_WIDTH / 2.0f), -(bullets->y - C.y) + (SCREEN_HEIGHT / 2.0f), bullets->radius);
@@ -260,19 +258,22 @@ void drawItems(item* items, camera C)
 
 }
 
+
 void drawBuildings(building *buildings, camera c) 
 {
   int buildingNum = grabBuildingNumb();
+  CP_Settings_StrokeWeight(0);
   for (int i = 0; i < buildingNum; i++)
   {
-    if (buildings[i].w == 0 || buildings[i].h == 0)
+    building b = buildings[i];
+    if (b.w == 0 || b.h == 0)
       continue;
-    if (fabsf(buildings[i].x - c.x) > fabsf(SCREEN_WIDTH / 2.0f) + (buildings[i].w / 2.0f) || fabsf(buildings[i].y - c.y) > fabsf(SCREEN_HEIGHT / 2.0f) + (buildings[i].h / 2.0f))
+    if (fabsf(b.x - c.x) > fabsf(SCREEN_WIDTH / 2.0f) + (b.w / 2.0f) || fabsf(b.y - c.y) > fabsf(SCREEN_HEIGHT / 2.0f) + (b.h / 2.0f))
       continue;
     CP_Settings_Fill(CP_Color_Create(10, 10, 10, 255));
-    CP_Graphics_DrawRect((buildings[i].x - c.x) + (SCREEN_WIDTH / 2.0f), -(buildings[i].y - c.y) + (SCREEN_HEIGHT / 2.0f),  buildings[i].w, buildings[i].h);
-    CP_Settings_Fill(CP_Color_CreateHex(0xBBE116FF));
-    CP_Graphics_DrawRect((buildings[i].x - c.x) + (SCREEN_WIDTH / 2.0f), -(buildings[i].y - c.y) + (SCREEN_HEIGHT / 2.0f), 10, 10);
+    CP_Graphics_DrawRect((b.x - c.x) + (SCREEN_WIDTH / 2.0f), -(b.y - c.y) + (SCREEN_HEIGHT / 2.0f), b.w, b.h);
+    
+
   }
 }
 

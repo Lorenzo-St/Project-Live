@@ -1,15 +1,16 @@
 #include "structs.h"
 #include "worldSystems.h"
+#define MAX_WORLD_NAME_LENGTH 30
 
-float time = 0;
-int highestBulletCount = 0;
-bool isPaused = false;
-bool inGame = false;
-bool inOptions = false;
-bool generated = false;
-const char* const version = "0.4.21";
-char* worldName = NULL;
-
+static float time = 0;
+static int highestBulletCount = 0;
+static bool isPaused = false;
+static bool inGame = false;
+static bool inOptions = false;
+static bool generated = false;
+static const char* const version = "0.5.01";
+static char* worldName = NULL;
+static char  newWorldName[MAX_WORLD_NAME_LENGTH] = { 0 };
 
 
 int grabBuildingNumb(void) 
@@ -21,6 +22,12 @@ char* getWorldName(void)
 {
   return worldName;
 }
+
+char* getNewName(void) 
+{
+  return newWorldName;
+}
+
 
 const char* getVersion(void) 
 {

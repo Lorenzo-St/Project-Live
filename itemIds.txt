@@ -9,5 +9,5 @@
 7   - ammo parts
 8   - Health kit
 9   - Mini Shotty [Medium]
-10  - RPG M99LX [Medium]
+10  - RPG M99LX [Heavy]
 

@@ -1,11 +1,5 @@
 What you were working on last
  - Initial release final touches
-   - more graphics
-   - new font?
-
- - Map Loading
-   - Buildings
-   - Spawn points
 
  - Weapons
     - Syringe

@@ -218,6 +218,7 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
     <ClCompile Include="randFunction.c" />
     <ClCompile Include="scoring.c" />
     <ClCompile Include="shootStuff.c" />
+    <ClCompile Include="Sound.c" />
     <ClCompile Include="spashScreen.c" />
     <ClCompile Include="worldInit.c" />
     <ClCompile Include="worldSystems.c" />
@@ -241,6 +242,7 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
     <ClInclude Include="randFunctions.h" />
     <ClInclude Include="scoring.h" />
     <ClInclude Include="shootStuff.h" />
+    <ClInclude Include="Sound.h" />
     <ClInclude Include="spashScreen.h" />
     <ClInclude Include="structs.h" />
     <ClInclude Include="worldInit.h" />

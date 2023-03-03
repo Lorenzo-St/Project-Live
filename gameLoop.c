@@ -35,7 +35,6 @@
 /* |---------------------- Game Stuff --------------------| */
 
 /* Input Keys */
-int playerKeys[KEY_COUNT] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q, KEY_R };
 
 /* Bools */
 bool bossesEnabled = false;
@@ -98,10 +97,9 @@ void gameLoopInit(void)
   obis[0].title = "Survive";
   setGame(true);
   bossesEnabled = 0;
-  if(getWorldName() == NULL)
-    generateWorld();
-  else
-    loadWorld(getWorldName());
+
+  generateWorld();
+
 
   buildings = returnBuildings();
   initAudio(bulletSounds);
@@ -150,7 +148,7 @@ void gameLoopInit(void)
 void gameLoopUpdate(void)
 {
 
-  CP_Settings_Stroke(CP_Color_CreateHex(0x000000ff));
+  CP_Settings_Stroke(BLACK);
   drawBackGroundLayer(&pl);
   if (pl.health <= 0)
   {
@@ -161,7 +159,7 @@ void gameLoopUpdate(void)
   CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
 
 
-  pl.direction[0] = CP_Input_GetMouseX()- ((SCREEN_WIDTH / 2.0f) + (pl.x - c.x));
+  pl.direction[0] = CP_Input_GetMouseX() - ((SCREEN_WIDTH / 2.0f) + (pl.x - c.x));
   pl.direction[1] = CP_Input_GetMouseY() - ((SCREEN_HEIGHT / 2.0f) - (pl.y - c.y));
   pl.rot = (float)(atan2(pl.direction[1], pl.direction[0]) * (180.0f / 3.14159265f) + 90.0f);
   c.x = pl.x;
@@ -172,7 +170,7 @@ void gameLoopUpdate(void)
   drawBullets(head,c);
   drawPlayer(pl,c);
   drawEnemies(&enHead, c);
-  drawItems(items,c);;
+  drawItems(items,c);
   drawPickupText(pickupText,c);
   drawObjectiveBoard();
 
@@ -181,8 +179,10 @@ void gameLoopUpdate(void)
     invHovered = drawInventory(returnHead());
   else
     invHovered = false;
+
   if (wheelOpen)
     drawWheel(&pl);
+  
   drawAmmo(&pl, invOpen, wheelOpen );
   if (getPause())
     return;
@@ -199,7 +199,7 @@ void gameLoopUpdate(void)
   int check = checkAgainstBuilding(buildings, 0, &pl);
 
   /* Check user input and collisions */
-  checkKeys(&pl, &multiplier, &head, playerKeys, &invOpen, &wheelOpen, getPause(), check);
+  checkKeys(&pl, &multiplier, &head, &invOpen, &wheelOpen, getPause(), check);
   checkItems(items, &pl, enHead, pickupText);
 
   CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
@@ -214,7 +214,9 @@ void gameLoopUpdate(void)
     if (bossesEnabled)
     {
       type = CP_Random_RangeInt(0, ENEMY_TYPE);
+      
       enHead = setEnemyStats(addEnemy(&enHead), c, type);
+      
     }
     else
     {

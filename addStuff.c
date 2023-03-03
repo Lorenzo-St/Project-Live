@@ -1,7 +1,7 @@
 #include "structs.h"
 #include "cprocessing.h"
 #include "checkStuff.h"
-
+#include "worldSystems.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -50,30 +50,44 @@ enemy* addEnemy(enemy** head)
   return new;
 }
 
-enemy* setEnemyStats(enemy* e, camera c,int type) 
+enemy* setEnemyStats(enemy* e, camera c, int type) 
 {
+  building* building = returnBuildings();
   e->type = type;
   switch (type) 
   {
   case 0:
-    e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
-    e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
+    do 
+    {
+      e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
+      e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
+    } while (checkInsideBuilding(building, 1, e));
+    
     e->speed = 50;
     e->cooldown = 1.5f;
     e->health = 60;
     e->radius = 25 * (SCREEN_WIDTH / 1920.0f);
+
     break;
   case 1:
-    e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
-    e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
+    do
+    {
+      e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
+      e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
+    } while (checkInsideBuilding(building, 1, e));
+
     e->speed = 50;
     e->cooldown = .3f;
     e->health = 50;
     e->radius = 25 * (SCREEN_WIDTH / 1920.0f);
     break;
   case 2:
-    e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
-    e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
+    do
+    {
+      e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
+      e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
+    } while (checkInsideBuilding(building, 1, e));
+
     e->speed = 25;
     e->cooldown = .2f;
     e->health = 300;
