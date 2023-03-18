@@ -153,6 +153,8 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
         
         *wheelOpen = false;
         break;
+      case KEY_LEFT_CONTROL:
+       /* FALL THROUGH */
       case KEY_LEFT_SHIFT:
         if (*multiplier <= 1)
         {
@@ -211,6 +213,8 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
 
 int checkItems(item *items, player *pl, enemy *en, notiString *pickupText)
 {
+  InvItem* j = NULL;
+  int count = 0;
   for (int i = 0; i < MAX_DROPS; i++)
   {
     if (items[i].active == 0)
@@ -223,12 +227,14 @@ int checkItems(item *items, player *pl, enemy *en, notiString *pickupText)
       {
       case 0:;
         id = (unsigned char)CP_Random_RangeInt(2, 4);
-        addItem(id, items[i].containes);
+        j = addItem(id, items[i].containes);
+        count = items[i].containes;
         break;
       case 1:;
         id = (unsigned char)items->containes;
-        int j = addItem(id, 1);
-        if (j == -1)
+        j = addItem(id, 1);
+        count = 1;
+        if (j == NULL)
         {
           items[i].active = 0;
           return -1;
@@ -236,10 +242,12 @@ int checkItems(item *items, player *pl, enemy *en, notiString *pickupText)
         break;
       case 2:;
         id = (unsigned char)CP_Random_RangeInt(5, 7);
-        addItem(id, items[i].containes);
+        j = addItem(id, items[i].containes);
+        count = items[i].containes;
         break;
       }
-      addPickup(items[i], pickupText);
+      if(j)
+        addPickup(&items[i],j ,pickupText, count);
       items[i].active = 0;
     }
     items[i].life -= CP_System_GetDt();
@@ -279,7 +287,7 @@ bool checkInsideBuilding(building* buildings, int which, ...)
         continue;
       if (b->x - e->x > SCREEN_WIDTH / 2.0f || b->y - e->y > SCREEN_HEIGHT / 2.0f)
         continue;
-      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, e->x, e->y, e->radius);
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, e->x, e->y, e->radius/2.0f);
       if (rc.value)
         return 1;
 

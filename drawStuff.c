@@ -924,6 +924,8 @@ void drawContextMenu(float x, float y, int type, int index)
   c = BLACK;
   c.a = 200;
   CP_Settings_Fill(c);
+  c = GRAY;
+  CP_Settings_Stroke(c);
   CP_Graphics_DrawRect(x, y - height/2.0f * 1.25f, width, height * .25f);
   InvItem* item = returnItemAtPos(index);
   if (item->type == 0) 
@@ -1286,7 +1288,7 @@ void drawAmmo(player* p, bool inv, bool wheel)
   CP_Font_DrawText(buffer, width / 2.0f, SCREEN_HEIGHT - height / 6.0f);
   if ((*returnWheel())[returnSelected()]->durability != INFINITY) 
   {
-    snprintf(buffer, sizeof buffer, "%f", (*returnWheel())[returnSelected()]->durability);
+    snprintf(buffer, sizeof buffer, "%3.0f", (*returnWheel())[returnSelected()]->durability);
     CP_Font_DrawText(buffer, width / 2.0f, SCREEN_HEIGHT - height + height / 4.0f);
   }
 }

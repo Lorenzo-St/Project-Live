@@ -10,32 +10,46 @@
 
 
 
-int moveEnemies(enemy* en, building *buildings)
+int moveEnemies(enemy** en, building *buildings)
 {
-  while(en)
+  enemy* preve = *en;
+  enemy* cur = *en;
+  while (cur)
   {
-    if (en->dir[0] <= 10 && en->dir[1] <= 10)
+    if (cur->dir[0] <= 10 && cur->dir[1] <= 10)
     {
-      en->dir[0] = CP_Random_RangeFloat(-100, 100);
-      en->dir[1] = CP_Random_RangeFloat(-100, 100);
+      cur->dir[0] = CP_Random_RangeFloat(-100, 100);
+      cur->dir[1] = CP_Random_RangeFloat(-100, 100);
     }
-    int check = checkAgainstBuilding(buildings, 1, en);
+    /*if (checkInsideBuilding(buildings, 1, cur) == 1)
+    {
+      cur->health = 0;
+      enemy* last = cur;
+      if (cur == *en)
+        *en = cur->next;
+      preve->next = last->next;
+      cur = last->next;
+      removeEnemy(last);
+      continue;
+    }*/
+    int check = checkAgainstBuilding(buildings, 1, cur);
     float dt = CP_System_GetDt();
-    float magnitude = sqrtf(en->dir[0] * en->dir[0] + en->dir[1] * en->dir[1]);
+    float magnitude = sqrtf(cur->dir[0] * cur->dir[0] + cur->dir[1] * cur->dir[1]);
     if (dt > 1)
       dt = .3f;
-    float change = (en->dir[0] * dt) * (check == 0 || check == 2);
+    float change = (cur->dir[0] * dt) * (check == 0 || check == 2);
     if (fabs(change) > 2)
-      change = .1f * en->dir[0] / magnitude;
-    en->x += change;
-    change = (en->dir[1] * dt) * (check == 0 || check == 1);
+      change = .1f * cur->dir[0] / magnitude;
+    cur->x += change;
+    change = (cur->dir[1] * dt) * (check == 0 || check == 1);
     if (fabs(change) > 2)
-      change = .1f * en->dir[1] / magnitude;
-    en->y += change;
-    en->dir[0] += -en->dir[0] * dt;
-    en->dir[1] += -en->dir[1] * dt;
-    //drawDebugLine(en->x, en->x + en->dir[0], en->y, en->y + en->dir[0]);
-    en = en->next;
+      change = .1f * cur->dir[1] / magnitude;
+    cur->y += change;
+    cur->dir[0] += -cur->dir[0] * dt;
+    cur->dir[1] += -cur->dir[1] * dt;
+    //drawDebugLine(cur->x, cur->x + cur->dir[0], cur->y, cur->y + cur->dir[0]);
+    preve = cur;
+    cur = cur->next;
   }
   return 0;
 }

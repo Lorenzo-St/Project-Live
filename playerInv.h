@@ -2,7 +2,6 @@
 #include "structs.h"
 
 int          returnSelected      (void);
-int          addItem             (const char,const int);
 int          removeItem          (int);
 int          removeFromWheel     (int);
 int          removeCount         (int,int);
@@ -21,5 +20,6 @@ InvItem      returnStats         (const char);
 InvItem*     returnItemAtPos     (int);
 InvItem*     returnHead          (void);
 InvItem*(*   returnWheel         (void))[WHEEL_SIZE];
+InvItem*     addItem             (const char, const int);
 wheelAmmo*   retAmmo             (void);
 weaponData*  setStats            (weaponData*,int);

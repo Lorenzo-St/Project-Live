@@ -193,7 +193,7 @@ void gameLoopUpdate(void)
   enemyShoot(enHead, bulletSounds, &head, pl);
 
   /* Move on screen items    */
-  moveEnemies(enHead, buildings);
+  moveEnemies(&enHead, buildings);
   moveBullets(&head, &enHead,  &pl, items, buildings);
 
   int check = checkAgainstBuilding(buildings, 0, &pl);
@@ -216,12 +216,23 @@ void gameLoopUpdate(void)
       type = CP_Random_RangeInt(0, ENEMY_TYPE);
       
       enHead = setEnemyStats(addEnemy(&enHead), c, type);
-      
+      if (checkInsideBuilding(buildings, 1, enHead)) 
+      {
+        enemy* old = enHead;
+        enHead = enHead->next;
+        removeEnemy(old);
+      }
     }
     else
     {
       while (type = CP_Random_RangeInt(0, ENEMY_TYPE), type == 2);
       enHead = setEnemyStats(addEnemy(&enHead), c, type);
+      if (checkInsideBuilding(buildings, 1, enHead))
+      {
+        enemy* old = enHead;
+        enHead = enHead->next;
+        removeEnemy(old);
+      }
     }
     addTimer = 5.0f / cbrtf((float)pl.kills + 1.0f);
   }

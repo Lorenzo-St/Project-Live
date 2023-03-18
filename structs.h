@@ -1,7 +1,7 @@
 #pragma once
 #include "cprocessing.h"
 #include <stdlib.h>
-static int playerKeys[] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q, KEY_R, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN };
+static int playerKeys[] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q, KEY_R, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_LEFT_CONTROL };
 
 /* |----------------------- Defines  ---------------------------| */
 #define MAX_ENEMIES 100

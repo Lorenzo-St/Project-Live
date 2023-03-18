@@ -21,7 +21,7 @@
 #include "globalImages.h"
 #include "globalData.h"
 #include "checkStuff.h"
-
+#include "Sound.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +36,7 @@ static player p = { 0 };
 static int screen = 0;
 static bool inWorlds = false;
 static bool newWorld = false;
-
+static int framesPast = 0;
 
 struct worldButton
 {
@@ -97,7 +97,7 @@ void setupButtons()
 // this function will be called once at the beginning of the program
 void MainMenuInit(void)
 {
- 
+  framesPast = 0;
   initImages();
   setupButtons();
   setGame(false);
@@ -120,6 +120,7 @@ void drawButtons(void)
     {
       c = BLACK;
     }
+    CP_Settings_StrokeWeight(3);
     CP_Settings_Fill(c);
     CP_Graphics_DrawRect(buttons[i].x, buttons[i].y, buttons[i].width, buttons[i].height);
     drawWords(buttons[i].words, buttons[i].x, buttons[i].y, 50  * (SCREEN_WIDTH / 1920.0f), WHITE);
@@ -128,6 +129,8 @@ void drawButtons(void)
 
 void checkButtons() 
 {
+  if (framesPast < 10)
+    return;
   float mX = CP_Input_GetMouseX();
   float mY = CP_Input_GetMouseY();
   for (int i = 0; i < BUTTONS; i++)
@@ -155,6 +158,7 @@ void checkButtons()
       CP_Engine_SetNextGameStateForced(OptionsInit, OptionsUpdate, OptionsExit);
       break;
     case 2:
+      ReleaseSounds();
       CP_Engine_Terminate();
       break;
     case 3:
@@ -170,6 +174,7 @@ void checkButtons()
 // this function will be called repeatedly every frame
 void MainMenuUpdate(void)
 {
+  framesPast++;
   CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
   drawBackGroundLayer(&p);
   drawWords("Simply Survive", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 5.0f, 205  * (SCREEN_WIDTH / 1920.0f), BLACK);

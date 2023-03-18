@@ -2,7 +2,7 @@
 #include "structs.h"
 
 int dropItem(float loc[], item* items);
-int addPickup(item a, notiString* pickupText);
+int addPickup(item* a, InvItem* b, notiString* pickupText, int count);
 
 
 void    removeEnemy    (enemy* toRemove);

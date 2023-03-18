@@ -247,7 +247,7 @@ int removeFromWheel(int position)
   return 0;
 }
 
-int addItem(const char id, const int count)
+InvItem* addItem(const char id, const int count)
 {
   InvItem* newItem = invhead;
   while (newItem)
@@ -255,7 +255,7 @@ int addItem(const char id, const int count)
     if (newItem->stackable && newItem->itemId == id)
     {
       newItem->count += count;
-      return 1;
+      return newItem;
     }
     newItem = newItem->next;
   }
@@ -263,15 +263,15 @@ int addItem(const char id, const int count)
     invSelected++;
   newItem = (InvItem*)malloc(1 * sizeof(InvItem));
   if (newItem == NULL)
-    return -1;
+    return NULL;
   (*newItem) = returnStats(id);
   if (newItem->itemId == -1)
-    return -1;
+    return NULL;
   newItem->next = invhead;
   invhead = newItem;
   if (count != 1)
     newItem->count = count;
-  return 0;
+  return newItem;
 }
 
 int destructWeapon(InvItem* wep, int index) 
@@ -290,14 +290,14 @@ int destructWeapon(InvItem* wep, int index)
     count = 12;
     break;
   }
-  int a = addItem(5, count);
-  if (a == 1) 
+  InvItem* a = addItem(5, count);
+  if (a != returnHead()) 
   {
     InvItem* l = returnItemAtPos(index);
     removeItem(index);
     freeItem(l);
   }
-  else if (a == 0) 
+  else if (a == returnHead())
   {
     InvItem* l = returnItemAtPos(index + 1);
     removeItem(index + 1);

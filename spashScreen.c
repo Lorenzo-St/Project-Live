@@ -3,7 +3,7 @@
 #include "mainMenu.h"
 #include "structs.h"
 #include "globalData.h"
-
+#include "Sound.h"
 #include <stdio.h>
 
 static CP_Image logo;
@@ -19,6 +19,8 @@ static float imageHeight = 0;
 // this function will be called once at the beginning of the program
 void SplashInit(void)
 {
+	initSounds();
+
 	//CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
 	CP_System_SetWindowSize(WINDOW_SIZE);
 	char buffer[40] = { 0 };

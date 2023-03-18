@@ -6,7 +6,7 @@
 #include "checkStuff.h"
 #include "options.h"
 #include "mainMenu.h"
-
+#include "Sound.h"
 #define KEY_COUNTS 1
 
 // main() the starting point for the program
@@ -111,7 +111,7 @@ int main(void)
   CP_System_SetFrameRate(60.0f);
 	CP_Engine_SetPreUpdateFunction(preUpdate);
   CP_Engine_SetPostUpdateFunction(postUpdate);
-	CP_Engine_SetNextGameState(SplashInit, SplashUpdate, SplashExit);
+  CP_Engine_SetNextGameState(SplashInit, SplashUpdate, SplashExit);
 	CP_Engine_Run();
 	return 0;
 }

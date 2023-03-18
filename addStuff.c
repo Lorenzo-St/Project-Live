@@ -2,11 +2,12 @@
 #include "cprocessing.h"
 #include "checkStuff.h"
 #include "worldSystems.h"
+#include "playerInv.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 
-int addPickup(item a, notiString* pickupText)
+int addPickup(item* a,  InvItem* b, notiString* pickupText, int count)
 {
   for (int i = 0; i < MAX_TEXT; i++)
   {
@@ -15,9 +16,9 @@ int addPickup(item a, notiString* pickupText)
 
     pickupText[i].active = 1;
     pickupText[i].life = 1.5f;
-    pickupText[i].x = a.x;
-    pickupText[i].y = a.y;
-    snprintf(pickupText[i].buffer, sizeof pickupText[i].buffer, "%i %i", a.type, a.containes);
+    pickupText[i].x = a->x;
+    pickupText[i].y = a->y;
+    snprintf(pickupText[i].buffer, sizeof pickupText[i].buffer, "Aquired: %s x%i", b->name, count);
   }
   return 0;
 }
@@ -94,6 +95,7 @@ enemy* setEnemyStats(enemy* e, camera c, int type)
     e->radius = 50 * (SCREEN_WIDTH / 1920.0f);
     break;
   }
+
   e->MaxHealth = e->health;
   return e;
 }

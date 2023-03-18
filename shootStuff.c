@@ -3,7 +3,7 @@
 #include "playerInv.h"
 #include "addStuff.h"
 #include "gameLoop.h"
-
+#include "Sound.h"
 #include <math.h>
 
 bullet* setBulletStats(bullet* thisOne, float dir[2], int user, float pl[2])
@@ -172,6 +172,8 @@ int playerFire(player pl, bullet **bullets)
     break;
   }
 
+  CP_Sound s = getWeaponSounds(pl.weapon->type, (*returnWheel())[returnSelected()]->itemId);
+  CP_Sound_Play(s);
   return 0;
 }
 
