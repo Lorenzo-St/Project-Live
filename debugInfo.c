@@ -26,7 +26,7 @@ void drawDebugInfo(player *pl, enemy *en)
   CP_Font_DrawText("Enemies", SCREEN_WIDTH - 100.0f, 50.0f);
   while(en)
   {
-    snprintf(buffer, 200, "%04.3f, %04.3f", en->dir[0], en->dir[1]);
+    snprintf(buffer, 200, "%04.3f, %04.3f", en->dir.x, en->dir.y);
     CP_Font_DrawText(buffer, SCREEN_WIDTH - 100.0f, 60.0f+ (15 * i));
     i++;
     en = en->next;

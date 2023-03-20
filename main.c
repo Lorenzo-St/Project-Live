@@ -7,6 +7,7 @@
 #include "options.h"
 #include "mainMenu.h"
 #include "Sound.h"
+#include "profileData.h"
 #define KEY_COUNTS 1
 
 // main() the starting point for the program
@@ -46,6 +47,15 @@ void postUpdate(void)
   if (!getPause())
     return;
   CP_Color C = CP_Color_CreateHex(0x8498A7A0);
+  switch (GetMode()) 
+  {
+  case LightMode:
+    C = CP_Color_CreateHex(0x8498A7A0);
+    break;
+  case DarkMode:
+    C = CP_Color_CreateHex(0x263E7FA0);
+    break;
+  }
   CP_Settings_Fill(C);
   CP_Graphics_DrawRectAdvanced(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, SCREEN_WIDTH * 1.0f, SCREEN_HEIGHT * 1.0f, 0, 0);
 

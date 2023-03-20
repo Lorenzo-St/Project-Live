@@ -16,7 +16,10 @@ void   setGame           (bool);
 void   setOptions        (bool);
 void   setGenerated      (bool);
 void   setWorldName      (char*);
+void   setColorMode      (ColorMode c);
 bool   getOptions        (void);
 bool   getPause          (void);
 bool   getGame           (void);
 bool   getGenerated      (void);
+ColorMode getColorMode   (void);
+

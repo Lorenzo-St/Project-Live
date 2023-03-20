@@ -1,6 +1,8 @@
 #include "cprocessing.h"
 #include "structs.h"
 #include "colorStuff.h"
+#include "globalData.h"
+#include "profileData.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -57,15 +59,43 @@ CP_Image grayScaleify(CP_Image c)
   return result;
 }
 
+void updateColorMode(void) 
+{
+  switch (getColorMode()) 
+  {
+  case LightMode:
+    if (ground)
+      CP_Image_Free(&ground);
+    ground = CP_Image_Load("./Assets/LightModeBG.png");
+
+    break;
+  case DarkMode:
+    if (ground)
+      CP_Image_Free(&ground);
+    ground = CP_Image_Load("./Assets/DarkModeBG.png");
+
+    break;
+  }
+}
+
+
 int initImages(void) 
 {
   CP_Settings_ImageFilterMode(CP_IMAGE_FILTER_NEAREST);
   if (initialized)
     return -1;
-
+  ColorMode c = GetMode();
   
-  ground = CP_Image_Load("./Assets/grass_mega_tile.png");
 
+  switch (c) 
+  {
+  case LightMode:
+    ground = CP_Image_Load("./Assets/LightModeBG.png");
+    break;
+  case DarkMode:
+    ground = CP_Image_Load("./Assets/DarkModeBG.png");
+    break;
+  }
   pickup = CP_Image_Load("./Assets/pickup_image.png");
 
   /* Weapons */

@@ -3,6 +3,7 @@
 
 int       initImages       (void);
 void      freeImages       (void);
+void      updateColorMode  (void);
 CP_Image  returnPickup     (void);
 CP_Image  returnLand       (void);
 CP_Image  returnWeapon     (int id);

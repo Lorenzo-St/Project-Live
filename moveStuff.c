@@ -5,7 +5,7 @@
 #include "debugInfo.h"
 #include "globalData.h"
 #include "playerInv.h"
-
+#include "gameLoop.h"
 #include <math.h>
 
 
@@ -16,37 +16,36 @@ int moveEnemies(enemy** en, building *buildings)
   enemy* cur = *en;
   while (cur)
   {
-    if (cur->dir[0] <= 10 && cur->dir[1] <= 10)
+    if (cur->dir.x <= 10 && cur->dir.y <= 10)
     {
-      cur->dir[0] = CP_Random_RangeFloat(-100, 100);
-      cur->dir[1] = CP_Random_RangeFloat(-100, 100);
+      cur->dir.x = CP_Random_RangeFloat(-100, 100);
+      cur->dir.y = CP_Random_RangeFloat(-100, 100);
     }
-    /*if (checkInsideBuilding(buildings, 1, cur) == 1)
-    {
-      cur->health = 0;
-      enemy* last = cur;
-      if (cur == *en)
-        *en = cur->next;
-      preve->next = last->next;
-      cur = last->next;
-      removeEnemy(last);
-      continue;
-    }*/
+
+    player* p = returnPlayer();
+    CP_Vector dir = { p->x - cur->x, p->y - cur->y };
+    float mag = sqrtf(dir.x * dir.x + dir.y * dir.y);
+    dir.x /= mag;
+    dir.y /= mag;
     int check = checkAgainstBuilding(buildings, 1, cur);
     float dt = CP_System_GetDt();
-    float magnitude = sqrtf(cur->dir[0] * cur->dir[0] + cur->dir[1] * cur->dir[1]);
+    float magnitude = sqrtf(cur->dir.x * cur->dir.x + cur->dir.y * cur->dir.y);
     if (dt > 1)
       dt = .3f;
-    float change = (cur->dir[0] * dt) * (check == 0 || check == 2);
-    if (fabs(change) > 2)
-      change = .1f * cur->dir[0] / magnitude;
-    cur->x += change;
-    change = (cur->dir[1] * dt) * (check == 0 || check == 1);
-    if (fabs(change) > 2)
-      change = .1f * cur->dir[1] / magnitude;
-    cur->y += change;
-    cur->dir[0] += -cur->dir[0] * dt;
-    cur->dir[1] += -cur->dir[1] * dt;
+    cur->dir.x /= magnitude;
+    cur->dir.y /= magnitude;
+    cur->dir.x += dir.x / 2.0f;
+    cur->dir.y += dir.y / 2.0f;
+    magnitude = sqrtf(cur->dir.x * cur->dir.x + cur->dir.y * cur->dir.y);
+    cur->dir.x /= magnitude;
+    cur->dir.y /= magnitude;
+    cur->dir.x *= (check == 1 || check == 3) ? 0 : cur->speed;
+    cur->dir.y *= (check == 2 || check == 3) ? 0 : cur->speed;
+    cur->x += cur->dir.x * dt;
+    cur->y += cur->dir.y * dt;
+    cur->dir.x -= cur->dir.x * dt;
+    cur->dir.y -= cur->dir.y * dt;
+
     //drawDebugLine(cur->x, cur->x + cur->dir[0], cur->y, cur->y + cur->dir[0]);
     preve = cur;
     cur = cur->next;

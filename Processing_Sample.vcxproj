@@ -96,7 +96,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <CompileAs>CompileAsC</CompileAs>
+      <CompileAs>Default</CompileAs>
       <PreprocessorDefinitions>_MBCS;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>_CONSOLE</UndefinePreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
@@ -123,7 +123,7 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <CompileAs>CompileAsC</CompileAs>
+      <CompileAs>Default</CompileAs>
       <PreprocessorDefinitions>_MBCS;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>_CONSOLE</UndefinePreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
@@ -150,7 +150,7 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <CompileAs>CompileAsC</CompileAs>
+      <CompileAs>Default</CompileAs>
       <PreprocessorDefinitions>_MBCS;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>_CONSOLE</UndefinePreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
@@ -177,7 +177,7 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <CompileAs>CompileAsC</CompileAs>
+      <CompileAs>Default</CompileAs>
       <PreprocessorDefinitions>_MBCS;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <UndefinePreprocessorDefinitions>_CONSOLE</UndefinePreprocessorDefinitions>
       <CallingConvention>Cdecl</CallingConvention>
@@ -211,10 +211,12 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
     <ClCompile Include="globalImages.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="mainMenu.c" />
+    <ClCompile Include="mathLib.c" />
     <ClCompile Include="mathStuff.c" />
     <ClCompile Include="moveStuff.c" />
     <ClCompile Include="options.c" />
     <ClCompile Include="playerInv.c" />
+    <ClCompile Include="profileData.cpp" />
     <ClCompile Include="randFunction.c" />
     <ClCompile Include="scoring.c" />
     <ClCompile Include="shootStuff.c" />
@@ -235,10 +237,12 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
     <ClInclude Include="globalData.h" />
     <ClInclude Include="globalImages.h" />
     <ClInclude Include="mainMenu.h" />
+    <ClInclude Include="mathLib.h" />
     <ClInclude Include="mathStuff.h" />
     <ClInclude Include="moveStuff.h" />
     <ClInclude Include="options.h" />
     <ClInclude Include="playerInv.h" />
+    <ClInclude Include="profileData.h" />
     <ClInclude Include="randFunctions.h" />
     <ClInclude Include="scoring.h" />
     <ClInclude Include="shootStuff.h" />

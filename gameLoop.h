@@ -13,9 +13,12 @@
 
 #pragma once
 #include "structs.h"
+int         getAlive        (void);
 void        gameLoopInit    (void);
 void        gameLoopUpdate  (void);
 void        gameLoopExit    (void);
+void        increaseAlive   (void);
+void        decreaseAlive   (void);
 void        disableWheel    (void);
 bool        returnInvSel    (void);
 player*     returnPlayer    (void);

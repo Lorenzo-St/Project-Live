@@ -4,6 +4,7 @@
 #include "structs.h"
 #include "globalData.h"
 #include "Sound.h"
+#include "profileData.h"
 #include <stdio.h>
 
 static CP_Image logo;
@@ -20,9 +21,9 @@ static float imageHeight = 0;
 void SplashInit(void)
 {
 	initSounds();
-
+	ProfileRead();
 	//CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
-	CP_System_SetWindowSize(WINDOW_SIZE);
+	//CP_System_SetWindowSize(WINDOW_SIZE);
 	char buffer[40] = { 0 };
 	snprintf(buffer, sizeof buffer, "Simply Survive v%s", getVersion());
 	CP_System_SetWindowTitle(buffer);

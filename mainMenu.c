@@ -22,6 +22,7 @@
 #include "globalData.h"
 #include "checkStuff.h"
 #include "Sound.h"
+#include "profileData.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -99,6 +100,7 @@ void MainMenuInit(void)
 {
   framesPast = 0;
   initImages();
+  ProfileWrite();
   setupButtons();
   setGame(false);
   CP_Settings_RectMode(CP_POSITION_CENTER);
@@ -151,8 +153,8 @@ void checkButtons()
     {
 
     case 0:
-      CP_Engine_SetNextGameStateForced(gameLoopInit, gameLoopUpdate, gameLoopExit);
-
+     CP_Engine_SetNextGameStateForced(gameLoopInit, gameLoopUpdate, gameLoopExit);
+     IncreaseRuns();
       break;
     case 1:
       CP_Engine_SetNextGameStateForced(OptionsInit, OptionsUpdate, OptionsExit);

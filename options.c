@@ -18,6 +18,7 @@
 #include "drawStuff.h"
 #include "gameLoop.h"
 #include "globalData.h"
+#include "profileData.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -26,7 +27,7 @@
 
 #define OPTIONSBUTTONS 5
 #define AUDIO_SLIDERS 2
-#define DISPLASY_BUTTONS 5
+#define DISPLASY_BUTTONS 7
 
 static button optionsButton[OPTIONSBUTTONS] = { 0 };
 static button displayScreen[DISPLASY_BUTTONS] = { 0 };
@@ -45,14 +46,14 @@ void initSliders(void)
       audioSliders[i].x = SCREEN_WIDTH / 2.0f;
       audioSliders[i].y = SCREEN_HEIGHT / 3.0f;
       audioSliders[i].length = SCREEN_WIDTH / 5.0f;
-      audioSliders[i].value = 1.0f;
+      audioSliders[i].value = GetSounds();
       break;
     case 1:
       snprintf(audioSliders[i].title, sizeof audioSliders[i].title, "Music");
       audioSliders[i].x = SCREEN_WIDTH / 2.0f;
       audioSliders[i].y = SCREEN_HEIGHT / 3.0f + 200;
       audioSliders[i].length = SCREEN_WIDTH / 5.0f;
-      audioSliders[i].value = .5f;
+      audioSliders[i].value = GetMusic();
       break;
     }
   }
@@ -108,36 +109,50 @@ void setupOptionsButtons(void)
     {
     case 0:
       snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "Fullscreen");
-      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].x = (SCREEN_WIDTH / 3.0f);
       displayScreen[i].y = (SCREEN_HEIGHT / 3.0f);
       displayScreen[i].width = width;
       displayScreen[i].height = height;
       break;
     case 1:
       snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "1920 x 1080");
-      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].x = (SCREEN_WIDTH / 3.0f);
       displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + (height * 1.10f);
       displayScreen[i].width = width;
       displayScreen[i].height = height;
       break;
     case 2:
       snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "1280 x 720");
-      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].x = (SCREEN_WIDTH / 3.0f);
       displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + 2 * (height * 1.10f);
       displayScreen[i].width = width;
       displayScreen[i].height = height;
       break;
     case 3:
       snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "800 x 600");
-      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].x = (SCREEN_WIDTH / 3.0f);
       displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + 3 * (height * 1.10f);
       displayScreen[i].width = width;
       displayScreen[i].height = height;
       break;
     case 4:
       snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "640 x 480");
-      displayScreen[i].x = (SCREEN_WIDTH / 2.0f);
+      displayScreen[i].x = (SCREEN_WIDTH / 3.0f);
       displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + 4 * (height * 1.10f);
+      displayScreen[i].width = width;
+      displayScreen[i].height = height;
+      break;
+    case 5:
+      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "Set Lightmode");
+      displayScreen[i].x = (SCREEN_WIDTH / 3.0f) * 2.0f;
+      displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + 2 * (height * 1.10f);
+      displayScreen[i].width = width;
+      displayScreen[i].height = height;
+      break;
+    case 6:
+      snprintf(displayScreen[i].words, sizeof displayScreen[i].words, "Set Darkmode");
+      displayScreen[i].x = (SCREEN_WIDTH / 3.0f) * 2.0f;
+      displayScreen[i].y = (SCREEN_HEIGHT / 3.0f) + 3 * (height * 1.10f);
       displayScreen[i].width = width;
       displayScreen[i].height = height;
       break;
@@ -203,9 +218,11 @@ void checkSliders(void)
         {
         case 0:
           CP_Sound_SetGroupVolume(CP_SOUND_GROUP_0, audioSliders[i].value);
+          SetSounds(audioSliders[i].value);
           break;
         case 1:
           CP_Sound_SetGroupVolume(CP_SOUND_GROUP_1, audioSliders[i].value);
+          SetMusic(audioSliders[i].value);
           break;
         }
       }
@@ -322,19 +339,35 @@ void drawSubScreen(void)
           {
           case 0:
             CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
+            SetFullScreen(true);
             break;
           case 1:
             CP_System_SetWindowSize(1920, 1080);
-
+            SetWindowSize((CP_Vector) { 1920, 1080 });
+            SetFullScreen(false);
             break;
           case 2:
             CP_System_SetWindowSize(1080, 720);
+            SetWindowSize((CP_Vector) { 1080, 720 });
+            SetFullScreen(false);
             break;
           case 3:
             CP_System_SetWindowSize(800, 600);
+            SetWindowSize((CP_Vector) { 800, 600 });
+            SetFullScreen(false);
             break;
           case 4:
             CP_System_SetWindowSize(640, 480);
+            SetWindowSize((CP_Vector) { 640, 480 });
+            SetFullScreen(false);
+            break;
+          case 5:
+            if(getColorMode() != LightMode)
+              setColorMode(LightMode);
+            break;
+          case 6:
+            if (getColorMode() != DarkMode)
+              setColorMode(DarkMode);
             break;
           }
           setupOptionsButtons();

@@ -3,6 +3,7 @@
 #include "checkStuff.h"
 #include "worldSystems.h"
 #include "playerInv.h"
+#include "gameLoop.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,6 +49,7 @@ enemy* addEnemy(enemy** head)
     return NULL;
   new->next = *head;
   *head = new;
+  increaseAlive();
   return new;
 }
 
@@ -64,7 +66,7 @@ enemy* setEnemyStats(enemy* e, camera c, int type)
       e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
     } while (checkInsideBuilding(building, 1, e));
     
-    e->speed = 50;
+    e->speed = 100;
     e->cooldown = 1.5f;
     e->health = 60;
     e->radius = 25 * (SCREEN_WIDTH / 1920.0f);
@@ -77,7 +79,7 @@ enemy* setEnemyStats(enemy* e, camera c, int type)
       e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
     } while (checkInsideBuilding(building, 1, e));
 
-    e->speed = 50;
+    e->speed = 100;
     e->cooldown = .3f;
     e->health = 50;
     e->radius = 25 * (SCREEN_WIDTH / 1920.0f);
@@ -89,7 +91,7 @@ enemy* setEnemyStats(enemy* e, camera c, int type)
       e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
     } while (checkInsideBuilding(building, 1, e));
 
-    e->speed = 25;
+    e->speed = 75;
     e->cooldown = .2f;
     e->health = 300;
     e->radius = 50 * (SCREEN_WIDTH / 1920.0f);
@@ -105,6 +107,7 @@ void removeEnemy(enemy* toRemove)
   if (toRemove == NULL)
     return;
   free(toRemove);
+  decreaseAlive();
 }
 
 int dropItem(float loc[], item* items)

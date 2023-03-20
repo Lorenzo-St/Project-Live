@@ -5,7 +5,7 @@
 #include "playerInv.h"
 #include "drawStuff.h"
 #include "globalData.h"
-
+#include "mathLib.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -104,8 +104,8 @@ void checkAlphanumericKeys(char* dest, int* pos, int max)
 
 bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, bool* wheelOpen, int isPaused, int check)
 {
-  pl->velocity[0] = 0.0f;
-  pl->velocity[1] = 0.0f;
+  pl->velocity.x = 0.0f;
+  pl->velocity.y = 0.0f;
   int errored = 0;
   float velo = (pl->move_speed * CP_System_GetDt());
   if (CP_Input_MouseTriggered(MOUSE_BUTTON_1)) 
@@ -173,19 +173,19 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
       {
       case KEY_UP:
       case KEY_W:
-        pl->velocity[1] += velo;
+        pl->velocity.y += velo;
         break;
       case KEY_LEFT:
       case KEY_A:
-        pl->velocity[0] += -velo;
+        pl->velocity.x += -velo;
         break;
       case KEY_DOWN:
       case KEY_S:
-        pl->velocity[1] += -velo;
+        pl->velocity.y += -velo;
         break;
       case KEY_RIGHT:
       case KEY_D:
-        pl->velocity[0] += velo;
+        pl->velocity.x += velo;
         break;
       case 256:
         if (isPaused)
@@ -206,8 +206,8 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
     }
   }
   
-  pl->x += (pl->velocity[0] * *multiplier) * (check == 0 || check == 2 );
-  pl->y += (pl->velocity[1] * *multiplier) * (check == 0 || check == 1 );
+  pl->x += (pl->velocity.x * *multiplier) * (check == 0 || check == 2 );
+  pl->y += (pl->velocity.y * *multiplier) * (check == 0 || check == 1 );
   return errored;
 }
 
@@ -364,9 +364,9 @@ bool checkAgainstBuilding(building* buildings, int which, ...)
       if (rc.value == true)
       {
         float distance = sqrtf(rc.x2 * rc.x2 + rc.y2 * rc.y2);
-        if (sqrtf(((p->x + (p->velocity[0])) - rc.x1) * ((p->x + (p->velocity[0])) - rc.x1) + rc.y2 * rc.y2) < distance)
+        if (sqrtf(((p->x + (p->velocity.x)) - rc.x1) * ((p->x + (p->velocity.x)) - rc.x1) + rc.y2 * rc.y2) < distance)
           result += 1;
-        if (sqrtf(((p->y + (p->velocity[1])) - rc.y1) * ((p->y + (p->velocity[1])) - rc.y1) + rc.x2 * rc.x2) < distance)
+        if (sqrtf(((p->y + (p->velocity.y)) - rc.y1) * ((p->y + (p->velocity.y)) - rc.y1) + rc.x2 * rc.x2) < distance)
           result += 2;
       }
 
@@ -385,9 +385,9 @@ bool checkAgainstBuilding(building* buildings, int which, ...)
       if (rc.value == true)
       {
         float distance = sqrtf(rc.x2 * rc.x2 + rc.y2 * rc.y2);
-        if (sqrtf(((e->x + e->dir[0] * CP_System_GetDt()) - rc.x1) * ((e->x + e->dir[0] * CP_System_GetDt() - rc.x1) + rc.y2 * rc.y2)) < distance)
+        if (sqrtf(((e->x + e->dir.x * CP_System_GetDt()) - rc.x1) * ((e->x + e->dir.x * CP_System_GetDt() - rc.x1) + rc.y2 * rc.y2)) < distance)
           result += 1;
-        if (sqrtf(((e->y + e->dir[1] * CP_System_GetDt()) - rc.y1) * ((e->y + e->dir[1] * CP_System_GetDt() - rc.y1) + rc.x2 * rc.x2)) < distance)
+        if (sqrtf(((e->y + e->dir.y * CP_System_GetDt()) - rc.y1) * ((e->y + e->dir.y * CP_System_GetDt() - rc.y1) + rc.x2 * rc.x2)) < distance)
           result += 2;
 
       }

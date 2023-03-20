@@ -44,6 +44,9 @@ bool invHovered = false;
 
 /* standard Data*/
 int screen = 0;
+int wave = 0;
+int enemiesPerWave = 5;
+int enemiesAlive = 5;
 float addTimer = 5.0f;
 float multiplier = 1;
 
@@ -77,6 +80,21 @@ bool returnInvSel(void)
   return invHovered;
 }
 
+void increaseAlive(void)
+{
+  enemiesAlive++;
+}
+
+int getAlive(void) 
+{
+  return enemiesAlive;
+}
+
+void decreaseAlive(void) 
+{
+  --enemiesAlive;
+}
+
 objective* returnObis(void) 
 {
   return obis;
@@ -105,8 +123,9 @@ void gameLoopInit(void)
   initAudio(bulletSounds);
   initPlayer(&pl, &multiplier, &addTimer);
   initDrops(items);
-
-
+  wave = 1;
+  enemiesPerWave = 5;
+  addTimer = 0;
   for(int i = 0; i < WHEEL_SIZE; i++)
   {
     removeFromWheel(i);
@@ -159,9 +178,9 @@ void gameLoopUpdate(void)
   CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
 
 
-  pl.direction[0] = CP_Input_GetMouseX() - ((SCREEN_WIDTH / 2.0f) + (pl.x - c.x));
-  pl.direction[1] = CP_Input_GetMouseY() - ((SCREEN_HEIGHT / 2.0f) - (pl.y - c.y));
-  pl.rot = (float)(atan2(pl.direction[1], pl.direction[0]) * (180.0f / 3.14159265f) + 90.0f);
+  pl.direction.x = CP_Input_GetMouseX() - ((SCREEN_WIDTH / 2.0f) + (pl.x - c.x));
+  pl.direction.y = CP_Input_GetMouseY() - ((SCREEN_HEIGHT / 2.0f) - (pl.y - c.y));
+  pl.rot = (float)(atan2(pl.direction.y, pl.direction.x) * (180.0f / 3.14159265f) + 90.0f);
   c.x = pl.x;
   c.y = pl.y;
 
@@ -203,37 +222,42 @@ void gameLoopUpdate(void)
   checkItems(items, &pl, enHead, pickupText);
 
   CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-  addTimer -= CP_System_GetDt();
+  if(enemiesAlive <= 0)
+    addTimer -= CP_System_GetDt();
   if (pl.cooldown > 0)
     pl.cooldown -= CP_System_GetDt();
   //drawWeapon(pl.weapon, pl.powerUpTimer, pl.powerUp);
 
   if (addTimer <= 0)
   {
-    int type;
-    if (bossesEnabled)
+    for (int i = 0; i < enemiesPerWave; i++) 
     {
-      type = CP_Random_RangeInt(0, ENEMY_TYPE);
-      
-      enHead = setEnemyStats(addEnemy(&enHead), c, type);
-      if (checkInsideBuilding(buildings, 1, enHead)) 
+      int type;
+      if (bossesEnabled)
       {
-        enemy* old = enHead;
-        enHead = enHead->next;
-        removeEnemy(old);
+        type = CP_Random_RangeInt(0, ENEMY_TYPE);
+
+        enHead = setEnemyStats(addEnemy(&enHead), c, type);
+        if (checkInsideBuilding(buildings, 1, enHead))
+        {
+          enemy* old = enHead;
+          enHead = enHead->next;
+          removeEnemy(old);
+        }
+      }
+      else
+      {
+        while (type = CP_Random_RangeInt(0, ENEMY_TYPE), type == 2);
+        enHead = setEnemyStats(addEnemy(&enHead), c, type);
+        if (checkInsideBuilding(buildings, 1, enHead))
+        {
+          enemy* old = enHead;
+          enHead = enHead->next;
+          removeEnemy(old);
+        }
       }
     }
-    else
-    {
-      while (type = CP_Random_RangeInt(0, ENEMY_TYPE), type == 2);
-      enHead = setEnemyStats(addEnemy(&enHead), c, type);
-      if (checkInsideBuilding(buildings, 1, enHead))
-      {
-        enemy* old = enHead;
-        enHead = enHead->next;
-        removeEnemy(old);
-      }
-    }
+    enemiesPerWave += (int)(5.0f * (1.0f + cbrtf(wave - 2.0f)));
     addTimer = 5.0f / cbrtf((float)pl.kills + 1.0f);
   }
 
@@ -254,8 +278,10 @@ void gameLoopUpdate(void)
     pl.weapon->reloadClock -= CP_System_GetDt();
   else if (pl.weapon->reloadClock < 0)
     pl.weapon->reloadClock = 0;
-  //drawDebugInfo(&pl, enHead);
-
+  drawDebugInfo(&pl, enHead);
+  char buffer[30];
+  snprintf(buffer, _countof(buffer), "%i", enemiesAlive);
+  CP_Font_DrawText(buffer, SCREEN_WIDTH/2.0f, 100);
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the exit function

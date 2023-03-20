@@ -1,6 +1,7 @@
 #pragma once
 #include "cprocessing.h"
 #include <stdlib.h>
+#include <stdbool.h>
 static int playerKeys[] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q, KEY_R, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_LEFT_CONTROL };
 
 /* |----------------------- Defines  ---------------------------| */
@@ -16,10 +17,6 @@ static int playerKeys[] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPAC
 #define MAX_TEXT 10
 #define AUDIOS 2
 #define NUMBER_OF_BUILDINGS 50
-#define FALSE 0
-#define false FALSE
-#define TRUE 1
-#define true TRUE
 #define ITEMS_PER_ROW 10
 #define WHEEL_SIZE 6
 #define SCREEN_WIDTH  CP_System_GetWindowWidth()
@@ -58,7 +55,13 @@ static int playerKeys[] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPAC
 
 /* |-----------------------  types   ---------------------------| */
 
-typedef unsigned int bool;
+typedef enum ColorMode 
+{
+  LightMode,
+  DarkMode,
+
+}ColorMode;
+
 
 typedef struct objective 
 {
@@ -107,8 +110,8 @@ typedef struct player
   float cooldown;
   float move_speed;
   float x, y;
-  float direction[2];
-  float velocity[2];
+  CP_Vector direction;
+  CP_Vector velocity;
   float rot;
   float powerUpTimer;
   weaponData* weapon;
@@ -182,7 +185,7 @@ typedef struct enemy
   float x;
   float y;
   float cooldown;
-  float dir[2];
+  CP_Vector dir;
   float speed;
   float radius;
   int health;
@@ -216,17 +219,4 @@ typedef struct wheelAmmo
 /* |----------------------- Gloabals ---------------------------| */
 
 
-static float roundFloat(float x)
-{
-  if (x < 0)
-  {
-    x -= .5f;
-    x = (float)((int)x);
-  }
-  else
-  {
-    x += .5f;
-    x = (float)((int)x);
-  }
-  return x;
-}
+

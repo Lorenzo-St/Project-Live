@@ -155,7 +155,7 @@ void drawPlayer(player pl, camera c)
   CP_Settings_Fill(CP_Color_CreateHex(0x22A3A4FF));
   CP_Graphics_DrawCircle((pl.x - c.x) + (SCREEN_WIDTH / 2.0f), -(pl.y - c.y) + (SCREEN_HEIGHT / 2.0f), pl.playerRadius * 2);
   CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
-  CP_Graphics_DrawRectAdvanced(((pl.x - c.x) + ((pl.direction[0] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (SCREEN_WIDTH / 2.0f), (-(pl.y - c.y) + ((pl.direction[1] * pl.playerRadius) / sqrtf(pl.direction[0] * pl.direction[0] + pl.direction[1] * pl.direction[1]))) + (SCREEN_HEIGHT / 2.0f), pl.playerRadius / 1.25f, 10 * (SCREEN_WIDTH / 1920.0f), pl.rot, 0.0f);
+  CP_Graphics_DrawRectAdvanced(((pl.x - c.x) + ((pl.direction.x * pl.playerRadius) / sqrtf(pl.direction.x * pl.direction.x + pl.direction.y * pl.direction.y))) + (SCREEN_WIDTH / 2.0f), (-(pl.y - c.y) + ((pl.direction.y * pl.playerRadius) / sqrtf(pl.direction.x * pl.direction.x + pl.direction.y * pl.direction.y))) + (SCREEN_HEIGHT / 2.0f), pl.playerRadius / 1.25f, 10 * (SCREEN_WIDTH / 1920.0f), pl.rot, 0.0f);
   
   CP_Settings_Fill(CP_Color_CreateHex(0x832051FF));
   CP_Settings_RectMode(CP_POSITION_CORNER);
@@ -257,7 +257,6 @@ void drawItems(item* items, camera C)
   }
 
 }
-
 
 void drawBuildings(building *buildings, camera c) 
 {

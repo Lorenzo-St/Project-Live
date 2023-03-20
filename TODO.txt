@@ -1,5 +1,8 @@
 What you were working on last
  - Initial release final touches
-
+ - Balence Weapons/Enemies
+ - Enemy Waves instead of drop in <- Doing
+ - More Weapons
+ - $1.99 worth of polish
  - Weapons
     - Syringe
