@@ -49,6 +49,7 @@ int enemiesPerWave = 5;
 int enemiesAlive = 5;
 float addTimer = 5.0f;
 float multiplier = 1;
+int maximumEnemies = 10;
 
 /* rapidly modifying Arrays, Change to Linked lists when optimizing */
 static enemy* enHead = NULL; 
@@ -60,6 +61,10 @@ notiString pickupText[MAX_TEXT] = { 0 };
 CP_Sound bulletSounds[AUDIOS] = { 0 };
 objective obis[MAX_OBJECTIVES] = { 0 };
 
+int getMaxEnemies(void) 
+{
+  return maximumEnemies;
+}
 
 player pl = { 0 };
 camera c = { 0 };
@@ -108,6 +113,7 @@ void disableWheel(void)
 // this function will be called once at the beginning of the program
 void gameLoopInit(void)
 {
+  
   initImages();
   initScrollable();
   if(getGame())
@@ -124,25 +130,14 @@ void gameLoopInit(void)
   initPlayer(&pl, &multiplier, &addTimer);
   initDrops(items);
   wave = 1;
+  pl.kills = 0;
   enemiesPerWave = 5;
   addTimer = 0;
-  for(int i = 0; i < WHEEL_SIZE; i++)
-  {
-    removeFromWheel(i);
-  }  
-  while (returnHead())
-  {
-    InvItem* oldHead = returnHead();
-    
-    removeItem(0);
-    freeItem(oldHead);
-  }
-  while (enHead) 
-  {
-    enemy* e = enHead;
-    enHead = e->next;
-    removeEnemy(e);
-  }
+  resetWheel();
+  resetHead();
+  if(enHead)
+    free(enHead);
+  enHead = calloc(MAX_ENEMIES, sizeof(enemy));
   while (head) 
   {
     bullet* b = head;
@@ -154,11 +149,12 @@ void gameLoopInit(void)
   swatchActive(0, &pl);
   initializeAmmo(&pl);
   addItem(2, retAmmo()->lightStorage);
+  enemiesAlive = 0;
 
   while (checkInsideBuilding(buildings, 0, pl) != 0)
   {
-    pl.x = CP_Random_RangeFloat(-1000, 1000);
-    pl.y = CP_Random_RangeFloat(-1000, 1000);
+    pl.pos.x = CP_Random_RangeFloat(-1000, 1000);
+    pl.pos.y = CP_Random_RangeFloat(-1000, 1000);
   }
 }
 
@@ -178,21 +174,22 @@ void gameLoopUpdate(void)
   CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
 
 
-  pl.direction.x = CP_Input_GetMouseX() - ((SCREEN_WIDTH / 2.0f) + (pl.x - c.x));
-  pl.direction.y = CP_Input_GetMouseY() - ((SCREEN_HEIGHT / 2.0f) - (pl.y - c.y));
+  pl.direction.x = CP_Input_GetMouseX() - ((SCREEN_WIDTH / 2.0f) + (pl.pos.x - c.x));
+  pl.direction.y = CP_Input_GetMouseY() - ((SCREEN_HEIGHT / 2.0f) - (pl.pos.y - c.y));
   pl.rot = (float)(atan2(pl.direction.y, pl.direction.x) * (180.0f / 3.14159265f) + 90.0f);
-  c.x = pl.x;
-  c.y = pl.y;
+  c.x = pl.pos.x;
+  c.y = pl.pos.y;
 
   /* Draw all on screen items */
-  drawBuildings(buildings, c);
   drawBullets(head,c);
   drawPlayer(pl,c);
-  drawEnemies(&enHead, c);
+  drawEnemies(enHead, c);
+  drawBuildings(buildings, c);
+  drawDirector(enHead);
   drawItems(items,c);
   drawPickupText(pickupText,c);
   drawObjectiveBoard();
-
+  
 
   if (invOpen)
     invHovered = drawInventory(returnHead());
@@ -212,8 +209,8 @@ void gameLoopUpdate(void)
   enemyShoot(enHead, bulletSounds, &head, pl);
 
   /* Move on screen items    */
-  moveEnemies(&enHead, buildings);
-  moveBullets(&head, &enHead,  &pl, items, buildings);
+  moveEnemies(enHead, buildings);
+  moveBullets(&head, enHead,  &pl, items, buildings);
 
   int check = checkAgainstBuilding(buildings, 0, &pl);
 
@@ -222,47 +219,79 @@ void gameLoopUpdate(void)
   checkItems(items, &pl, enHead, pickupText);
 
   CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
-  if(enemiesAlive <= 0)
+  if (enemiesAlive <= 0) 
+  {
     addTimer -= CP_System_GetDt();
+    ColorMode cm = getColorMode();
+    if(cm == DarkMode )
+      CP_Settings_Fill(WHITE);
+    else if(cm == LightMode)
+      CP_Settings_Fill(BLACK);
+
+    char buff[15];
+    CP_Settings_TextSize(60);
+    snprintf(buff, _countof(buff), "New Wave in: %2.3f", addTimer);
+    CP_Font_DrawText(buff, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 5.0f);
+  }
   if (pl.cooldown > 0)
     pl.cooldown -= CP_System_GetDt();
   //drawWeapon(pl.weapon, pl.powerUpTimer, pl.powerUp);
 
   if (addTimer <= 0)
   {
-    for (int i = 0; i < enemiesPerWave; i++) 
+    while(enemiesAlive < enemiesPerWave)
     {
+      enemy* newest = NULL;
       int type;
       if (bossesEnabled)
       {
         type = CP_Random_RangeInt(0, ENEMY_TYPE);
 
-        enHead = setEnemyStats(addEnemy(&enHead), c, type);
+        newest = setEnemyStats(addEnemy(enHead), c, type, wave);
         if (checkInsideBuilding(buildings, 1, enHead))
         {
-          enemy* old = enHead;
-          enHead = enHead->next;
-          removeEnemy(old);
+          removeEnemy(newest);
         }
       }
       else
       {
-        while (type = CP_Random_RangeInt(0, ENEMY_TYPE), type == 2);
-        enHead = setEnemyStats(addEnemy(&enHead), c, type);
+        if (wave < 4)
+          type = 0;
+        else
+          while (type = CP_Random_RangeInt(0, ENEMY_TYPE), type == 2);
+        
+        newest = setEnemyStats(addEnemy(enHead), c, type, wave);
         if (checkInsideBuilding(buildings, 1, enHead))
         {
-          enemy* old = enHead;
-          enHead = enHead->next;
-          removeEnemy(old);
+          removeEnemy(newest);
         }
       }
     }
-    enemiesPerWave += (int)(5.0f * (1.0f + cbrtf(wave - 2.0f)));
-    addTimer = 5.0f / cbrtf((float)pl.kills + 1.0f);
+    if (enemiesAlive == enemiesPerWave) 
+    {
+      float wCheck = ((wave - 2.0f) >= 0) ? wave - 2.0f : 0;
+      enemiesPerWave += (int)(3.0f * (1.0f + sqrtf(wCheck)));
+      if (enemiesPerWave > MAX_ENEMIES) 
+      {
+        enemy* temp = realloc(enHead, (enemiesPerWave * 2) * sizeof(enemy));
+        if (temp != NULL) 
+        {
+          maximumEnemies = enemiesPerWave * 2;
+          enHead = temp;
+        }
+        else 
+        {
+          enemiesPerWave = maximumEnemies;
+        }
+      }
+      addTimer = 5.0f;
+      pl.maxHealth += (int)(10 * (1 + wave / 100.0f));
+      wave++;
+    }
   }
 
-  if (getTime() >= 60.0f)
-    bossesEnabled = 1;
+  if (wave > 10 && !bossesEnabled)
+    bossesEnabled = true;
   multiplier -= CP_System_GetDt() * 5;
   if (multiplier < 1)
   {
@@ -278,10 +307,15 @@ void gameLoopUpdate(void)
     pl.weapon->reloadClock -= CP_System_GetDt();
   else if (pl.weapon->reloadClock < 0)
     pl.weapon->reloadClock = 0;
+#if _DEBUG && 0
   drawDebugInfo(&pl, enHead);
+  CP_Settings_TextSize(80);
+  CP_Settings_Fill(BLACK);
   char buffer[30];
   snprintf(buffer, _countof(buffer), "%i", enemiesAlive);
   CP_Font_DrawText(buffer, SCREEN_WIDTH/2.0f, 100);
+#endif
+  verifyEnemyCount(enHead);
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the exit function
@@ -297,20 +331,7 @@ void gameLoopExit(void)
   }
   freeImages();
   releaseScrollable();
-  
-  InvItem* i = returnHead();
-  if (i != NULL)
-  {
-    InvItem* next = i->next;
-    while (i)
-    {
-      next = i->next;
-      freeItem(i);
-      i = next;
-    }
-
-  }
   resetHead();
-  if(getGenerated())
-    free(getWorldName());
+  if (enHead)
+    free(enHead);
 }

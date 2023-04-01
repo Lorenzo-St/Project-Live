@@ -113,9 +113,9 @@ extern "C"
         const int len = static_cast<int>(std::string("ColorMode : ").length());
         std::string sub = token.substr(token.find("ColorMode : ") + len, token.length() - len);
         if (sub == "LightMode")
-          profile.mode = LightMode;
+          setColorMode(LightMode);
         else if (sub == "DarkMode")
-          profile.mode = DarkMode;
+          setColorMode(DarkMode);
         continue;
       }
 
@@ -131,6 +131,8 @@ extern "C"
         const int len = static_cast<int>(std::string("Sounds : ").length());
         std::string sub = token.substr(token.find("Sounds : ") + len, token.length() - len);
         profile.SoundsVolume = (float)atof(sub.c_str());
+        CP_Sound_SetGroupVolume(CP_SOUND_GROUP_0, profile.SoundsVolume);
+
         continue;
       }
 
@@ -139,6 +141,8 @@ extern "C"
         const int len = static_cast<int>(std::string("Music : ").length());
         std::string sub = token.substr(token.find("Music : ") + len, token.length() - len);
         profile.MusicVolume = (float)atof(sub.c_str());
+        CP_Sound_SetGroupVolume(CP_SOUND_GROUP_1, profile.MusicVolume);
+
         continue;
       }
 

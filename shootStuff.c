@@ -21,14 +21,14 @@ bullet* setBulletStats(bullet* thisOne, float dir[2], int user, float pl[2])
 int fireAtPlayer(enemy a, bullet** bullets, player pl, CP_Sound *bulletSounds)
 {
   float dir[2] = { 0,0 };
-  dir[0] = pl.x - a.x;
-  dir[1] = pl.y - a.y;
+  dir[0] = pl.pos.x - a.pos.x;
+  dir[1] = pl.pos.y - a.pos.y;
   float magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
   dir[0] /= magnitude;
   dir[1] /= magnitude;
   bullet* thisOne;
   thisOne = addBullet(bullets);
-  thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { a.x, a.y });
+  thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { a.pos.x, a.pos.y });
   if (thisOne == NULL)
     return -1;
   thisOne->pwr = CP_Random_RangeInt(5, 25);
@@ -53,7 +53,7 @@ int bossPatterns(enemy boss, player pl, bullet **bullets)
       dir[0] /= magnitude;
       dir[1] /= magnitude;
       thisOne = addBullet(bullets);
-      thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { boss.x, boss.y });
+      thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { boss.pos.x, boss.pos.y });
       if (thisOne == NULL)
         return -1;
       thisOne->pwr = CP_Random_RangeInt(5, 25);
@@ -65,13 +65,13 @@ int bossPatterns(enemy boss, player pl, bullet **bullets)
     for (int k = 0; k < SPREAD_COUNT * 2; k++)
     {
       angle = CP_Random_RangeFloat(-100, 100);
-      dir[0] = pl.x - boss.x + angle;
-      dir[1] = pl.y - boss.y + angle;
+      dir[0] = pl.pos.x - boss.pos.x + angle;
+      dir[1] = pl.pos.y - boss.pos.y + angle;
       magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
       dir[0] /= magnitude;
       dir[1] /= magnitude;
       thisOne = addBullet(bullets);
-      thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { boss.x, boss.y });
+      thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { boss.pos.x, boss.pos.y });
       if (thisOne == NULL)
         return -1;
       thisOne->pwr = 20;
@@ -81,13 +81,13 @@ int bossPatterns(enemy boss, player pl, bullet **bullets)
     break;
   case 2:
 
-    dir[0] = pl.x - boss.x;
-    dir[1] = pl.y - boss.y;
+    dir[0] = pl.pos.x - boss.pos.x;
+    dir[1] = pl.pos.y - boss.pos.y;
     magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
     dir[0] /= magnitude;
     dir[1] /= magnitude;
     thisOne = addBullet(bullets);
-    thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { boss.x, boss.y });
+    thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { boss.pos.x, boss.pos.y });
     if (thisOne == NULL)
       return -1;
     thisOne->pwr = CP_Random_RangeInt(5, 25);
@@ -95,13 +95,13 @@ int bossPatterns(enemy boss, player pl, bullet **bullets)
     break;
   case 3:
 
-    dir[0] = (pl.x - boss.x);
-    dir[1] = (pl.y - boss.y);
+    dir[0] = (pl.pos.x - boss.pos.x);
+    dir[1] = (pl.pos.y - boss.pos.y);
     magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
     dir[0] /= magnitude;
     dir[1] /= magnitude;
     thisOne = addBullet(bullets);
-    thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { boss.x, boss.y });
+    thisOne = setBulletStats(thisOne, dir, 0, (float[2]) { boss.pos.x, boss.pos.y });
     if (thisOne == NULL)
       return -1;
     thisOne->pwr = CP_Random_RangeInt(5, 25);
@@ -130,12 +130,10 @@ int playerFire(player pl, bullet **bullets)
     return -1;
   }
 
-  if (((*returnWheel())[returnSelected()]->durability -= (CP_Random_RangeInt(0, 100) > 75))  <= 0) 
+  if (((returnWheel())[returnSelected()].durability -= (CP_Random_RangeInt(0, 100) > 75))  <= 0) 
   {
     removeFromWheel(returnSelected());
-    InvItem* ei = returnHead();
     removeItem(0);
-    freeItem(ei);
   }
 
   switch (pl.weapon->pattern) 
@@ -147,7 +145,7 @@ int playerFire(player pl, bullet **bullets)
     dir[0] /= magnitude;
     dir[1] /= magnitude;
     thisOne = addBullet(bullets);
-    thisOne = setBulletStats(thisOne, dir, 1, (float[2]) { pl.x, pl.y });
+    thisOne = setBulletStats(thisOne, dir, 1, (float[2]) { pl.pos.x, pl.pos.y });
     if (thisOne == NULL)
       return -1;
     thisOne->pwr = pl.weapon->damage;
@@ -163,7 +161,7 @@ int playerFire(player pl, bullet **bullets)
       dir[0] /= magnitude;
       dir[1] /= magnitude;
       thisOne = addBullet(bullets);
-      thisOne = setBulletStats(thisOne, dir, 1, (float[2]) { pl.x, pl.y });
+      thisOne = setBulletStats(thisOne, dir, 1, (float[2]) { pl.pos.x, pl.pos.y });
       if (thisOne == NULL)
         return -1;
       thisOne->pwr = pl.weapon->damage;
@@ -172,15 +170,22 @@ int playerFire(player pl, bullet **bullets)
     break;
   }
 
-  CP_Sound s = getWeaponSounds(pl.weapon->type, (*returnWheel())[returnSelected()]->itemId);
+  CP_Sound s = getWeaponSounds(pl.weapon->type, (returnWheel())[returnSelected()].itemId);
   CP_Sound_Play(s);
   return 0;
 }
 
-int enemyShoot(enemy* en, CP_Sound* bulletSounds, bullet **bullets, player pl)
+int enemyShoot(enemy* e, CP_Sound* bulletSounds, bullet **bullets, player pl)
 {
-  while(en)
+  int i = 0;
+  while(i < MAX_ENEMIES)
   {
+    enemy* en = e + i;
+    if (en->alive == false) 
+    {
+      i++;
+      continue;
+    }
     if (en->cooldown <= 0)
     {
       
@@ -219,8 +224,7 @@ int enemyShoot(enemy* en, CP_Sound* bulletSounds, bullet **bullets, player pl)
       en->cooldown -= .03f;
     else
       en->cooldown -= d;
-
-    en = en->next;
+    i++;
   }
   return 0;
 }

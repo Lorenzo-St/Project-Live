@@ -2,7 +2,6 @@
 #include "worldSystems.h"
 #include "globalImages.h"
 #include "profileData.h"
-#define MAX_WORLD_NAME_LENGTH 30
 
 static float time = 0;
 static int highestBulletCount = 0;
@@ -10,9 +9,7 @@ static bool isPaused = false;
 static bool inGame = false;
 static bool inOptions = false;
 static bool generated = false;
-static const char* const version = "0.5.7";
-static char* worldName = NULL;
-static char  newWorldName[MAX_WORLD_NAME_LENGTH] = { 0 };
+static const char* const version = "0.6.2";
 static ColorMode colorMode = LightMode;
 
 ColorMode getColorMode(void) 
@@ -32,15 +29,7 @@ int grabBuildingNumb(void)
   return getNumOfBuildings();
 }
 
-char* getWorldName(void) 
-{
-  return worldName;
-}
 
-char* getNewName(void) 
-{
-  return newWorldName;
-}
 
 
 const char* getVersion(void) 
@@ -78,10 +67,6 @@ void setPause(bool a)
   isPaused = a;
 }
 
-void setWorldName(char* name) 
-{
-  worldName = name;
-}
 
 void setOptions(bool a)
 {

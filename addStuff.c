@@ -4,12 +4,15 @@
 #include "worldSystems.h"
 #include "playerInv.h"
 #include "gameLoop.h"
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 
 int addPickup(item* a,  InvItem* b, notiString* pickupText, int count)
 {
+  if (b->itemId == -1 || b->count < 0)
+    return -1;
   for (int i = 0; i < MAX_TEXT; i++)
   {
     if (pickupText[i].active)
@@ -42,59 +45,54 @@ void removeBullet(bullet* toRemove)
 
 }
 
-enemy* addEnemy(enemy** head) 
+enemy* addEnemy(enemy* head) 
 {
-  enemy* new = (enemy*)malloc(1 * sizeof(enemy));
-  if (new == NULL)
-    return NULL;
-  new->next = *head;
-  *head = new;
+  int i = 0;
+  while (i < MAX_ENEMIES)
+  {
+    if ((head + i)->alive == 0) 
+    {
+      (head + i)->alive = true;
+      break;
+    }
+
+    i++;
+  }
   increaseAlive();
-  return new;
+  return (head + i);
 }
 
-enemy* setEnemyStats(enemy* e, camera c, int type) 
+enemy* setEnemyStats(enemy* e, camera c, int type, int wave) 
 {
-  building* building = returnBuildings();
   e->type = type;
+  e->pos.x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
+  e->pos.y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
+
   switch (type) 
   {
   case 0:
-    do 
-    {
-      e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
-      e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
-    } while (checkInsideBuilding(building, 1, e));
-    
+
+
     e->speed = 100;
     e->cooldown = 1.5f;
-    e->health = 60;
+    e->health = (int)(60 * (1.0f + (wave / 50.0f)));
     e->radius = 25 * (SCREEN_WIDTH / 1920.0f);
 
     break;
   case 1:
-    do
-    {
-      e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
-      e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
-    } while (checkInsideBuilding(building, 1, e));
+
 
     e->speed = 100;
     e->cooldown = .3f;
-    e->health = 50;
+    e->health = (int)(45 * (1.0f + (wave / 75.0f)));
     e->radius = 25 * (SCREEN_WIDTH / 1920.0f);
     break;
   case 2:
-    do
-    {
-      e->x = CP_Random_RangeFloat(c.x - SCREEN_WIDTH / 2.0f, c.x + SCREEN_WIDTH / 2.0f);
-      e->y = CP_Random_RangeFloat(c.y - SCREEN_HEIGHT / 2.0f, c.y + SCREEN_HEIGHT / 2.0f);
-    } while (checkInsideBuilding(building, 1, e));
-
     e->speed = 75;
     e->cooldown = .2f;
-    e->health = 300;
-    e->radius = 50 * (SCREEN_WIDTH / 1920.0f);
+    e->health = (int)(300 * (1.0f + (wave / 25.0f)));
+    e->radius = 60 * (SCREEN_WIDTH / 1920.0f);
+    e->pattern = type;
     break;
   }
 
@@ -106,7 +104,7 @@ void removeEnemy(enemy* toRemove)
 {
   if (toRemove == NULL)
     return;
-  free(toRemove);
+  toRemove->alive = 0;
   decreaseAlive();
 }
 

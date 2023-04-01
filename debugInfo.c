@@ -21,15 +21,14 @@ void drawDebugInfo(player *pl, enemy *en)
   CP_Settings_TextSize(15);
   snprintf(buffer, 200, "%.3f", CP_System_GetFrameRate());
   CP_Font_DrawText(buffer, SCREEN_WIDTH - 50.0f, 20.0f);
-  snprintf(buffer, 200, "%04.3f, %04.3f", pl->x, pl->y);
+  snprintf(buffer, 200, "%04.3f, %04.3f", pl->pos.x, pl->pos.y);
   CP_Font_DrawText(buffer, SCREEN_WIDTH - 100.0f, 40.0f);
   CP_Font_DrawText("Enemies", SCREEN_WIDTH - 100.0f, 50.0f);
-  while(en)
+  while(i < MAX_ENEMIES)
   {
-    snprintf(buffer, 200, "%04.3f, %04.3f", en->dir.x, en->dir.y);
+    snprintf(buffer, 200, "%04.3f, %04.3f", (en + i)->dir.x, (en + i)->dir.y);
     CP_Font_DrawText(buffer, SCREEN_WIDTH - 100.0f, 60.0f+ (15 * i));
     i++;
-    en = en->next;
   }
   CP_Settings_Stroke(CP_Color_CreateHex(0xffed00ff));
   CP_Settings_StrokeWeight(5);

@@ -6,16 +6,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-
-static InvItem*  invhead = NULL;
-InvItem* (itemWheel[WHEEL_SIZE]) = { NULL };
+static InvItem invhead[MAX_INV_ITEMS] = {0};
+InvItem itemWheel[WHEEL_SIZE] = { 0 };
 wheelAmmo ammo = { 0 };
 int selected = -1;
 int invSelected = -1;
 
 void resetHead(void) 
 {
-  invhead = NULL;
+  memset(invhead,   -1, sizeof(InvItem) * MAX_INV_ITEMS);
+
+}
+
+void resetWheel(void) 
+{
+  memset(itemWheel, -1, sizeof(InvItem) * WHEEL_SIZE);
 }
 
 void initializeAmmo(player* p) 
@@ -27,25 +32,25 @@ void initializeAmmo(player* p)
 
 void wheelUpgrade(int index) 
 {
-  itemWheel[index]->subID++;
+  itemWheel[index].subID++;
 
   if (selected == index) 
   {
-    weaponData a = *setStats(&a, itemWheel[index]->itemId);
+    weaponData a = *setStats(&a, itemWheel[index].itemId);
 
-    returnPlayer()->weapon->damage = a.damage += 5 * nthPower(1.25, itemWheel[index]->subID);
-    itemWheel[index]->durability += 10;
+    returnPlayer()->weapon->damage = a.damage += 5 * nthPower(1.25, itemWheel[index].subID);
+    itemWheel[index].durability += 10;
   }
   else 
   {
-    itemWheel[index]->durability += 10;
+    itemWheel[index].durability += 10;
   }
 }
 
 void reloadFromReserves(void) 
 {
-  InvItem* r = itemWheel[selected];
-  weaponData* w = malloc(1 * sizeof(weaponData));
+  InvItem* r = &itemWheel[selected];
+  weaponData* w = calloc(1, sizeof(weaponData));
   w = setStats(w, r->itemId);
 
   if (ammo.active[selected] > 0)
@@ -78,99 +83,122 @@ void reloadFromReserves(void)
 
 void reloadFromStorage(int wheelLoc)
 {
-  InvItem* r = itemWheel[wheelLoc];
+  InvItem* r = &itemWheel[wheelLoc];
   weaponData* w = malloc(1 * sizeof(weaponData));
   w = setStats(w, r->itemId);
-
+  int missingActive = w->ammo - ammo.active[wheelLoc];
+  int missingReserv = w->ammoReserves - ammo.reserves[wheelLoc];
   switch (w->ammoType) 
   {
   case 0:
     if (ammo.lightStorage == 0)
       break;
-    if (ammo.lightStorage > w->ammoReserves + w->ammo)
+    if (missingActive > 0) 
     {
-      ammo.active[wheelLoc] = w->ammo;
-      ammo.reserves[wheelLoc] = w->ammoReserves;
-      ammo.lightStorage -= w->ammo + w->ammoReserves;
-      removeCount(2, w->ammo + w->ammoReserves);
-    }
-    else
-    {
-      int dif = ammo.lightStorage - w->ammo;
-      if (dif < 0)
+      if (ammo.lightStorage >= missingActive)
       {
-        ammo.active[wheelLoc] = ammo.lightStorage;
-        removeCount(2, ammo.lightStorage);
-        ammo.lightStorage = 0;
-        
-        break;
+        ammo.active[wheelLoc] = w->ammo;
+        ammo.lightStorage -= missingActive;
+        removeCount(2, missingActive);
       }
       else 
       {
-        ammo.active[wheelLoc] = w->ammo;
-        ammo.reserves[wheelLoc] = dif;
-        ammo.lightStorage = 0;
-        removeCount(2, dif);
+        ammo.active[wheelLoc] += ammo.lightStorage;
+        removeCount(2, ammo.lightStorage);
+        ammo.lightStorage -= ammo.lightStorage;
+
       }
     }
+    if (missingReserv > 0)
+    {
+     if (ammo.lightStorage >= missingReserv)
+      {
+        ammo.reserves[wheelLoc] = w->ammoReserves;
+        ammo.lightStorage -= missingReserv;
+        removeCount(2, missingReserv);
+
+      }
+      else
+      {
+        ammo.reserves[wheelLoc] += ammo.lightStorage;
+        removeCount(2, ammo.lightStorage);
+        ammo.lightStorage -= ammo.lightStorage;
+
+      }
+    }
+    
     break;
   case 1:
     if (ammo.mediumStorage == 0)
       break;
-    if (ammo.mediumStorage > w->ammoReserves + w->ammo)
+    if (missingActive > 0)
     {
-      ammo.active[wheelLoc] = w->ammo;
-      ammo.reserves[wheelLoc] = w->ammoReserves;
-      ammo.mediumStorage -= w->ammo + w->ammoReserves;
-      removeCount(3, w->ammo + w->ammoReserves);
-    }
-    else
-    {
-      int dif = ammo.mediumStorage - w->ammo;
-      if (dif < 0)
+      if (ammo.mediumStorage >= missingActive)
       {
-        ammo.active[wheelLoc] = ammo.mediumStorage;
-        removeCount(3, ammo.mediumStorage);
-        ammo.mediumStorage = 0;
-
-        break;
+        ammo.active[wheelLoc] = w->ammo;
+        ammo.mediumStorage -= missingActive;
+        removeCount(3, missingActive);
       }
       else
       {
-        ammo.active[wheelLoc] = w->ammo;
-        ammo.reserves[wheelLoc] = dif;
-        ammo.mediumStorage = 0;
-        removeCount(3, dif);
+        ammo.active[wheelLoc] += ammo.mediumStorage;
+        ammo.mediumStorage -= ammo.mediumStorage;
+        removeCount(3, ammo.mediumStorage);
+
+      }
+    }
+    if (missingReserv > 0)
+    {
+      if (ammo.mediumStorage >= missingReserv)
+      {
+        ammo.reserves[wheelLoc] = w->ammoReserves;
+        ammo.mediumStorage -= missingReserv;
+        removeCount(3, missingReserv);
+
+      }
+      else
+      {
+        ammo.reserves[wheelLoc] += ammo.mediumStorage;
+        ammo.mediumStorage -= ammo.mediumStorage;
+        removeCount(3, ammo.mediumStorage);
+
       }
     }
     break;
   case 2:
     if (ammo.heavyStorage == 0)
       break;
-    if (ammo.heavyStorage > w->ammoReserves + w->ammo)
+    if (missingActive > 0)
     {
-      ammo.active[wheelLoc] = w->ammo;
-      ammo.reserves[wheelLoc] = w->ammoReserves;
-      ammo.heavyStorage -= w->ammo + w->ammoReserves;
-      removeCount(4, w->ammo + w->ammoReserves);
-    }
-    else
-    {
-      int dif = ammo.heavyStorage - w->ammo;
-      if (dif < 0)
+      if (ammo.heavyStorage >= missingActive)
       {
-        ammo.active[wheelLoc] = ammo.heavyStorage;
-        removeCount(4, ammo.heavyStorage);
-        ammo.heavyStorage = 0;
-
-        break;
+        ammo.active[wheelLoc] = w->ammo;
+        ammo.heavyStorage -= missingActive;
+        removeCount(4, missingActive);
       }
       else
       {
-        ammo.active[wheelLoc] = w->ammo;
-        ammo.reserves[wheelLoc] = dif;
-        ammo.heavyStorage = 0;
-        removeCount(4, dif);
+        ammo.active[wheelLoc] += ammo.heavyStorage;
+        ammo.heavyStorage -= ammo.heavyStorage;
+        removeCount(4, ammo.heavyStorage);
+
+      }
+    }
+    if (missingReserv > 0)
+    {
+      if (ammo.heavyStorage >= missingReserv)
+      {
+        ammo.reserves[wheelLoc] = w->ammoReserves;
+        ammo.heavyStorage -= missingReserv;
+        removeCount(4, missingReserv);
+
+      }
+      else
+      {
+        ammo.reserves[wheelLoc] += ammo.heavyStorage;
+        ammo.heavyStorage -= ammo.heavyStorage;
+        removeCount(4, ammo.heavyStorage);
+
       }
     }
     break;
@@ -180,20 +208,20 @@ void reloadFromStorage(int wheelLoc)
 
 void swatchActive(int i, player *pl) 
 {
-  if (i != selected && itemWheel[i] != NULL)
+  if (i != selected && itemWheel[i].itemId != -1)
     selected = i;
-  if (pl->weapon != NULL && itemWheel[i] != NULL)
+  if (pl->weapon != NULL && itemWheel[i].itemId != -1)
   {
     free(pl->weapon);
     pl->weapon = malloc(1 * sizeof(weaponData));
-    pl->weapon = setStats(pl->weapon, itemWheel[i]->itemId);
-    pl->weapon->damage += nthPower(1.25, itemWheel[selected]->subID);
+    pl->weapon = setStats(pl->weapon, itemWheel[i].itemId);
+    pl->weapon->damage += nthPower(1.25, itemWheel[selected].subID);
   }
-  else if (pl->weapon == NULL && itemWheel[i] != NULL) 
+  else if (pl->weapon == NULL && itemWheel[i].itemId != -1) 
   {
     pl->weapon = malloc(1 * sizeof(weaponData));
-    pl->weapon = setStats(pl->weapon, itemWheel[i]->itemId);
-    pl->weapon->damage += nthPower(1.25, itemWheel[selected]->subID);
+    pl->weapon = setStats(pl->weapon, itemWheel[i].itemId);
+    pl->weapon->damage += nthPower(1.25, itemWheel[selected].subID);
 
   }
 }
@@ -207,76 +235,85 @@ int addToWheel(InvItem* toAdd, int position, int index)
 {
   if (toAdd->type != 0)
     return -1;
-  if (itemWheel[position] != NULL)
+  // if the wheel item is not illegal
+  if (itemWheel[position].itemId != -1)
   {
-    if (toAdd != invhead)
-      itemWheel[position]->next = invhead;
-    else
-      itemWheel[position]->next = invhead->next;
-    invhead = itemWheel[position];
-    itemWheel[position] = toAdd;
-    toAdd->next = NULL;
-    reloadFromStorage(position);
+    // swap item positions
+    InvItem temp = *toAdd;
+    memcpy_s(toAdd, sizeof(InvItem), &itemWheel[position], sizeof(InvItem));
+    memcpy_s(&itemWheel[position], sizeof(InvItem),&temp , sizeof(InvItem));
     if (position == selected)
     {
       selected = -1;
       swatchActive(position, returnPlayer());
     }
+
   }
   else 
   {
-    itemWheel[position] = toAdd;
-    removeItem(index);
-    toAdd->next = NULL;
-    reloadFromStorage(position);
+    memcpy_s(&itemWheel[position], sizeof(InvItem), toAdd, sizeof(InvItem));
     invSelected = -1;
   }
+  reloadFromStorage(position);
+  removeItem(index);
 
-  
   return 0;
 }
 
 int removeFromWheel(int position) 
 {
-  if (itemWheel[position] == NULL)
-    return -1;
-
-  itemWheel[position]->next = invhead;
-  invhead = itemWheel[position];
-  itemWheel[position] = NULL;
-  return 0;
+  int i = 0;
+  while (i < MAX_INV_ITEMS)
+  {
+    if (invhead[i].itemId == -1) 
+    {
+      memcpy_s(&invhead[i], sizeof(InvItem), &itemWheel[position], sizeof(InvItem));
+      memset(&itemWheel[position], -1, sizeof(InvItem));
+      return 0;
+    }
+    i++;
+  }
+  return -1;
 }
 
 InvItem* addItem(const char id, const int count)
 {
-  InvItem* newItem = invhead;
-  while (newItem)
+  int i = 0;
+  while (i < MAX_INV_ITEMS) 
   {
-    if (newItem->stackable && newItem->itemId == id)
+    if (invhead[i].itemId == id)
     {
-      newItem->count += count;
-      return newItem;
+      if (invhead[i].stackable == true)
+        invhead[i].count += count;
+      else
+      {
+        while (i < MAX_INV_ITEMS && invhead[i].itemId != -1) i++;
+        invhead[i] = returnStats(id);
+
+      }
+      return &invhead[i];
     }
-    newItem = newItem->next;
+    
+    i++;
   }
-  if (invSelected != -1)
-    invSelected++;
-  newItem = (InvItem*)malloc(1 * sizeof(InvItem));
-  if (newItem == NULL)
-    return NULL;
-  (*newItem) = returnStats(id);
-  if (newItem->itemId == -1)
-    return NULL;
-  newItem->next = invhead;
-  invhead = newItem;
-  if (count != 1)
-    newItem->count = count;
-  return newItem;
+  i = 0;
+  while (i < MAX_INV_ITEMS) 
+  {
+    if (invhead[i].itemId == -1)
+    {
+      invhead[i] = returnStats(id);
+      invhead[i].count = count;
+      return &invhead[i];
+    }
+    i++;
+  }
+
+  return NULL;
 }
 
-int destructWeapon(InvItem* wep, int index) 
+int destructWeapon(int index) 
 {
-  weaponData wd = *setStats(&wd, wep->itemId);
+  weaponData wd = *setStats(&wd, invhead[index].itemId);
   int count = 0;
   switch (wd.ammoType) 
   {
@@ -290,90 +327,33 @@ int destructWeapon(InvItem* wep, int index)
     count = 12;
     break;
   }
-  InvItem* a = addItem(5, count);
-  if (a != returnHead()) 
-  {
-    InvItem* l = returnItemAtPos(index);
-    removeItem(index);
-    freeItem(l);
-  }
-  else if (a == returnHead())
-  {
-    InvItem* l = returnItemAtPos(index + 1);
-    removeItem(index + 1);
-    freeItem(l);
-  }
-    
+  removeItem(index);
+  addItem(5, count);
   invSelected = -1;
   return count;
 }
 
 int removeCount(int id, int count) 
 {
-  InvItem* current = invhead;
-  InvItem* last = invhead;
-  if (current == NULL)
-    return -1;
+
   int i = 0;
-  while (current) 
+  while (i < MAX_INV_ITEMS) 
   {
-    if (current->itemId == id) 
+    if (invhead[i].itemId == id) 
     {
-      current->count -= count;
-      if (current->count <= 0)
-      {
-        
-        InvItem* this = current;
-        if (this == invhead)
-          invhead = current->next;
-        last->next = current->next;
-        current = current->next;
-        freeItem(this);
-        return 1;
-      }
-      break;
+      invhead[i].count -= count;
+      if (invhead[i].count <= 0)
+        removeItem(i);
+      return 0;
     }
     i++;
-    current = current->next;
   }
-  return 0;
+  return -1;
 }
 
 int removeItem(int index) 
 {
-  InvItem* current = invhead;
-  InvItem* previos = invhead;
-  if (current == NULL)
-    return -1;
-  int i = 0; 
-  while (current)
-  {
-    if (i++ == index)
-    {
-      if (current == invhead)
-      {
-        invhead = current->next;
-      }
-      else
-      {
-        previos->next = current->next;
-      }
-      break;
-    }
-    previos = current;
-    current = current->next;
-
-  }
-
-  return 0;
-}
-
-int freeItem(InvItem* toFree) 
-{
-  if (toFree == NULL)
-    return -1;
-
-  free(toFree);
+  memset(&invhead[index], -1, sizeof(InvItem));
   return 0;
 }
 
@@ -400,7 +380,6 @@ InvItem returnStats(const char id)
     i.durability = INFINITY;
     i.type = 0;
     i.name = "Pistol";
-    i.next = NULL;
     i.count = 1;
     i.stackable = false;
     break;
@@ -410,7 +389,6 @@ InvItem returnStats(const char id)
     i.durability = 100;
     i.type = 0;
     i.name = "Assult Rifle";
-    i.next = NULL;
     i.count = 1;
     i.stackable = false;
     break;
@@ -420,7 +398,6 @@ InvItem returnStats(const char id)
     i.durability = INFINITY;
     i.type = 1;
     i.name = "Light Ammo";
-    i.next = NULL;
     i.count = 1;
     i.stackable = true;
     break;
@@ -430,7 +407,6 @@ InvItem returnStats(const char id)
     i.durability = INFINITY;
     i.type = 1;
     i.name = "Medium Ammo";
-    i.next = NULL;
     i.count = 1;
     i.stackable = true;
     break;
@@ -440,7 +416,6 @@ InvItem returnStats(const char id)
     i.durability = INFINITY;
     i.type = 1;
     i.name = "Heavy Ammo";
-    i.next = NULL;
     i.count = 1;
     i.stackable = true;
     break;
@@ -450,7 +425,6 @@ InvItem returnStats(const char id)
     i.durability = INFINITY;
     i.type = 2;
     i.name = "Weapon Parts";
-    i.next = NULL;
     i.count = 1;
     i.stackable = true;
     break;
@@ -460,7 +434,6 @@ InvItem returnStats(const char id)
     i.durability = INFINITY;
     i.type = 2;
     i.name = "Kit Parts";
-    i.next = NULL;
     i.count = 1;
     i.stackable = true;
     break;
@@ -470,7 +443,6 @@ InvItem returnStats(const char id)
     i.durability = INFINITY;
     i.type = 2;
     i.name = "Ammo Parts";
-    i.next = NULL;
     i.count = 1;
     i.stackable = true;
     break;
@@ -480,7 +452,6 @@ InvItem returnStats(const char id)
     i.durability = INFINITY;
     i.type = 3;
     i.name = "Heakth Kit";
-    i.next = NULL;
     i.count = 1;
     i.stackable = true;
     break;
@@ -490,7 +461,6 @@ InvItem returnStats(const char id)
     i.durability = 75;
     i.type = 0;
     i.name = "Mini Shotty";
-    i.next = NULL;
     i.count = 1;
     i.stackable = false;
     break;
@@ -500,7 +470,6 @@ InvItem returnStats(const char id)
     i.durability = 20;
     i.type = 0;
     i.name = "RPG M99LX";
-    i.next = NULL;
     i.count = 1;
     i.stackable = false;
     break;
@@ -515,25 +484,17 @@ InvItem returnStats(const char id)
 
 InvItem* returnHead(void)
 {
-  return invhead;
+  return &invhead[0];
 }
 
 InvItem* returnItemAtPos(int i)
 {
-  InvItem* temp = invhead;
-  for (int j = 0; j < i; j++)
-  {
-    if (temp->next != NULL)
-      temp = temp->next;
-    else
-      break;
-  }
-  return temp;
+  return &invhead[i];
 }
 
-InvItem* ((*returnWheel(void))[WHEEL_SIZE])
+InvItem *returnWheel(void)
 {
-  return &itemWheel;
+  return &itemWheel[0];
 }
 
 wheelAmmo* retAmmo(void)

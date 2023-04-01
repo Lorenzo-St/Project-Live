@@ -47,6 +47,7 @@ void initSliders(void)
       audioSliders[i].y = SCREEN_HEIGHT / 3.0f;
       audioSliders[i].length = SCREEN_WIDTH / 5.0f;
       audioSliders[i].value = GetSounds();
+
       break;
     case 1:
       snprintf(audioSliders[i].title, sizeof audioSliders[i].title, "Music");
@@ -54,6 +55,8 @@ void initSliders(void)
       audioSliders[i].y = SCREEN_HEIGHT / 3.0f + 200;
       audioSliders[i].length = SCREEN_WIDTH / 5.0f;
       audioSliders[i].value = GetMusic();
+      CP_Sound_SetGroupVolume(CP_SOUND_GROUP_1, audioSliders[i].value);
+
       break;
     }
   }
@@ -362,11 +365,9 @@ void drawSubScreen(void)
             SetFullScreen(false);
             break;
           case 5:
-            if(getColorMode() != LightMode)
               setColorMode(LightMode);
             break;
           case 6:
-            if (getColorMode() != DarkMode)
               setColorMode(DarkMode);
             break;
           }

@@ -5,6 +5,7 @@
 #include "playerInv.h"
 #include "drawStuff.h"
 #include "globalData.h"
+#include "gameLoop.h"
 #include "mathLib.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -21,6 +22,42 @@ typedef struct returnStruct
 }returnStruct;
 
 returnStruct wallsChecks[5] = { 0 };
+
+CP_Vector checkLineCollision(CP_Vector* Line1Start, CP_Vector* Line1End, CP_Vector* Line2Start, CP_Vector* Line2End) 
+{
+  CP_Vector result = returnPlayer()->pos;
+  CP_Vector line1;
+  Vector2DSub(&line1, Line1End, Line1Start);
+  CP_Vector line1Normal = { line1.y, -line1.x };
+  Vector2DSub(&line1, Line2End, Line2Start);
+  if (Vector2DDot(&line1, &line1Normal) == 0)
+    return result;
+  if (Vector2DDot(&line1Normal, Line2Start) <= Vector2DDot(&line1Normal, Line1Start) && Vector2DDot(&line1Normal, Line2End) < Vector2DDot(&line1Normal, Line1Start))
+    return result;
+  if (Vector2DDot(&line1Normal, Line2Start) >= Vector2DDot(&line1Normal, Line1Start) && Vector2DDot(&line1Normal, Line2End) > Vector2DDot(&line1Normal, Line1Start))
+    return result;
+
+  float ti = Vector2DDot(&line1Normal, Line1Start) - Vector2DDot(&line1Normal, Line2Start);
+  ti /= Vector2DDot(&line1Normal, &line1);
+
+  Vector2DScaleAdd(&result, &line1, Line2Start, ti);
+  return result;
+}
+
+
+void verifyEnemyCount(enemy* e)
+{
+  int count = 0;
+  int i = 0;
+  while (i < MAX_ENEMIES)
+  {
+    if((e + i)->alive)
+      count++;
+    i++;
+  }
+  while (getAlive() > count)
+    decreaseAlive();
+}
 
 bool checkMouseBoxCollide(float x, float y, float width, float height) 
 {
@@ -131,6 +168,7 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
       {
       case KEY_R:
         reloadFromReserves();
+        reloadFromStorage(returnSelected());
         pl->weapon->reloadClock = pl->weapon->reloadTime;
         break;
 #ifdef _DEBUG
@@ -206,8 +244,8 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
     }
   }
   
-  pl->x += (pl->velocity.x * *multiplier) * (check == 0 || check == 2 );
-  pl->y += (pl->velocity.y * *multiplier) * (check == 0 || check == 1 );
+  pl->pos.x += (pl->velocity.x * *multiplier) * (check != 1 && check != 3 );
+  pl->pos.y += (pl->velocity.y * *multiplier) * (check != 2 && check != 3 );
   return errored;
 }
 
@@ -219,7 +257,7 @@ int checkItems(item *items, player *pl, enemy *en, notiString *pickupText)
   {
     if (items[i].active == 0)
       continue;
-    float distance = sqrtf((items[i].x - pl->x) * (items[i].x - pl->x) + (items[i].y - pl->y) * (items[i].y - pl->y));
+    float distance = sqrtf((items[i].x - pl->pos.x) * (items[i].x - pl->pos.x) + (items[i].y - pl->pos.y) * (items[i].y - pl->pos.y));
     unsigned char id;
     if (distance < pl->playerRadius + items[i].radius)
     {
@@ -246,7 +284,7 @@ int checkItems(item *items, player *pl, enemy *en, notiString *pickupText)
         count = items[i].containes;
         break;
       }
-      if(j)
+      if(!j || j->itemId != -1 || j->count != -1)
         addPickup(&items[i],j ,pickupText, count);
       items[i].active = 0;
     }
@@ -272,7 +310,7 @@ bool checkInsideBuilding(building* buildings, int which, ...)
       building* b = buildings + i;
       if (b->w == 0 || b->h == 0)
         continue;
-      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, p->x, p->y, p->playerRadius);
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, p->pos.x, p->pos.y, p->playerRadius);
       if (rc.value)
         return 1;
     
@@ -285,9 +323,9 @@ bool checkInsideBuilding(building* buildings, int which, ...)
       building* b = buildings + i;
       if (b->w == 0 || b->h == 0)
         continue;
-      if (b->x - e->x > SCREEN_WIDTH / 2.0f || b->y - e->y > SCREEN_HEIGHT / 2.0f)
+      if (b->x -e->pos.x > SCREEN_WIDTH / 2.0f || b->y -e->pos.y > SCREEN_HEIGHT / 2.0f)
         continue;
-      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, e->x, e->y, e->radius/2.0f);
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h,e->pos.x,e->pos.y, e->radius/2.0f);
       if (rc.value)
         return 1;
 
@@ -343,7 +381,7 @@ void CheckCollsionWithBuilding(building* b, float x, float y, float r)
 
 }
 
-bool checkAgainstBuilding(building* buildings, int which, ...)
+int checkAgainstBuilding(building* buildings, int which, ...)
 {
   int buil = grabBuildingNumb();
   va_list v;
@@ -360,13 +398,13 @@ bool checkAgainstBuilding(building* buildings, int which, ...)
         continue;
       returnStruct rc;
 
-      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, p->x, p->y, p->playerRadius);
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, p->pos.x, p->pos.y, p->playerRadius);
       if (rc.value == true)
       {
         float distance = sqrtf(rc.x2 * rc.x2 + rc.y2 * rc.y2);
-        if (sqrtf(((p->x + (p->velocity.x)) - rc.x1) * ((p->x + (p->velocity.x)) - rc.x1) + rc.y2 * rc.y2) < distance)
+        if (sqrtf(((p->pos.x + (p->velocity.x)) - rc.x1) * ((p->pos.x + (p->velocity.x)) - rc.x1) + rc.y2 * rc.y2) < distance)
           result += 1;
-        if (sqrtf(((p->y + (p->velocity.y)) - rc.y1) * ((p->y + (p->velocity.y)) - rc.y1) + rc.x2 * rc.x2) < distance)
+        if (sqrtf(((p->pos.y + (p->velocity.y)) - rc.y1) * ((p->pos.y + (p->velocity.y)) - rc.y1) + rc.x2 * rc.x2) < distance)
           result += 2;
       }
 
@@ -381,13 +419,13 @@ bool checkAgainstBuilding(building* buildings, int which, ...)
         continue;
       returnStruct rc;
 
-      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, e->x, e->y, e->radius / 2.0f);
+      rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h,e->pos.x,e->pos.y, e->radius / 2.0f);
       if (rc.value == true)
       {
         float distance = sqrtf(rc.x2 * rc.x2 + rc.y2 * rc.y2);
-        if (sqrtf(((e->x + e->dir.x * CP_System_GetDt()) - rc.x1) * ((e->x + e->dir.x * CP_System_GetDt() - rc.x1) + rc.y2 * rc.y2)) < distance)
+        if (sqrtf(((e->pos.x + e->dir.x * CP_System_GetDt()) - rc.x1) * ((e->pos.x + e->dir.x * CP_System_GetDt() - rc.x1) + rc.y2 * rc.y2)) < distance)
           result += 1;
-        if (sqrtf(((e->y + e->dir.y * CP_System_GetDt()) - rc.y1) * ((e->y + e->dir.y * CP_System_GetDt() - rc.y1) + rc.x2 * rc.x2)) < distance)
+        if (sqrtf(((e->pos.y + e->dir.y * CP_System_GetDt()) - rc.y1) * ((e->pos.y + e->dir.y * CP_System_GetDt() - rc.y1) + rc.x2 * rc.x2)) < distance)
           result += 2;
 
       }

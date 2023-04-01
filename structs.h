@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 static int playerKeys[] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPACE, KEY_E, KEY_I, KEY_Q, KEY_R, KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN, KEY_LEFT_CONTROL };
+int getMaxEnemies(void);
 
 /* |----------------------- Defines  ---------------------------| */
-#define MAX_ENEMIES 100
 #define MAX_BULLETS 500
+#define MAX_ENEMIES getMaxEnemies()
 #define MAX_DROPS 10
 #define MAX_ITEMS 6
 #define KEY_COUNT _countof(playerKeys)
@@ -29,6 +30,7 @@ static int playerKeys[] = { KEY_W, KEY_A, KEY_S, KEY_D, KEY_LEFT_SHIFT, KEY_SPAC
 #define LIGHT_WEAPONS 2
 #define MAX_OBJECTIVES 1
 #define WINDOW_SIZE 1920, 1080
+#define MAX_INV_ITEMS 100
 
  /* Crafting numbers */
 #define SMALL_T_MED_COMB 25
@@ -104,12 +106,13 @@ typedef struct weaponData
 typedef struct player
 {
   int health;
+  int maxHealth;
   int kills;
   int powerUp; /* 0: no powerup, 1: insta kill, 2: RAPID FIRE, 3: FULL HEAL, 4: SCREEN WIPE, 5: INVINCIBILITY, 6: TIME WARP (WIP)  */
   float playerRadius;
   float cooldown;
   float move_speed;
-  float x, y;
+  CP_Vector pos;
   CP_Vector direction;
   CP_Vector velocity;
   float rot;
@@ -166,7 +169,6 @@ typedef struct invItem
   bool stackable;
   int count;
   float durability;
-  struct invItem* next;
 }InvItem;
 
 typedef struct item
@@ -182,20 +184,19 @@ typedef struct item
 
 typedef struct enemy
 {
-  float x;
-  float y;
+  CP_Vector pos;
   float cooldown;
   CP_Vector dir;
   float speed;
   float radius;
+  int OOBCOunt;
   int health;
   int MaxHealth;
   int type; /*0 is basic, 1 is rapid fire, 2 is boss*/
   int lvl;
   /* Only Used with boses */
   int pattern;
-  struct enemy* next;
-
+  bool alive;
 }enemy;
 
 typedef struct notiString
@@ -206,7 +207,7 @@ typedef struct notiString
   char buffer[100];
 }notiString;
 
-typedef struct wheelAmmo 
+typedef struct wheelAmmo
 {
   int active[WHEEL_SIZE];
   int reserves[WHEEL_SIZE];
@@ -217,6 +218,5 @@ typedef struct wheelAmmo
 
 
 /* |----------------------- Gloabals ---------------------------| */
-
 
 
