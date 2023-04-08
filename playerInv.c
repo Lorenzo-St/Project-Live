@@ -14,7 +14,7 @@ int invSelected = -1;
 
 void resetHead(void) 
 {
-  memset(invhead,   -1, sizeof(InvItem) * MAX_INV_ITEMS);
+  memset(invhead, -1, sizeof(InvItem) * (MAX_INV_ITEMS));
 
 }
 

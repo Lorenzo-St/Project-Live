@@ -332,6 +332,9 @@ void gameLoopExit(void)
   freeImages();
   releaseScrollable();
   resetHead();
-  if (enHead)
+  if (enHead) 
+  {
     free(enHead);
+    enHead = NULL;
+  }
 }
