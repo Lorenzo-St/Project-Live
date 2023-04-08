@@ -4,6 +4,7 @@
 #include "addStuff.h"
 #include "gameLoop.h"
 #include "Sound.h"
+#include "drawStuff.h"
 #include <math.h>
 
 bullet* setBulletStats(bullet* thisOne, float dir[2], int user, float pl[2])
@@ -112,14 +113,16 @@ int bossPatterns(enemy boss, player pl, bullet **bullets)
   return 0;
 }
 
-int playerFire(player pl, bullet **bullets)
+int playerFire(const player* pl, bullet **bullets)
 {
   float dir[2] = { 0,0 };
   float magnitude = 0;
   float angle = 0;
   bullet* thisOne;
-  if (pl.weapon->reloadClock > 0)
+  if (pl->weapon->reloadClock > 0) 
+  {
     return 1;
+  }
   if (returnInvSel())
     return 0;
   if (retAmmo()->active[returnSelected()]-- <= 0)
@@ -127,16 +130,11 @@ int playerFire(player pl, bullet **bullets)
     
     retAmmo()->active[returnSelected()] = 0;
     reloadFromReserves();
+    pl->weapon->reloadClock = pl->weapon->reloadTime;
     return -1;
   }
 
-  if (((returnWheel())[returnSelected()].durability -= (CP_Random_RangeInt(0, 100) > 75))  <= 0) 
-  {
-    removeFromWheel(returnSelected());
-    removeItem(0);
-  }
-
-  switch (pl.weapon->pattern) 
+  switch (pl->weapon->pattern) 
   {
   case 0:
     dir[0] = (CP_Input_GetMouseX() - SCREEN_WIDTH / 2.0f);
@@ -145,11 +143,11 @@ int playerFire(player pl, bullet **bullets)
     dir[0] /= magnitude;
     dir[1] /= magnitude;
     thisOne = addBullet(bullets);
-    thisOne = setBulletStats(thisOne, dir, 1, (float[2]) { pl.pos.x, pl.pos.y });
+    thisOne = setBulletStats(thisOne, dir, 1, (float[2]) { pl->pos.x, pl->pos.y });
     if (thisOne == NULL)
       return -1;
-    thisOne->pwr = pl.weapon->damage;
-    thisOne->speed = pl.weapon->bulletSpeed;
+    thisOne->pwr = pl->weapon->damage;
+    thisOne->speed = pl->weapon->bulletSpeed;
     break;
   case 1:
     for (int k = 0; k < SPREAD_COUNT; k++)
@@ -161,16 +159,16 @@ int playerFire(player pl, bullet **bullets)
       dir[0] /= magnitude;
       dir[1] /= magnitude;
       thisOne = addBullet(bullets);
-      thisOne = setBulletStats(thisOne, dir, 1, (float[2]) { pl.pos.x, pl.pos.y });
+      thisOne = setBulletStats(thisOne, dir, 1, (float[2]) { pl->pos.x, pl->pos.y });
       if (thisOne == NULL)
         return -1;
-      thisOne->pwr = pl.weapon->damage;
-      thisOne->speed = pl.weapon->bulletSpeed;
+      thisOne->pwr = pl->weapon->damage;
+      thisOne->speed = pl->weapon->bulletSpeed;
     }
     break;
   }
 
-  CP_Sound s = getWeaponSounds(pl.weapon->type, (returnWheel())[returnSelected()].itemId);
+  CP_Sound s = getWeaponSounds(pl->weapon->type, (returnWheel())[returnSelected()].itemId);
   CP_Sound_Play(s);
   return 0;
 }

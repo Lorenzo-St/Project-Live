@@ -103,7 +103,7 @@ extern "C"
     read.open(converted_str, std::ios_base::in);
 
     if (read.is_open() == false)
-      return;
+      goto end;
     std::string token;
     while (!read.eof()) 
     {
@@ -177,13 +177,15 @@ extern "C"
 
     }
 
-
+    end:
     if (read.is_open())
       read.close();
     if(profile.fullScreen)
       CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
-    else
+    else if(profile.windowSize.x != 0 && profile.windowSize.y != 0)
       CP_System_SetWindowSize((int)profile.windowSize.x, (int)profile.windowSize.y);
+    else
+      CP_System_SetWindowSize(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
 
   }
 

@@ -41,6 +41,7 @@ bool bossesEnabled = false;
 bool invOpen = false;
 bool wheelOpen = false;
 bool invHovered = false;
+bool boxClosed = false;
 
 /* standard Data*/
 int screen = 0;
@@ -124,6 +125,7 @@ void gameLoopInit(void)
 
   generateWorld();
 
+  boxClosed = false;
 
   buildings = returnBuildings();
   initAudio(bulletSounds);
@@ -189,18 +191,41 @@ void gameLoopUpdate(void)
   drawItems(items,c);
   drawPickupText(pickupText,c);
   drawObjectiveBoard();
-  
+  if (boxClosed == false) 
+  {
+    CP_Settings_Fill(WHITE);
+    CP_Settings_Stroke(BLACK);
+    CP_Settings_StrokeWeight(5);
 
+    CP_Graphics_DrawRectAdvanced(SCREEN_WIDTH / 2.0f + 100 * (SCREEN_WIDTH / 1920.0f), SCREEN_HEIGHT / 2.0f - 100.0f * (SCREEN_WIDTH / 1920.0f), 700 * (SCREEN_WIDTH / 1920.0f), 200 * (SCREEN_WIDTH / 1920.0f), 0, 10);
+    CP_Settings_TextSize(25 * (SCREEN_WIDTH / 1920.0f));
+    CP_Settings_Fill(BLACK);
+    CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_LEFT, CP_TEXT_ALIGN_V_MIDDLE);
+    CP_Font_DrawText("Hey there!", SCREEN_WIDTH / 2.0f - 230 * (SCREEN_WIDTH / 1920.0f), SCREEN_HEIGHT / 2.0f - 170.0f * (SCREEN_WIDTH / 1920.0f));
+    CP_Font_DrawText("A lot of enemies are on the way!", SCREEN_WIDTH / 2.0f - 230 * (SCREEN_WIDTH / 1920.0f), SCREEN_HEIGHT / 2.0f - 150.0f * (SCREEN_WIDTH / 1920.0f));
+    CP_Font_DrawText("You'll need to collect what they drop to improve your stuff", SCREEN_WIDTH / 2.0f - 230 * (SCREEN_WIDTH / 1920.0f), SCREEN_HEIGHT / 2.0f - 130.0f * (SCREEN_WIDTH / 1920.0f));
+    CP_Font_DrawText("Use \"E\" to access your inventory", SCREEN_WIDTH / 2.0f - 230 * (SCREEN_WIDTH / 1920.0f), SCREEN_HEIGHT / 2.0f - 110.0f * (SCREEN_WIDTH / 1920.0f));
+    CP_Font_DrawText("Use \"Q\" to access your weapon wheel", SCREEN_WIDTH / 2.0f - 230 * (SCREEN_WIDTH / 1920.0f), SCREEN_HEIGHT / 2.0f - 90.0f * (SCREEN_WIDTH / 1920.0f));
+    CP_Font_DrawText("You can upgrade your equiped weapons with any parts you find", SCREEN_WIDTH / 2.0f - 230 * (SCREEN_WIDTH / 1920.0f), SCREEN_HEIGHT / 2.0f - 70.0f * (SCREEN_WIDTH / 1920.0f));
+    CP_Settings_TextSize(20 * (SCREEN_WIDTH / 1920.0f));
+    CP_Font_DrawText("press anything to continue...", SCREEN_WIDTH / 2.0f - 230 * (SCREEN_WIDTH / 1920.0f), SCREEN_HEIGHT / 2.0f - 40.0f * (SCREEN_WIDTH / 1920.0f));
+
+    CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
+
+    if (CP_Input_KeyDown(KEY_ANY) || CP_Input_MouseDown(MOUSE_BUTTON_1))
+      boxClosed = true;
+    return;
+  }
   if (invOpen)
     invHovered = drawInventory(returnHead());
   else
     invHovered = false;
 
-  if (wheelOpen)
+  if (wheelOpen) 
     drawWheel(&pl);
   
   drawAmmo(&pl, invOpen, wheelOpen );
-  if (getPause())
+  if (getPause() && boxClosed)
     return;
   addTime(CP_System_GetDt());
 
@@ -248,7 +273,7 @@ void gameLoopUpdate(void)
         type = CP_Random_RangeInt(0, ENEMY_TYPE);
 
         newest = setEnemyStats(addEnemy(enHead), c, type, wave);
-        if (checkInsideBuilding(buildings, 1, enHead))
+        if (checkInsideBuilding(buildings, 1, newest))
         {
           removeEnemy(newest);
         }
@@ -269,8 +294,8 @@ void gameLoopUpdate(void)
     }
     if (enemiesAlive == enemiesPerWave) 
     {
-      float wCheck = ((wave - 2.0f) >= 0) ? wave - 2.0f : 0;
-      enemiesPerWave += (int)(3.0f * (1.0f + sqrtf(wCheck)));
+      float wCheck = ((wave - 2.0f) > 0) ? wave - 2.0f : 0;
+      enemiesPerWave += (int)(3.0f * (1.0f + (cbrtf(wCheck))/(wCheck != 0 ? wCheck : 1)));
       if (enemiesPerWave > MAX_ENEMIES) 
       {
         enemy* temp = realloc(enHead, (enemiesPerWave * 2) * sizeof(enemy));
@@ -284,6 +309,11 @@ void gameLoopUpdate(void)
           enemiesPerWave = maximumEnemies;
         }
       }
+      for (int i = enemiesAlive; i < maximumEnemies; i++) 
+      {
+        *(enHead + i) = (enemy){ 0 };
+      }
+        
       addTimer = 5.0f;
       pl.maxHealth += (int)(10 * (1 + wave / 100.0f));
       wave++;
@@ -303,11 +333,22 @@ void gameLoopUpdate(void)
     pl.powerUp = 0;
   CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
   CP_Settings_TextSize(100);
-  if (pl.weapon->reloadClock > 0)
+  if (pl.weapon->reloadClock > 0) 
+  {
+    const float reloadPercent =  (pl.weapon->reloadTime - pl.weapon->reloadClock) / pl.weapon->reloadTime;
+    for (float i = 0; i < 360 * reloadPercent; i += 60)
+    {
+      CP_Settings_Fill(CP_Color_CreateHex(0xa8bbd9ff));
+      CP_Settings_StrokeWeight(2);
+      drawArc(i, i + 61, CP_Input_GetMouseX(), CP_Input_GetMouseY(), 30);
+    }
     pl.weapon->reloadClock -= CP_System_GetDt();
+  }
   else if (pl.weapon->reloadClock < 0)
     pl.weapon->reloadClock = 0;
-#if _DEBUG && 0
+#if _DEBUG && 1
+  if (CP_Input_KeyTriggered('K'))
+    addItem(6, 1);
   drawDebugInfo(&pl, enHead);
   CP_Settings_TextSize(80);
   CP_Settings_Fill(BLACK);

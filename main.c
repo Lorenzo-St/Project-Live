@@ -77,7 +77,7 @@ void postUpdate(void)
    C = WHITE;
   CP_Settings_Fill(C);
   CP_Graphics_DrawRect(x, y, width, height);
-  drawWords("Resume!", x, y, 40, BLACK);
+  drawWords("Resume!", x, y, 40 * (SCREEN_WIDTH / 1920.0f), BLACK);
 
   y += height * 1.15f;
   if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), width, height))
@@ -94,7 +94,7 @@ void postUpdate(void)
     C = WHITE;
   CP_Settings_Fill(C);
   CP_Graphics_DrawRect(x, y, width, height);
-  drawWords("Options!", x, y, 40, BLACK);
+  drawWords("Options!", x, y, 40 * (SCREEN_WIDTH / 1920.0f), BLACK);
 
   y += height * 1.15f;
   if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), width, height))
@@ -112,7 +112,7 @@ void postUpdate(void)
     C = WHITE;
   CP_Settings_Fill(C);
   CP_Graphics_DrawRect(x, y, width, height);
-  drawWords("Main Menu!", x, y, 40, BLACK);
+  drawWords("Main Menu!", x, y, 40 * (SCREEN_WIDTH / 1920.0f), BLACK);
 
 }
 

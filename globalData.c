@@ -9,7 +9,7 @@ static bool isPaused = false;
 static bool inGame = false;
 static bool inOptions = false;
 static bool generated = false;
-static const char* const version = "0.6.2";
+static const char* const version = "0.6.4";
 static ColorMode colorMode = LightMode;
 
 ColorMode getColorMode(void) 

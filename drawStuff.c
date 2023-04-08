@@ -474,13 +474,17 @@ void checkClick(int click, int numb, int index)
     subsubsub = true;
     inContext = true;
     break;
-  case 8:; // Craft all
-    int count = item->count / BASE_KIT_COST;
+  case 8:;
+    int count;
+    if (item->count >= BASE_KIT_COST)
+    {// Craft all
+      count = item->count / BASE_KIT_COST;
 
-    removeCount(item->itemId, count * BASE_KIT_COST);
-    addItem(8, count);
-    subSub = false;
-    subsubsub = false;
+      removeCount(item->itemId, count * BASE_KIT_COST);
+      addItem(8, count);
+      subSub = false;
+      subsubsub = false;
+    }
     upgradeMicro = false;
     microOpen = false;
     showContext = false;

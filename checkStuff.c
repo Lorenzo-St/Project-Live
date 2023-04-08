@@ -133,8 +133,9 @@ void checkAlphanumericKeys(char* dest, int* pos, int max)
   }
   key = KEY_BACKSPACE;
   pressed = CP_Input_KeyDown(key);
-  if (pressed) 
+  if (pressed && *pos > 0) 
   {
+
     dest[--(*pos)] = '\0';
   }
 }
@@ -145,18 +146,18 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
   pl->velocity.y = 0.0f;
   int errored = 0;
   float velo = (pl->move_speed * CP_System_GetDt());
-  if (CP_Input_MouseTriggered(MOUSE_BUTTON_1)) 
+  if (CP_Input_MouseTriggered(MOUSE_BUTTON_1) && !*wheelOpen) 
   {
     if (pl->weapon->type == 2) 
     {
-      playerFire((*pl), bullets);
+      playerFire(pl, bullets);
     }
   }
-  if (CP_Input_MouseDown(MOUSE_BUTTON_1))
+  if (CP_Input_MouseDown(MOUSE_BUTTON_1) && !*wheelOpen)
   {
     if (pl->cooldown <= 0 && pl->weapon->type != 2)
     {
-      playerFire((*pl), bullets);
+      playerFire(pl, bullets);
       pl->cooldown = pl->weapon->attackSpeed;
     }
   }
@@ -201,7 +202,7 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
         break;
       case KEY_SPACE:
         if (pl->weapon->type == 2)
-          playerFire((*pl), bullets);
+          playerFire(pl, bullets);
         break;
       }
     }
@@ -236,7 +237,7 @@ bool checkKeys(player *pl, float *multiplier, bullet **bullets, bool* InvOpen, b
           break;
         if (pl->cooldown <= 0)
         {
-          playerFire((*pl), bullets);
+          playerFire(pl, bullets);
           pl->cooldown = pl->weapon->attackSpeed;
         }
         break;

@@ -433,7 +433,7 @@ void drawSubScreen(void)
     CP_Font_DrawText("Dash", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 300 * SCREEN_WIDTH / 1920.0f);
 
     CP_Font_DrawText("Shoot", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f);
-    CP_Font_DrawText("Aim", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 550 * SCREEN_WIDTH / 1920.0f);
+    CP_Font_DrawText("Aim (Move mouse)", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 550 * SCREEN_WIDTH / 1920.0f);
     CP_Settings_TextSize(20 * SCREEN_WIDTH / 1920.0f);
     CP_Font_DrawText("Left Mouse", xpos - 150 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f);
 
@@ -450,7 +450,15 @@ void drawSubScreen(void)
 void OptionsUpdate(void)
 {
   CP_Settings_TextSize(40  * (SCREEN_WIDTH / 1920.0f));
-  CP_Graphics_ClearBackground(CP_Color_CreateHex(0x111111ff));
+  switch (getColorMode()) 
+  {
+  case DarkMode:
+    CP_Graphics_ClearBackground(CP_Color_CreateHex(0x7494bfff));
+    break;
+  case LightMode:
+    CP_Graphics_ClearBackground(CP_Color_CreateHex(0xf2e7efff));
+    break;
+  }
   drawOptionsButtons();
   checkSliders();
   checkOptionsButtons();

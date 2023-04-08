@@ -26,10 +26,17 @@ void drawDebugInfo(player *pl, enemy *en)
   CP_Font_DrawText("Enemies", SCREEN_WIDTH - 100.0f, 50.0f);
   while(i < MAX_ENEMIES)
   {
+    if ((en + i)->alive)
+      CP_Settings_Fill(WHITE);
+    else
+      CP_Settings_Fill(RED);
+
     snprintf(buffer, 200, "%04.3f, %04.3f", (en + i)->dir.x, (en + i)->dir.y);
     CP_Font_DrawText(buffer, SCREEN_WIDTH - 100.0f, 60.0f+ (15 * i));
     i++;
   }
+  CP_Settings_Fill(WHITE);
+
   CP_Settings_Stroke(CP_Color_CreateHex(0xffed00ff));
   CP_Settings_StrokeWeight(5);
   //CP_Graphics_DrawLine(SCREEN_WIDTH/2.0f,SCREEN_HEIGHT / 2.0f, pl->direction[0] + SCREEN_WIDTH / 2.0f, (pl->direction[1]) + SCREEN_HEIGHT / 2.0f);
