@@ -1,0 +1,11 @@
+Pistol	0	0	0	false	1	INFINITY
+Assult Riffle	1	0	0	false	1	100
+Light Ammo	-1	0	1	true	1	INFINITY
+Medium Ammo	-1	0	1	true	1	INFINITY
+Heavy Ammo	-1	0	1	true	1	INFINITY
+Weapon Parts	-1	0	2	true	1	INFINITY
+Kit Parts	-1	0	2	true	1	INFINITY
+Ammo Parts	-1	0	2	true	1	INFINITY
+Health Kit	-1	0	3	true	1	INFINITY
+Mini Shotty	2	0	0	false	1	75
+RPG M99LX	3	0	0	false	1	20

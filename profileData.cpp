@@ -101,10 +101,10 @@ extern "C"
 
     std::ifstream read;
     read.open(converted_str, std::ios_base::in);
+    std::string token;
 
     if (read.is_open() == false)
       goto end;
-    std::string token;
     while (!read.eof()) 
     {
       std::getline(read, token);

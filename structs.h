@@ -162,8 +162,9 @@ typedef struct bullet
 
 typedef struct invItem 
 {
-  char* name;
+  const char* name;
   char itemId;
+  char weaponId;
   char subID;
   unsigned char type;/* 0 == weapon, 1 == light and medium ammo, 2 == materials, 3 == health kits, 4 == */
   bool stackable;
@@ -176,8 +177,7 @@ typedef struct item
   bool active;
   float x;
   float y;
-  int type;/*0 is health, 1 is weapon, 2 powerup*/
-  int containes; /*must be non zero, if its a health pickup then containes is how much health it containes, if its a weapon then containes is what weapon it is*/
+  char id;
   float life;
   float radius;
 }item;
@@ -185,8 +185,8 @@ typedef struct item
 typedef struct enemy
 {
   CP_Vector pos;
-  float cooldown;
   CP_Vector dir;
+  weaponData* weapon;
   float speed;
   float radius;
   int OOBCOunt;
@@ -194,8 +194,6 @@ typedef struct enemy
   int MaxHealth;
   int type; /*0 is basic, 1 is rapid fire, 2 is boss*/
   int lvl;
-  /* Only Used with boses */
-  int pattern;
   bool alive;
 }enemy;
 

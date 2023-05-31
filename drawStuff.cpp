@@ -1,3 +1,8 @@
+#include <vector>
+#define CPP
+extern "C" 
+{
+
 #include "drawStuff.h"
 #include "structs.h"
 #include "cprocessing.h"
@@ -75,7 +80,7 @@ void initScrollable(void)
 {
   button* current = NULL;
 
-  lightWeapons.buttons = malloc(LIGHT_WEAPONS * sizeof(button));
+  lightWeapons.buttons = reinterpret_cast<button*>(calloc(LIGHT_WEAPONS, sizeof(button)));
   current = lightWeapons.buttons;
   
   if (lightWeapons.buttons == NULL)
@@ -98,7 +103,7 @@ void initScrollable(void)
   
   lightWeapons.scrollPosition = 0;
   
-  mediumWeapons.buttons = malloc(MEDIUM_WEAPONS * sizeof(button));
+  mediumWeapons.buttons = reinterpret_cast<button*>(calloc(MEDIUM_WEAPONS, sizeof(button)));
   current = mediumWeapons.buttons;
   
   if (mediumWeapons.buttons == NULL)
@@ -119,7 +124,7 @@ void initScrollable(void)
   }
   mediumWeapons.scrollPosition = 0;
   
-  heavyWeapons.buttons = malloc(HEAVY_WEAPONS * sizeof(button));
+  heavyWeapons.buttons = reinterpret_cast<button*>(calloc(HEAVY_WEAPONS, sizeof(button)));
   current = heavyWeapons.buttons;
   
   if (heavyWeapons.buttons == NULL)
@@ -165,63 +170,71 @@ void drawPlayer(player pl, camera c)
 
 }
 
-void drawDirector(const enemy* en) 
+void drawDirector(std::vector<enemy> const& e)
 {
-  const CP_Vector playerPos = returnPlayer()->pos;
-  const CP_Vector topLeft =  { 0 };
-  const CP_Vector botLeft =  { 0 };
-  const CP_Vector botRight = { 0 };
-  const CP_Vector topRight = { 0 };
+   CP_Vector playerPos = returnPlayer()->pos;
+   CP_Vector topLeft = { 0 };
+   CP_Vector botLeft = { 0 };
+   CP_Vector botRight = { 0 };
+   CP_Vector topRight = { 0 };
+   CP_Vector screenCorners[4] = {
+  {-SCREEN_WIDTH / 2.0f,  SCREEN_HEIGHT / 2.0f},
+  { SCREEN_WIDTH / 2.0f,  SCREEN_HEIGHT / 2.0f},
+  {-SCREEN_WIDTH / 2.0f, -SCREEN_HEIGHT / 2.0f},
+  { SCREEN_WIDTH / 2.0f, -SCREEN_HEIGHT / 2.0f}
+  };
+
   CP_Settings_Fill(CP_Color_CreateHex(0x81A432FF));
-  Vector2DAdd(&topLeft,  &playerPos, &(CP_Vector){-SCREEN_WIDTH / 2.0f,  SCREEN_HEIGHT / 2.0f});
-  Vector2DAdd(&topRight, &playerPos, &(CP_Vector){ SCREEN_WIDTH / 2.0f,  SCREEN_HEIGHT / 2.0f});
-  Vector2DAdd(&botLeft,  &playerPos, &(CP_Vector){-SCREEN_WIDTH / 2.0f, -SCREEN_HEIGHT / 2.0f});
-  Vector2DAdd(&botRight, &playerPos, &(CP_Vector){ SCREEN_WIDTH / 2.0f, -SCREEN_HEIGHT / 2.0f});
+  Vector2DAdd(&topLeft ,  &playerPos, &screenCorners[0]);
+  Vector2DAdd(&topRight, &playerPos, &screenCorners[1]);
+  Vector2DAdd(&botLeft ,  &playerPos, &screenCorners[2]);
+  Vector2DAdd(&botRight, &playerPos, &screenCorners[3]);
   int i = 0;
-  while (i < MAX_ENEMIES) 
+  for(auto &enemy : e)
   {
-    enemy* e = en + i;
-    if (e->alive == false)
+    if (enemy.alive == false)
     {
       i++;
       continue;
     }
-    CP_Vector interPos = checkLineCollision(&botRight, &topRight, &playerPos, &e->pos);
+    CP_Vector pos = enemy.pos;
+    CP_Vector interPos = checkLineCollision(&botRight, &topRight, &playerPos, &pos);
+    CP_Vector halfScreen = { SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
     if (!Vector2DEquals(&interPos, &playerPos)) 
     {
       Vector2DSub(&interPos, &interPos, &playerPos);
       interPos.y *= -1;
-      Vector2DAdd(&interPos, &interPos, &(CP_Vector){SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f});
+      Vector2DAdd(&interPos, &interPos, &halfScreen);
       CP_Graphics_DrawCircle(interPos.x, interPos.y, 50);
       i++;
       continue;
     }
-    interPos = checkLineCollision(&topRight, &topLeft, &playerPos, &e->pos);
+    interPos = checkLineCollision(&topRight, &topLeft, &playerPos, &pos);
     if (!Vector2DEquals(&interPos, &playerPos))
     {
       Vector2DSub(&interPos, &interPos, &playerPos);
       interPos.y *= -1;
-      Vector2DAdd(&interPos, &interPos, &(CP_Vector){SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f});
+      Vector2DAdd(&interPos, &interPos, &halfScreen);
       CP_Graphics_DrawCircle(interPos.x, interPos.y, 50);
       i++;
       continue;
     }
-    interPos = checkLineCollision(&topLeft, &botLeft, &playerPos, &e->pos);
+    interPos = checkLineCollision(&topLeft, &botLeft, &playerPos, &pos);
     if (!Vector2DEquals(&interPos, &playerPos))
     {
       Vector2DSub(&interPos, &interPos, &playerPos);
       interPos.y *= -1;
-      Vector2DAdd(&interPos, &interPos, &(CP_Vector){SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f});
+      Vector2DAdd(&interPos, &interPos, &halfScreen);
       CP_Graphics_DrawCircle(interPos.x, interPos.y, 50);
       i++;
       continue;
     }
-    interPos = checkLineCollision(&botLeft, &botRight, &playerPos, &e->pos);
+    interPos = checkLineCollision(&botLeft, &botRight, &playerPos, &pos);
     if (!Vector2DEquals(&interPos, &playerPos))
     {
       Vector2DSub(&interPos, &interPos, &playerPos);
       interPos.y *= -1;
-      Vector2DAdd(&interPos, &interPos, &(CP_Vector){SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f});
+      Vector2DAdd(&interPos, &interPos, &halfScreen);
       CP_Graphics_DrawCircle(interPos.x, interPos.y, 50);
       i++;
 
@@ -248,19 +261,16 @@ void drawBullets(bullet* bullets, camera C)
   }
 }
 
-void drawEnemies(const enemy* en, camera C)
+void drawEnemies(std::vector<enemy> const& e, camera C)
 {
   CP_Color c = { 0 };
-  int i = 0;
-  while (i < MAX_ENEMIES)
+  for(auto const& enemy : e)
   {
-    enemy* curr = en + i;
-    if (curr->alive == false) 
+    if (enemy.alive == false) 
     {
-      i++;
       continue;
     }
-    switch (curr->type)
+    switch (enemy.type)
     {
     case 0:
       c = CP_Color_CreateHex(0xE2E14CFF);
@@ -273,14 +283,13 @@ void drawEnemies(const enemy* en, camera C)
       break;
     }
     CP_Settings_Fill(c);
-    CP_Graphics_DrawCircle((curr->pos.x - C.x) + (SCREEN_WIDTH / 2.0f), -(curr->pos.y - C.y) + (SCREEN_HEIGHT / 2.0f), curr->radius);
+    CP_Graphics_DrawCircle((enemy.pos.x - C.x) + (SCREEN_WIDTH / 2.0f), -(enemy.pos.y - C.y) + (SCREEN_HEIGHT / 2.0f), enemy.radius);
     CP_Settings_RectMode(CP_POSITION_CORNER);
     CP_Settings_Fill(CP_Color_CreateHex(0x832051FF));
-    CP_Graphics_DrawRect((curr->pos.x - C.x) + (SCREEN_WIDTH / 2.0f) - curr->radius, -(curr->pos.y - C.y) + (SCREEN_HEIGHT / 2.0f) + curr->radius, curr->radius * 2, 20.0f * SCREEN_WIDTH / 1920);
+    CP_Graphics_DrawRect((enemy.pos.x - C.x) + (SCREEN_WIDTH / 2.0f) - enemy.radius, -(enemy.pos.y - C.y) + (SCREEN_HEIGHT / 2.0f) + enemy.radius, enemy.radius * 2, 20.0f * SCREEN_WIDTH / 1920);
     CP_Settings_Fill(CP_Color_CreateHex(0x81A432FF));
-    CP_Graphics_DrawRect((curr->pos.x - C.x) + (SCREEN_WIDTH / 2.0f) - curr->radius, -(curr->pos.y - C.y) + (SCREEN_HEIGHT / 2.0f) + curr->radius, curr->radius * 2.0f * (curr->health * 1.0f / curr->MaxHealth * 1.0f), 20.0f * SCREEN_WIDTH / 1920);
+    CP_Graphics_DrawRect((enemy.pos.x - C.x) + (SCREEN_WIDTH / 2.0f) - enemy.radius, -(enemy.pos.y - C.y) + (SCREEN_HEIGHT / 2.0f) + enemy.radius, enemy.radius * 2.0f * (enemy.health * 1.0f / enemy.MaxHealth * 1.0f), 20.0f * SCREEN_WIDTH / 1920);
     CP_Settings_RectMode(CP_POSITION_CENTER);
-    i++;
 
   }
 }
@@ -423,6 +432,7 @@ void checkClick(int click, int numb, int index)
     return;
 
   InvItem* item = returnItemAtPos(index);
+  weaponData wd = { 0 };
 
   switch (numb) 
   {
@@ -438,10 +448,8 @@ void checkClick(int click, int numb, int index)
     showContext = false;
     break;
   case 3:;
-    weaponData wd = { 0 };
-    wd = *setStats(&wd, (returnWheel())[returnSelected()].itemId);
-    if(wd.ammoType + 2 == item->itemId)
-      reloadFromStorage(returnSelected());
+    wd = *setStats(&wd, (returnWheel())[returnSelected()].weaponId);
+    reloadFromStorage(returnSelected());
     subSub = false;
     subsubsub = false;
     upgradeMicro = false;
@@ -622,7 +630,7 @@ int checkContext(float x, float y, float width, float height)
   return 0;
 }
 
-void drawWords(char* string, float x, float y, float textSize, CP_Color c) 
+void drawWords(const char* string, float x, float y, float textSize, CP_Color c) 
 {
   CP_Settings_TextSize(textSize);
   CP_Settings_Fill(c);
@@ -960,7 +968,8 @@ void drawContextMenu(float x, float y, int type, int index)
  
   if (subSub)
   {
-    drawSubContext((float[2]) { x, y }, index);
+    float loc[2] = {x, y};
+    drawSubContext(loc , index);
     inContext = true;
   }
   if (subsubsub)
@@ -1349,4 +1358,5 @@ void drawAmmo(player* p, bool inv, bool wheel)
     snprintf(buffer, sizeof buffer, "%3.0f", (returnWheel())[returnSelected()].durability);
     CP_Font_DrawText(buffer, width / 2.0f, SCREEN_HEIGHT - height + height / 4.0f);
   }
+}
 }

@@ -1,22 +1,29 @@
 #pragma once
+#ifdef CPP
+#include <vector>
+#endif
+
 #include "structs.h"
 
-void  initScrollable       (void);
-void  releaseScrollable    (void);
-void  drawObjectiveBoard   (void);
-void  drawBackGroundLayer  (player* p);
-void  setContexts          (bool ya);
-void  drawPlayer           (player pl, camera c);
-void  drawWeapon           (int weapon, float powerUpTimer, int powerUp);
-void  drawBullets          (bullet *bullets, camera C);
-void  drawEnemies          (const enemy *en, camera C);
-void  drawPickupText       (notiString *pickupText, camera C);
-void  drawItems            (item *items, camera C);
-void  drawBuildings        (building* buildings, camera c);
-void  drawWheel            (player* p);
-void  drawAmmo             (player* p, bool inv, bool wheel);
-void  drawWheelImages      (float x, float y, float radius);
-void  drawArc              (float startAngle, float endAngle, float x, float y, float radius);
-void  drawWords            (char* string, float x, float y, float textSize, CP_Color c);
-void  drawDirector         (const enemy* e);
-int   drawInventory        (InvItem* head);
+  void  initScrollable(void);
+  void  releaseScrollable(void);
+  void  drawObjectiveBoard(void);
+  void  drawBackGroundLayer(player* p);
+  void  setContexts(bool ya);
+  void  drawPlayer(player pl, camera c);
+  void  drawWeapon(int weapon, float powerUpTimer, int powerUp);
+  void  drawBullets(bullet* bullets, camera C);
+#ifdef CPP
+  void  drawEnemies(std::vector<enemy> const& e, camera C);
+  void drawDirector(std::vector<enemy> const& e);
+#endif
+  void  drawPickupText(notiString* pickupText, camera C);
+  void  drawItems(item* items, camera C);
+  void  drawBuildings(building* buildings, camera c);
+  void  drawWheel(player* p);
+  void  drawAmmo(player* p, bool inv, bool wheel);
+  void  drawWheelImages(float x, float y, float radius);
+  void  drawArc(float startAngle, float endAngle, float x, float y, float radius);
+  void  drawWords(const char* string, float x, float y, float textSize, CP_Color c);
+
+  int   drawInventory(InvItem* head);
