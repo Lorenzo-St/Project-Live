@@ -25,7 +25,10 @@ extern "C"
 
   void resetWheel(void)
   {
-    itemWheel = {};
+    for (auto& item : itemWheel) 
+    {
+      item = { 0, -1 };
+    }
   }
 
   void initializeAmmo(player* p)
@@ -298,21 +301,22 @@ extern "C"
     return 0;
   }
 
-  void addItem(const char id, const int count)
+  const InvItem* addItem(const char id, const int count)
   {
+    
     for (auto &item : invhead) 
     {
-      if (item.itemId == id)
+      if (item.itemId == id && item.stackable)
       {
         item.count += count;
-        return;
+        return &item;
       }
     }
     InvItem newest = *getItem(id);
     newest.count = count;
     items.push_back(newest);
 
-    return;
+    return &items[items.size() - 1];
   }
 
   int destructWeapon(int index)
@@ -369,9 +373,9 @@ extern "C"
 
  
 
-  InvItem* returnHead(void)
+  std::vector<InvItem> const& returnHead(void)
   {
-    return &invhead[0];
+    return invhead;
   }
 
   InvItem* returnItemAtPos(int i)

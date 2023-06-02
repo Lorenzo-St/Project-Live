@@ -7,7 +7,6 @@ typedef struct EnemyInfo
   float speed;
   float radius;
   int MaxHealth;
-  int pattern;
   float scaler;
 }EnemyInfo;
 
@@ -17,3 +16,4 @@ const EnemyInfo* getEnemy(int id);
 
 void ReleaseEnemiesStorage(void);
 
+size_t getEnemyCount();

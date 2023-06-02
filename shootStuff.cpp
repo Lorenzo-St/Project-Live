@@ -138,7 +138,7 @@ extern "C"
           fireAtPlayer(const_cast<enemy*>(&enem), bullets, pl, bulletSounds);
           break;
         }
-        enem.weapon->reloadClock = enem.weapon->reloadTime;
+        enem.weapon->reloadClock = enem.weapon->attackSpeed;
       }
       float d = CP_System_GetDt();
       if (d > 1)

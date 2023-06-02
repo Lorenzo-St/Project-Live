@@ -60,7 +60,7 @@ extern "C"
   /* rapidly modifying Arrays, Change to Linked lists when optimizing */
   static std::vector<enemy> enemies;
   static bullet* head = NULL;
-  item items[MAX_DROPS] = { 0 };
+  static std::vector<item> items;
   notiString pickupText[MAX_TEXT] = { 0 };
 
   /* Static arrays */
@@ -135,7 +135,7 @@ extern "C"
     buildings = returnBuildings();
     initAudio(bulletSounds);
     initPlayer(&pl, &multiplier, &addTimer);
-    initDrops(items);
+    items.clear();
     wave = 1;
     pl.kills = 0;
     enemiesPerWave = 5;
@@ -267,20 +267,16 @@ extern "C"
 
     if (addTimer <= 0)
     {
+      static int totalEnemyCount = static_cast<int>(getEnemyCount());
       while (enemiesAlive < enemiesPerWave)
       {
         enemy newest = {};
         int type;
         
-        if (bossesEnabled)
-        {
-          type = CP_Random_RangeInt(0, ENEMY_TYPE);
-        }
-
         if (wave < 4)
           type = 0;
         else
-          while (type = CP_Random_RangeInt(0, ENEMY_TYPE), type == 2);
+          type = CP_Random_RangeInt(0, (totalEnemyCount > wave) ? wave : totalEnemyCount);
 
         const EnemyInfo* eI = getEnemy(type);
         while (eI == nullptr) eI = getEnemy(0);
@@ -299,6 +295,8 @@ extern "C"
             if (e.alive == false)
             {
               e = newest;
+              set = true;
+              break; 
             }
           }
           if (set == false) 
@@ -346,14 +344,14 @@ extern "C"
 #if _DEBUG && 1
     if (CP_Input_KeyTriggered(CP_KEY('K')))
       addItem(6, 1);
-    drawDebugInfo(&pl, enemies.data());
+    drawDebugInfo(&pl, enemies);
     CP_Settings_TextSize(80);
     CP_Settings_Fill(BLACK);
     char buffer[30];
     snprintf(buffer, _countof(buffer), "%i", enemiesAlive);
     CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, 100);
 #endif
-    verifyEnemyCount(enemies.data());
+    //verifyEnemyCount(enemies.data());
   }
 
   // use CP_Engine_SetNextGameState to specify this function as the exit function

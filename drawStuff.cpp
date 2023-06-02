@@ -184,7 +184,6 @@ void drawDirector(std::vector<enemy> const& e)
   { SCREEN_WIDTH / 2.0f, -SCREEN_HEIGHT / 2.0f}
   };
 
-  CP_Settings_Fill(CP_Color_CreateHex(0x81A432FF));
   Vector2DAdd(&topLeft ,  &playerPos, &screenCorners[0]);
   Vector2DAdd(&topRight, &playerPos, &screenCorners[1]);
   Vector2DAdd(&botLeft ,  &playerPos, &screenCorners[2]);
@@ -197,6 +196,7 @@ void drawDirector(std::vector<enemy> const& e)
       i++;
       continue;
     }
+    CP_Settings_Fill(CP_Color_CreateHex(0xE2E14CFF - (0x15F38C00 * enemy.type)));
     CP_Vector pos = enemy.pos;
     CP_Vector interPos = checkLineCollision(&botRight, &topRight, &playerPos, &pos);
     CP_Vector halfScreen = { SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
@@ -267,21 +267,8 @@ void drawEnemies(std::vector<enemy> const& e, camera C)
   for(auto const& enemy : e)
   {
     if (enemy.alive == false) 
-    {
       continue;
-    }
-    switch (enemy.type)
-    {
-    case 0:
-      c = CP_Color_CreateHex(0xE2E14CFF);
-      break;
-    case 1:
-      c = CP_Color_CreateHex(0xCCEDC0FF);
-      break;
-    case 2:
-      c = CP_Color_CreateHex(0x0A0AF1FF);
-      break;
-    }
+    c = CP_Color_CreateHex(0xE2E14CFF - (0x15F38C00 * enemy.type));
     CP_Settings_Fill(c);
     CP_Graphics_DrawCircle((enemy.pos.x - C.x) + (SCREEN_WIDTH / 2.0f), -(enemy.pos.y - C.y) + (SCREEN_HEIGHT / 2.0f), enemy.radius);
     CP_Settings_RectMode(CP_POSITION_CORNER);
@@ -313,18 +300,17 @@ void drawPickupText(notiString* pickupText, camera C)
   }
 }
 
-void drawItems(item* items, camera C)
+void drawItems(std::vector<item> const& items, camera C)
 {
   CP_Settings_StrokeWeight(0.0f);
   CP_Settings_TextSize(10 * (SCREEN_WIDTH / 1920.0f));
   CP_Image im = returnPickup();
   float imageSize = 30.0f * SCREEN_WIDTH / 1920.0f;
-  for (int i = 0; i < MAX_DROPS; i++)
+  for (auto const& item : items)
   {
-    if (items[i].active == 0)
+    if (item.active == false)
       continue;
-
-    CP_Image_Draw(im, (items[i].x - C.x) + (SCREEN_WIDTH / 2.0f), -(items[i].y - C.y) + (SCREEN_HEIGHT / 2.0f), imageSize, imageSize, 255);
+    CP_Image_Draw(im, (item.x - C.x) + (SCREEN_WIDTH / 2.0f), -(item.y - C.y) + (SCREEN_HEIGHT / 2.0f), imageSize, imageSize, 255);
   }
 
 }
@@ -546,8 +532,9 @@ void checkClick(int click, int numb, int index)
   case 12:
     if(item->count >= SMALL_AMMO_COST)
     {
-      removeCount(item->itemId, SMALL_AMMO_COST);
-      addItem(2, 5);
+      int counts = item->count / SMALL_AMMO_COST;
+      removeCount(item->itemId, SMALL_AMMO_COST * counts);
+      addItem(2, 5 * counts );
     }
     subSub = false;
     subsubsub = false;
@@ -559,8 +546,9 @@ void checkClick(int click, int numb, int index)
   case 13:
     if (item->count >= MEDIU_AMMO_COST)
     {
-      removeCount(item->itemId, MEDIU_AMMO_COST);
-      addItem(3, 3);
+      int counts = item->count / MEDIU_AMMO_COST;
+      removeCount(item->itemId, MEDIU_AMMO_COST * counts);
+      addItem(3, 3 * counts);
      
     }
     subSub = false;
@@ -573,8 +561,9 @@ void checkClick(int click, int numb, int index)
   case 14:
     if (item->count >= LARGE_AMMO_COST)
     {
-      removeCount(item->itemId, LARGE_AMMO_COST);
-      addItem(4, 5);
+      int counts = item->count / LARGE_AMMO_COST;
+      removeCount(item->itemId, LARGE_AMMO_COST * counts);
+      addItem(4, 5 * counts);
       
     }
     subSub = false;
@@ -931,19 +920,19 @@ void drawSubContext(float baseLoc[2], int index)
     baseLoc[1] -= height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("5 Light x5", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("Light x5 parts", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 12, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("3 Medium x10", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("Medium x10 parts", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 13, index);
 
     baseLoc[1] += height * 1.25f;
     click = checkContext(baseLoc[0], baseLoc[1], width, height);
     CP_Graphics_DrawRect(baseLoc[0], baseLoc[1], width, height);
-    drawWords("5 Heavy x25", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
+    drawWords("Heavy x25 parts", baseLoc[0], baseLoc[1], 30  * (SCREEN_WIDTH / 1920.0f), BLACK);
     checkClick(click, 14, index);
     break;
   }
@@ -1106,7 +1095,7 @@ void drawContextMenu(float x, float y, int type, int index)
     drawMicroWheel(index);
 }
 
-int drawInventory(InvItem * const head) 
+int drawInventory(std::vector<InvItem> const & head) 
 {
   float centerX = SCREEN_WIDTH * (6.5f / 8.0f);
   float centerY = SCREEN_HEIGHT / 2.0f;
@@ -1118,8 +1107,6 @@ int drawInventory(InvItem * const head)
   float itemY = SCREEN_HEIGHT / 6.0f;
   int row = 0;
   int h = 0;
-  
-
 
   CP_Settings_Fill(INVENTORY);
   CP_Graphics_DrawRectAdvanced(centerX, centerY, pannelWidth, pannelHeight, 0, 20.0f);
@@ -1129,14 +1116,8 @@ int drawInventory(InvItem * const head)
   float conPos[2] = { 0 };
   int conData[2] = { 0 };
   int i = 0;
-  while (h < MAX_INV_ITEMS)
+  for(auto const& item : head)
   {
-    if (head[h].itemId == -1) 
-    {
-      h++;
-      continue;
-
-    }
     selectedLoop = false;
     curFreed = false;
     float pos[2] = { itemX + (itemWidth * 1.15f * i) ,itemY + (itemHeight * 1.25f * row) };
@@ -1168,43 +1149,43 @@ int drawInventory(InvItem * const head)
 
     CP_Image img = NULL;
     float angle = 0;
-    switch (head[h].itemId)
+    switch (item.itemId)
     {
     case 2:
-      retAmmo()->lightStorage = head[h].count;
+      retAmmo()->lightStorage = item.count;
       break;
     case 3:
-      retAmmo()->mediumStorage = head[h].count;
+      retAmmo()->mediumStorage = item.count;
       break;
     case 4:
-      retAmmo()->heavyStorage = head[h].count;
+      retAmmo()->heavyStorage = item.count;
       break;
     }
-    switch (head[h].type)
+    switch (item.type)
     {
     case 0:
-      img = returnWeaponGS(head[h].itemId);
+      img = returnWeaponGS(item.weaponId);
       angle = -45.0f;
       break;
     case 1:
-      img = returnAmmo(head[h].itemId);
+      img = returnAmmo(item.itemId);
       angle = 0.0f;
       break;
     case 2:
-      img = returnMaterials(head[h].itemId);
+      img = returnMaterials(item.itemId);
       angle = 0.0f;
       break;
     case 3:
-      img = returnMisc(head[h].itemId);
+      img = returnMisc(item.itemId);
       angle = 0.0f;
       break;
     }
     CP_Image_DrawAdvanced(img, pos[0], pos[1], itemWidth * (9.0f / 10.0f), itemHeight * (9.0f / 10.0f), 255, angle);
-    if (head[h].count > 1)
+    if (item.count > 1)
     {
       char buff[10];
       CP_Settings_TextSize(40  * (SCREEN_WIDTH / 1920.0f));
-      snprintf(buff, sizeof buff, "%i", head[h].count);
+      snprintf(buff, sizeof buff, "%i", item.count);
       CP_Font_DrawText(buff, pos[0] - itemWidth / 4.0f, pos[1] + itemHeight / 3.0f);
     }
     if (returnInvSelected() == h && !selectedLoop)
@@ -1215,7 +1196,7 @@ int drawInventory(InvItem * const head)
       {
         conPos[0] = pos[0];
         conPos[1] = pos[1];
-        conData[0] = head[h].type;
+        conData[0] = item.type;
         conData[1] = h;
       }
 
@@ -1278,8 +1259,7 @@ void drawWheelImages(float x, float y, float radius)
       continue;
     }
       
-    int id = curItem.itemId;
-    CP_Image c = returnWeapon(id);
+    CP_Image c = returnWeapon(curItem.weaponId);
     float x2 = x + radius * cosf(degrees * 3.1415f / 180.0f);
     float y2 = y + radius * sinf(degrees * 3.1415f / 180.0f);
     float imageSize = x / 5.0f;

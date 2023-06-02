@@ -1,7 +1,7 @@
 #include <vector>
 extern"C"
 {
-
+#define CPP
 
 #include "structs.h"
 #include "cprocessing.h"
@@ -72,7 +72,7 @@ extern"C"
     return 0;
   }
 
-  int moveBullets(bullet** bullets, std::vector<enemy>& en, player* pl, item* items, building buildings[])
+  int moveBullets(bullet** bullets, std::vector<enemy>& en, player* pl, std::vector<item>& items, building buildings[])
   {
     int count = 0;
     //bullet** head = bullets;

@@ -1,3 +1,5 @@
 #pragma once
-
-void drawDebugInfo(player* pl, enemy* en);
+#ifdef CPP
+#include <vector>
+void drawDebugInfo(player* pl, std::vector<enemy> const& en);
+#endif

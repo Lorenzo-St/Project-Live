@@ -65,6 +65,9 @@ extern "C"
       decreaseAlive();
   }
 
+
+ 
+
   bool checkMouseBoxCollide(float x, float y, float width, float height)
   {
     float topCorner[2] = { x - .5f * width, y + .5f * height };
@@ -256,28 +259,30 @@ extern "C"
     return errored;
   }
 
-  int checkItems(item* items, player* pl, enemy* en, notiString* pickupText)
+  int checkItems(std::vector<item>& items, player* pl, enemy* en, notiString* pickupText)
   {
-    InvItem* j = NULL;
+    const InvItem* j = NULL;
     int count = 1;
-    for (int i = 0; i < MAX_DROPS; i++)
-    {
-      if (items[i].active == 0)
+    if (items.size() == 0)
+      return 0;
+    for (auto& item: items)
+    {  
+      if (item.active == false)
         continue;
-      float distance = sqrtf((items[i].x - pl->pos.x) * (items[i].x - pl->pos.x) + (items[i].y - pl->pos.y) * (items[i].y - pl->pos.y));
-      if (distance < pl->playerRadius + items[i].radius)
+      float distance = sqrtf((item.x - pl->pos.x) * (item.x - pl->pos.x) + (item.y - pl->pos.y) * (item.y - pl->pos.y));
+      if (distance < pl->playerRadius + item.radius)
       {
-
-        const InvItem* newest = getItem(items[i].id);
+        const InvItem* newest = getItem(item.id);
         if (newest->stackable)
           count = randNextInt(40, 120);
-        addItem(items[i].id, count);
-        addPickup(&items[i], j, pickupText, count);
-        items[i].active = false;
+        j = addItem(item.id, count);
+        addPickup(&item, j, pickupText, count);
+        item.active = false;
       }
-      items[i].life -= CP_System_GetDt();
-      if (items[i].life <= 0)
-        items[i].active = 0;
+      item.life -= CP_System_GetDt();
+      if (item.life <= 0)
+        item.active = false;
+
     }
     return 0;
   }

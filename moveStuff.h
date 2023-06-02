@@ -10,6 +10,6 @@ typedef struct building building;
 typedef struct player player;
 typedef struct item item;
 #ifdef CPP
-int moveBullets(bullet** bullets, std::vector<enemy>& e, player* pl, item* items, building buildings[]);
+int moveBullets(bullet** bullets, std::vector<enemy>& en, player* pl, std::vector<item>& items, building buildings[]);
 int moveEnemies(std::vector<enemy>& e, building* buildings);
 #endif

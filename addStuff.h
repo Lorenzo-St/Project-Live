@@ -1,8 +1,10 @@
 #pragma once
 #include "structs.h"
 typedef struct EnemyInfo EnemyInfo;
-int dropItem(float loc[], item* items);
-int addPickup(item* a, InvItem* b, notiString* pickupText, int count);
+#ifdef CPP
+int dropItem(float loc[], std::vector<item>& items);
+#endif
+int addPickup(item* a, const InvItem* b, notiString* pickupText, int count);
 
 
 void    removeEnemy    (enemy* toRemove);

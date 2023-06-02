@@ -199,11 +199,11 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="addStuff.c" />
+    <ClCompile Include="addStuff.cpp" />
     <ClCompile Include="checkStuff.cpp" />
     <ClCompile Include="colorStuff.c" />
     <ClCompile Include="credits.c" />
-    <ClCompile Include="debugInfo.c" />
+    <ClCompile Include="debugInfo.cpp" />
     <ClCompile Include="drawStuff.cpp" />
     <ClCompile Include="endScreen.c" />
     <ClCompile Include="EnemyInfo.cpp" />

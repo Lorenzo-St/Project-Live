@@ -139,7 +139,6 @@ CP_Image returnLand(void)
 
 CP_Image returnWeaponGS(int id) 
 {
-  id -= 7 * (id > 1);
   return weaponsGrayScale[id];
 }
 
@@ -151,7 +150,6 @@ CP_Image returnAmmo(int id)
 
 CP_Image returnWeapon(int id) 
 {
-  id -= 7 * (id > 1);
   return weapons[id];
 }
 
