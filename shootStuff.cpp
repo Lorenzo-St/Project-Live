@@ -42,7 +42,7 @@ extern "C"
       dir[1] /= magnitude;
       thisOne = addBullet(bullets);
   
-      thisOne = setBulletStats(thisOne, dir, 1, pos);
+      thisOne = setBulletStats(thisOne, dir, shooter, pos);
       if (thisOne == NULL)
         return;
       thisOne->pwr = weapon->damage;
@@ -51,14 +51,16 @@ extern "C"
     case 1:
       for (int k = 0; k < SPREAD_COUNT; k++)
       {
-        angle = CP_Random_RangeFloat(-25, 25);
-        dir[0] += angle;
-        dir[1] += angle;
+        angle = CP_Random_RangeFloat(-.333f, .333f);
+
+        
+        dir[0] += cosf(angle);
+        dir[1] += sinf(angle);
         magnitude = sqrtf(dir[0] * dir[0] + dir[1] * dir[1]);
         dir[0] /= magnitude;
         dir[1] /= magnitude;
         thisOne = addBullet(bullets);
-        thisOne = setBulletStats(thisOne, dir, 1,pos);
+        thisOne = setBulletStats(thisOne, dir, shooter ,pos);
         if (thisOne == NULL)
           return;
         thisOne->pwr = weapon->damage;
@@ -66,8 +68,6 @@ extern "C"
       }
       break;
     }
-    if(thisOne != nullptr)
-      thisOne->users = shooter;
   }
 
   int fireAtPlayer(enemy* a, bullet** bullets, player* pl, CP_Sound* bulletSounds)
@@ -123,21 +123,7 @@ extern "C"
       }
       if (enem.weapon->reloadClock <= 0)
       {
-
-        switch (enem.type)
-        {
-        case 0:
-          fireAtPlayer(const_cast<enemy*>(&enem), bullets, pl, bulletSounds);
-          //enemy.cooldown = 5.0f;
-          break;
-        case 1:
-          fireAtPlayer(const_cast<enemy*>(&enem), bullets, pl, bulletSounds);
-          //enemy.cooldown = .5f;
-          break;
-        case 2:
-          fireAtPlayer(const_cast<enemy*>(&enem), bullets, pl, bulletSounds);
-          break;
-        }
+        fireAtPlayer(const_cast<enemy*>(&enem), bullets, pl, bulletSounds);
         enem.weapon->reloadClock = enem.weapon->attackSpeed;
       }
       float d = CP_System_GetDt();

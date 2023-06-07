@@ -8,9 +8,7 @@
 #include "mainMenu.h"
 #include "Sound.h"
 #include "profileData.h"
-#include "WeaponData.h"
-#include "EnemyInfo.h"
-#include "ItemData.h"
+
 #define KEY_COUNTS 1
 
 // main() the starting point for the program
@@ -121,9 +119,7 @@ void postUpdate(void)
 
 int main(void)
 {
-  loadItems();
-  loadWeapons();
-  loadEnemies();
+ 
   CP_System_SetFrameRate(60.0f);
 	CP_Engine_SetPreUpdateFunction(preUpdate);
   CP_Engine_SetPostUpdateFunction(postUpdate);

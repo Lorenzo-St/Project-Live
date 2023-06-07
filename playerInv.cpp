@@ -263,8 +263,8 @@ extern "C"
       memcpy_s(&itemWheel[position], sizeof(InvItem), toAdd, sizeof(InvItem));
       invSelected = -1;
     }
-    reloadFromStorage(position);
     removeItem(index);
+    reloadFromStorage(position);
 
     return 0;
   }
@@ -287,6 +287,11 @@ extern "C"
   
   int removeItem(int index) 
   {
+    if (index == invhead.size() - 1) 
+    {
+      invhead[index].itemId = -1;
+      return 0;
+    }
     int i = 0;
     for (std::vector<InvItem>::iterator item = invhead.begin(); 
       item < invhead.end(); 
@@ -380,6 +385,8 @@ extern "C"
 
   InvItem* returnItemAtPos(int i)
   {
+    if (i >= invhead.size() || i < 0)
+      return NULL;
     return &invhead[i];
   }
 
@@ -397,5 +404,15 @@ extern "C"
   {
     *w = *getWeapon(id);
     return w;
+  }
+
+  void cleanInventory(void) 
+  {
+    for (int i = 0;i < invhead.size(); i++) 
+    {
+      if (invhead[i].itemId == -1)
+        invhead.erase(invhead.begin() + i);
+    }
+    
   }
 }

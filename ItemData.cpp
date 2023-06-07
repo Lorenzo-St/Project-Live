@@ -8,6 +8,7 @@ extern "C"
 #include "WeaponData.h"
 #include "structs.h"
 #include "randFunctions.h"
+#include "globalImages.h"
   std::vector<invItem*> itemsStorage;
   std::vector<std::string*> names;
 
@@ -22,6 +23,20 @@ extern "C"
       return nullptr;
     return itemsStorage[id];
   }
+
+  std::string const* getName(char id) 
+  {
+    if (id < 0 || id >= names.size())
+      return nullptr;
+    return names[id];
+  }
+
+
+  std::vector<invItem*> const & getItemList(void)
+  {
+    return itemsStorage;
+  }
+
 
   void loadItems()
   {
@@ -55,6 +70,14 @@ extern "C"
 
       float durability = std::stof(buffer.c_str() + tab);
 
+      if (weaponId != -1)
+      {
+        std::string filename = name->c_str();
+        size_t spaceloc = filename.find(' ');
+        if (spaceloc != std::string::npos)
+          filename = filename.replace(spaceloc, 1, "_");
+        loadWeaponImage(filename.c_str());
+      }
       invItem* e = new invItem();
       *e = {
         (*names[names.size() - 1]).c_str(),

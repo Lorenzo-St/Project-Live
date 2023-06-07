@@ -13,6 +13,7 @@ int          setInvSelected      (int);
 int          destructWeapon      (int);
 void         resetWheel          (void);
 void         resetHead           (void);
+void         cleanInventory      (void);
 void         wheelUpgrade        (int);
 void         swatchActive        (int,player*);
 void         initializeAmmo      (player*);

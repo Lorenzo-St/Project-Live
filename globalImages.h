@@ -2,6 +2,7 @@
 #include "CProcessing.h"
 
 int       initImages       (void);
+bool      loadWeaponImage  (const char* name);
 void      freeImages       (void);
 void      updateColorMode  (void);
 CP_Image  returnPickup     (void);

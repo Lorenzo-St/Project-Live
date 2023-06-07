@@ -28,6 +28,7 @@ extern "C"
       pickupText[i].x = a->x;
       pickupText[i].y = a->y;
       snprintf(pickupText[i].buffer, sizeof pickupText[i].buffer, "Aquired: %s x%i", b->name, count);
+      break;
     }
     return 0;
   }

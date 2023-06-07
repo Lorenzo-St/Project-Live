@@ -5,6 +5,9 @@
 #include "globalData.h"
 #include "Sound.h"
 #include "profileData.h"
+#include "WeaponData.h"
+#include "EnemyInfo.h"
+#include "ItemData.h"
 #include <stdio.h>
 
 static CP_Image logo;
@@ -20,6 +23,9 @@ static float imageHeight = 0;
 // this function will be called once at the beginning of the program
 void SplashInit(void)
 {
+	loadItems();
+	loadWeapons();
+	loadEnemies();
 	initSounds();
 	ProfileRead();
 	//CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());

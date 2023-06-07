@@ -16,6 +16,7 @@ extern "C"
     return WeaponStorage[id];
   }
 
+
   void loadWeapons() 
   {
     std::ifstream read("./Managed/Weapons.dat");

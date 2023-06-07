@@ -1,8 +1,10 @@
 #include <vector>
+#include <string>
 #define CPP
 extern "C" 
 {
-
+#include "WeaponData.h"
+#include "ItemData.h"
 #include "drawStuff.h"
 #include "structs.h"
 #include "cprocessing.h"
@@ -628,33 +630,25 @@ void drawWords(const char* string, float x, float y, float textSize, CP_Color c)
 
 char getWeaponID(int type, int i) 
 {
-  switch (type) 
+  std::vector<invItem*> const& itemList = getItemList();
+  int wantedCount = 0;
+  char pos = -1;
+  for (auto const& ite : itemList) 
   {
-  case 1:
-    switch (i) 
-    {
-    case 0:
-      return 0;
-    case 1:
-      return 1;
-    }
-    break;
-  case 2:
-    switch (i) 
-    {
-    case 0:
-      return 9;
-    }
-    break;
-  case 3:
-    switch (i) 
-    {
-    case 0:
-      return 10;
-    }
-    break;
-  }
+    ++pos;
+    if (ite->weaponId < 0)
+      continue;
 
+    const weaponData* weapon = getWeapon(ite->weaponId);
+    if (weapon->type != type)
+      continue;
+    if (wantedCount == i)
+    {
+      return pos;
+    }
+    ++wantedCount;
+
+  }
   return -1;
 }
 
@@ -667,6 +661,7 @@ void drawSubSubContext(int type, float x, float y)
   int buttonsPerScreen = (int)(height/ buttonHeight) - 1;
   int topButton = 0;
   int bottomButton = 0;
+  char id = 0;
   CP_Color c = BLACK;
 
   if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), width, height))
@@ -686,6 +681,7 @@ void drawSubSubContext(int type, float x, float y)
 
     for (int i = topButton; i < bottomButton; i++) 
     {
+      id = getWeaponID(type - 1, i);
       if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), buttonWidth, buttonHeight)) 
       {
         c = WHITE;
@@ -694,9 +690,9 @@ void drawSubSubContext(int type, float x, float y)
         if (count >= cost && CP_Input_MouseTriggered(MOUSE_BUTTON_1)) 
         {
  
-          addItem(getWeaponID(type, i), 1);
-          int id = returnItemAtPos(returnInvSelected())->itemId;
-          removeCount(id, cost);
+          addItem(id, 1);
+          int iid = returnItemAtPos(returnInvSelected())->itemId;
+          removeCount(iid, cost);
           subSub = false;
           subsubsub = false;
           inContext = false; 
@@ -708,10 +704,10 @@ void drawSubSubContext(int type, float x, float y)
       else
         c = GRAY_BUT;
       CP_Settings_Fill(c);
-      if (i >= LIGHT_WEAPONS)
+      if (id == -1)
         break;
       CP_Graphics_DrawRect(x, y, buttonWidth, buttonHeight);
-      drawWords((lightWeapons.buttons + i)->words, x, y, 25  * (SCREEN_WIDTH / 1920.0f) , BLACK);
+      drawWords(getName(id)->c_str(), x, y, 25  * (SCREEN_WIDTH / 1920.0f) , BLACK);
       y += (buttonHeight * 1.25f);
     }
 
@@ -734,6 +730,8 @@ void drawSubSubContext(int type, float x, float y)
 
     for (int i = topButton; i < bottomButton; i++)
     {
+      id = getWeaponID(type - 1, i);
+
       if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), buttonWidth, buttonHeight))
       {
         c = WHITE;
@@ -742,9 +740,9 @@ void drawSubSubContext(int type, float x, float y)
         if (count >= cost && CP_Input_MouseTriggered(MOUSE_BUTTON_1))
         {
 
-          addItem(getWeaponID(type, i), 1);
-          int id = returnItemAtPos(returnInvSelected())->itemId;
-          removeCount(id, cost);
+          addItem(id, 1);
+          int iid = returnItemAtPos(returnInvSelected())->itemId;
+          removeCount(iid, cost);
           subSub = false;
           subsubsub = false;
           inContext = false;
@@ -756,10 +754,10 @@ void drawSubSubContext(int type, float x, float y)
       else
         c = GRAY_BUT;
       CP_Settings_Fill(c);
-      if (i >= MEDIUM_WEAPONS)
+      if (id == -1)
         break;
       CP_Graphics_DrawRect(x, y, buttonWidth, buttonHeight);
-      drawWords((mediumWeapons.buttons + i)->words, x, y, 25  * (SCREEN_WIDTH / 1920.0f), BLACK);
+      drawWords(getName(id)->c_str(), x, y, 25  * (SCREEN_WIDTH / 1920.0f), BLACK);
       y += (buttonHeight * 1.25f);
     }
 
@@ -782,6 +780,8 @@ void drawSubSubContext(int type, float x, float y)
 
     for (int i = topButton; i < bottomButton; i++)
     {
+      id = getWeaponID(type - 1, i);
+
       if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), buttonWidth, buttonHeight))
       {
         c = WHITE;
@@ -790,9 +790,9 @@ void drawSubSubContext(int type, float x, float y)
         if (count >= cost && CP_Input_MouseTriggered(MOUSE_BUTTON_1))
         {
 
-          addItem(getWeaponID(type, i), 1);
-          int id = returnItemAtPos(returnInvSelected())->itemId;
-          removeCount(id, cost);
+          addItem(id, 1);
+          int iid = returnItemAtPos(returnInvSelected())->itemId;
+          removeCount(iid, cost);
           subSub = false;
           subsubsub = false;
           inContext = false;
@@ -804,10 +804,10 @@ void drawSubSubContext(int type, float x, float y)
       else
         c = GRAY_BUT;
       CP_Settings_Fill(c);
-      if (i >= HEAVY_WEAPONS)
+      if (id == -1)
         break;
       CP_Graphics_DrawRect(x, y, buttonWidth, buttonHeight);
-      drawWords((heavyWeapons.buttons + i)->words, x, y, 25  * (SCREEN_WIDTH / 1920.0f), BLACK);
+      drawWords(getName(id)->c_str(), x, y, 25 * (SCREEN_WIDTH / 1920.0f), BLACK);
       y += (buttonHeight * 1.25f);
     }
 

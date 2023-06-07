@@ -209,7 +209,7 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
     <ClCompile Include="EnemyInfo.cpp" />
     <ClCompile Include="gameLoop.cpp" />
     <ClCompile Include="globalData.c" />
-    <ClCompile Include="globalImages.c" />
+    <ClCompile Include="globalImages.cpp" />
     <ClCompile Include="ItemData.cpp" />
     <ClCompile Include="main.c" />
     <ClCompile Include="mainMenu.c" />

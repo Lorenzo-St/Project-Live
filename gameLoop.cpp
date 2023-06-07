@@ -264,7 +264,13 @@ extern "C"
     if (pl.cooldown > 0)
       pl.cooldown -= CP_System_GetDt();
     //drawWeapon(pl.weapon, pl.powerUpTimer, pl.powerUp);
-
+#ifdef _DEBUG
+    if (CP_Input_KeyTriggered(KEY_K)) 
+    {
+      enemiesAlive = 0;
+      enemies.clear();
+    }
+#endif
     if (addTimer <= 0)
     {
       static int totalEnemyCount = static_cast<int>(getEnemyCount());
@@ -276,7 +282,7 @@ extern "C"
         if (wave < 4)
           type = 0;
         else
-          type = CP_Random_RangeInt(0, (totalEnemyCount > wave) ? wave : totalEnemyCount);
+          type = CP_Random_RangeInt(0, (totalEnemyCount > wave/4) ? wave / 4 : totalEnemyCount);
 
         const EnemyInfo* eI = getEnemy(type);
         while (eI == nullptr) eI = getEnemy(0);
@@ -286,6 +292,15 @@ extern "C"
         newest.type = type;
         newest.weapon = new weaponData(*eI->weapon);
         newest.alive = true;
+        for (auto const& spec : eI->stats) 
+        {
+          switch (spec) 
+          {
+          case Rapid:
+            newest.weapon->attackSpeed /= 10;
+            break;
+          }
+        }
         setEnemyStats(&newest, eI,  c, type, wave);
         if (!checkInsideBuilding(buildings, 1, newest))
         {
@@ -312,6 +327,10 @@ extern "C"
         addTimer = 5.0f;
         pl.maxHealth += (int)(10 * (1 + wave / 100.0f));
         wave++;
+      }
+      for (auto& e : enemies) 
+      {
+        e.health = e.MaxHealth;
       }
     }
 
@@ -352,6 +371,7 @@ extern "C"
     CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, 100);
 #endif
     //verifyEnemyCount(enemies.data());
+    cleanInventory();
   }
 
   // use CP_Engine_SetNextGameState to specify this function as the exit function
