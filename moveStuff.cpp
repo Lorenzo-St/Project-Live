@@ -97,7 +97,7 @@ extern"C"
         goto end;
       }
       float distance = sqrtf((current->x - pl->pos.x) * (current->x - pl->pos.x) + (current->y - pl->pos.y) * (current->y - pl->pos.y));
-      if (distance < pl->playerRadius && current->users == 0)
+      if (current->users == 0 && distance < pl->playerRadius)
       {
         if (pl->powerUp != 5)
         {

@@ -178,7 +178,6 @@ extern "C"
 
     CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
 
-
     pl.direction.x = CP_Input_GetMouseX() - ((SCREEN_WIDTH / 2.0f) + (pl.pos.x - c.x));
     pl.direction.y = CP_Input_GetMouseY() - ((SCREEN_HEIGHT / 2.0f) - (pl.pos.y - c.y));
     pl.rot = (float)(atan2(pl.direction.y, pl.direction.x) * (180.0f / 3.14159265f) + 90.0f);
@@ -223,6 +222,15 @@ extern "C"
       invHovered = drawInventory(returnHead());
     else
       invHovered = false;
+
+    if (getTime() < 3.0f) 
+    {
+      pl.powerUp = 5;
+    }
+    else if(pl.powerUp == 5)
+    {
+      pl.powerUp = 0;
+    }
 
     if (wheelOpen)
       drawWheel(&pl);
@@ -302,7 +310,7 @@ extern "C"
           }
         }
         setEnemyStats(&newest, eI,  c, type, wave);
-        if (!checkInsideBuilding(buildings, 1, newest))
+        if (!checkInsideBuilding(buildings, 1, &newest))
         {
           bool set = false;
           for (auto& e : enemies) 
