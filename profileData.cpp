@@ -5,7 +5,7 @@
 #include <sstream>
 #include <locale>
 #include <codecvt>
-
+#include "playerInput.h"
 extern "C"
 {
 
@@ -230,6 +230,107 @@ extern "C"
     write << std::endl;
     if (write.is_open())
       write.close();
+  }
+  void ProfileWriteInputs(void);
+  void SetDefaultInputs(void)
+  {
+    addBinding(Shoot, tMouse, bindings(MOUSE_BUTTON_1) );
+    addBinding(Confirm, tMouse, bindings(MOUSE_BUTTON_1));
+
+    addBinding(Shoot,     Key, bindings(KEY_SPACE));
+    addBinding(Inventory, Key, bindings(KEY_E));
+    addBinding(Reload,    Key, bindings(KEY_R));
+    addBinding(Wheel,     Key, bindings(KEY_Q));
+    addBinding(Dash,      Key, bindings(KEY_LEFT_CONTROL));
+    addBinding(Dash,      Key, bindings(KEY_LEFT_SHIFT));
+    addBinding(Confirm,   Key, bindings(KEY_ENTER));
+    addBinding(Return,    Key, bindings(KEY_ESCAPE));
+    addAxisBinding(false, true,  Key, bindings(KEY_W));
+    addAxisBinding(false, false, Key, bindings(KEY_S));
+    addAxisBinding(true,  true,  Key, bindings(KEY_D));
+    addAxisBinding(true,  false, Key, bindings(KEY_A));
+    
+    addBinding(Shoot,     Controller, bindings(GAMEPAD_LEFT_SHOULDER));
+    addBinding(Inventory, Controller, bindings(GAMEPAD_BACK));
+    addBinding(Reload,    Controller, bindings(GAMEPAD_X));
+    addBinding(Confirm,   Controller, bindings(GAMEPAD_A));
+    addBinding(Back,      Controller, bindings(GAMEPAD_B));
+    addBinding(Return,    Controller, bindings(GAMEPAD_START));
+    addBinding(Wheel,     Controller, bindings(GAMEPAD_Y));
+    addBinding(XAxisPos,  Controller, bindings(GAMEPAD_DPAD_RIGHT));
+    addBinding(XAxisNeg,  Controller, bindings(GAMEPAD_DPAD_LEFT));
+    addBinding(YAxisPos,  Controller, bindings(GAMEPAD_DPAD_UP));
+    addBinding(YAxisNeg,  Controller, bindings(GAMEPAD_DPAD_DOWN));
+    addAxisBinding(false, true,  Controller, bindings(GAMEPAD_DPAD_UP));
+    addAxisBinding(false, false, Controller, bindings(GAMEPAD_DPAD_DOWN));
+    addAxisBinding(true,  true,  Controller, bindings(GAMEPAD_DPAD_RIGHT));
+    addAxisBinding(true,  false, Controller, bindings(GAMEPAD_DPAD_LEFT));
+
+
+
+
+  }
+
+
+  void ProfileReadControls(void) 
+  {
+    wchar_t* p;
+    std::wstring path;
+    SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &p);
+
+    std::wstringstream ss;
+    ss << p << L"\\";
+
+    CoTaskMemFree(static_cast<void*>(p));
+    std::wstring string_to_convert = ss.str();
+
+    //setup converter
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+
+    //use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
+    std::string converted_str = converter.to_bytes(string_to_convert);
+    converted_str += "DescentGames\\";
+    converted_str += "Simply_Sruvive\\";
+    converted_str += "Controls.ini";
+
+    std::ifstream read;
+    read.open(converted_str, std::ios_base::in);
+    std::string token;
+    if (read.is_open() == false)
+      SetDefaultInputs();
+
+
+
+
+  }
+
+  void ProfileWriteInputs(void) 
+  {
+    wchar_t* p;
+    std::wstring path;
+    SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &p);
+
+    std::wstringstream ss;
+    ss << p << L"\\";
+
+    CoTaskMemFree(static_cast<void*>(p));
+    std::wstring string_to_convert = ss.str();
+
+    //setup converter
+    using convert_type = std::codecvt_utf8<wchar_t>;
+    std::wstring_convert<convert_type, wchar_t> converter;
+
+    //use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
+    std::string converted_str = converter.to_bytes(string_to_convert);
+    converted_str += "DescentGames\\";
+
+    CreateDirectory(converted_str.c_str(), NULL);
+
+    converted_str += "Simply_Sruvive\\";
+    CreateDirectory(converted_str.c_str(), NULL);
+    converted_str += "Controls.ini";
+  
   }
 
 

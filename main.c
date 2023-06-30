@@ -20,6 +20,12 @@ int playerInput[KEY_COUNTS] = { KEY_ESCAPE };
 
 void preUpdate(void)
 {
+  if (CP_Input_GamepadTriggered(GAMEPAD_START))
+  {
+    if (getGame() && !getOptions())
+      setPause(!getPause());
+  }
+
   for (int i = 0; i < KEY_COUNT; i++)
   {
     if (CP_Input_KeyTriggered(playerInput[i]))
@@ -45,6 +51,7 @@ void preUpdate(void)
 
 void postUpdate(void) 
 {
+
   if (!getPause())
     return;
   CP_Color C = CP_Color_CreateHex(0x8498A7A0);

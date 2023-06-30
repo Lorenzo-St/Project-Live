@@ -1,5 +1,6 @@
 #include <vector>
 #include <array>
+#include "playerInfo.h"
 extern "C"
 {
 #include "structs.h"
@@ -17,12 +18,26 @@ extern "C"
   wheelAmmo ammo = { 0 };
   int selected = -1;
   int invSelected = -1;
-
   void resetHead(void)
   {
     invhead.clear();
   }
-
+  void moveSelected(CP_Vector dir) 
+  {
+    if (dir.x != 0) 
+    {
+      invSelected += static_cast<int>(dir.x);
+    }
+    if (dir.y != 0)
+    {
+      invSelected += static_cast<int>(dir.y * (ITEMS_PER_ROW - 2));
+    }
+    if (invSelected < 0)
+      invSelected = 0;
+    if (invSelected >= items.size())
+      invSelected = static_cast<int>(items.size() - 1);
+     
+  }
   void resetWheel(void)
   {
     for (auto& item : itemWheel) 
@@ -33,8 +48,8 @@ extern "C"
 
   void initializeAmmo(player* p)
   {
-    ammo.active[selected] = p->weapon->ammo;
-    ammo.reserves[selected] = p->weapon->ammoReserves;
+    ammo.active[selected] = PlayerGetActiveAmmo(p);
+    ammo.reserves[selected] = PlayerGetReserveAmmo(p);
     ammo.lightStorage = 200;
   }
 
@@ -46,7 +61,7 @@ extern "C"
     {
       weaponData a = *setStats(&a, itemWheel[index].weaponId);
 
-      returnPlayer()->weapon->damage = a.damage += 5 * nthPower(1.25, itemWheel[index].subID);
+      PlayerGetWeapon(returnPlayer())->damage = a.damage += 5 * nthPower(1.25, itemWheel[index].subID);
       itemWheel[index].durability += 10;
     }
     else
@@ -219,18 +234,21 @@ extern "C"
   {
     if (i != selected && itemWheel[i].itemId != -1)
       selected = i;
-    if (pl->weapon != NULL && itemWheel[i].itemId != -1)
+    weaponData* playerWeapon = PlayerGetWeapon(pl);
+    if (playerWeapon != NULL && itemWheel[i].itemId != -1)
     {
-      free(pl->weapon);
-      pl->weapon = reinterpret_cast<weaponData*>(calloc(1 , sizeof(weaponData)));
-      pl->weapon = setStats(pl->weapon, itemWheel[i].weaponId);
-      pl->weapon->damage += nthPower(1.25, itemWheel[selected].subID);
+      free(playerWeapon);
+      PlayerSetWeapon(pl, new weaponData());
+      playerWeapon = PlayerGetWeapon(pl);
+      setStats(playerWeapon, itemWheel[i].weaponId);
+      playerWeapon->damage += nthPower(1.25, itemWheel[selected].subID);
     }
-    else if (pl->weapon == NULL && itemWheel[i].itemId != -1)
+    else if (playerWeapon == NULL && itemWheel[i].itemId != -1)
     {
-      pl->weapon = reinterpret_cast<weaponData*>(calloc(1 , sizeof(weaponData)));
-      pl->weapon = setStats(pl->weapon, itemWheel[i].weaponId);
-      pl->weapon->damage += nthPower(1.25, itemWheel[selected].subID);
+      PlayerSetWeapon(pl, new weaponData());
+      playerWeapon = PlayerGetWeapon(pl);
+      setStats(playerWeapon, itemWheel[i].weaponId);
+      playerWeapon->damage += nthPower(1.25, itemWheel[selected].subID);
 
     }
   }

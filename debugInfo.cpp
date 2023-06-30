@@ -1,4 +1,5 @@
 #include <vector>
+#include "playerInfo.h"
 extern "C" {
 #include "cprocessing.h"
 #include "structs.h"
@@ -22,7 +23,7 @@ extern "C" {
     CP_Settings_TextSize(15);
     snprintf(buffer, 200, "%.3f", CP_System_GetFrameRate());
     CP_Font_DrawText(buffer, SCREEN_WIDTH - 50.0f, 20.0f);
-    snprintf(buffer, 200, "%04.3f, %04.3f", pl->pos.x, pl->pos.y);
+    snprintf(buffer, 200, "%04.3f, %04.3f", PlayerGetPos(pl)->x, PlayerGetPos(pl)->y);
     CP_Font_DrawText(buffer, SCREEN_WIDTH - 100.0f, 40.0f);
     CP_Font_DrawText("Enemies", SCREEN_WIDTH - 100.0f, 50.0f);
     for (auto const& enem : en)

@@ -1,8 +1,9 @@
 #pragma once
 #include "structs.h"
-
+typedef struct Camera Camera;
+typedef struct player player;
 bool checkMouseBoxCollide     (float x, float y, float width, float height);
-bool checkKeys                (player* pl, float* multiplier, bullet** bullets, bool* InvOpen, bool* wheelOpen, int isPaused, int check);
+bool checkKeys                (player* pl, float* multiplier, bullet** bullets, bool* InvOpen, bool* wheelOpen, bool* isPaused, int check);
 bool checkMouseArcCollide     (float startAngle, float endAngle, float centerX, float centerY, float radius);
 bool checkInsideBuilding      (building* buildings, int which, ...);
 int  checkAgainstBuilding     (building* buildings, int which, ...);

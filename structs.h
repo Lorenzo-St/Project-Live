@@ -25,9 +25,6 @@ int getMaxEnemies(void);
 #define WEAPON_IMAGES 4
 #define AMMO_TYPES 3
 #define ENEMY_TYPE 2 /* starts at 0*/
-#define HEAVY_WEAPONS 1
-#define MEDIUM_WEAPONS 1
-#define LIGHT_WEAPONS 2
 #define MAX_OBJECTIVES 1
 #define WINDOW_SIZE 1920, 1080
 #define MAX_INV_ITEMS 100
@@ -83,9 +80,7 @@ typedef struct button
 
 typedef struct scorllableMenu
 {
-  button* buttons;
   int scrollPosition;
-
 }scrolllable;
 
 typedef struct weaponData
@@ -103,27 +98,9 @@ typedef struct weaponData
   
 }weaponData;
 
-typedef struct player
-{
-  int health;
-  int maxHealth;
-  int kills;
-  int powerUp; /* 0: no powerup, 1: insta kill, 2: RAPID FIRE, 3: FULL HEAL, 4: SCREEN WIPE, 5: INVINCIBILITY, 6: TIME WARP (WIP)  */
-  float playerRadius;
-  float cooldown;
-  float move_speed;
-  CP_Vector pos;
-  CP_Vector direction;
-  CP_Vector velocity;
-  float rot;
-  float powerUpTimer;
-  weaponData* weapon;
-}player;
 
-typedef struct Camera 
-{
-  float x, y;
-}camera;
+
+
 
 typedef struct slider{
 

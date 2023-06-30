@@ -1,4 +1,5 @@
 #include <vector>
+#include "playerInfo.h"
 extern"C"
 {
 #define CPP
@@ -28,8 +29,8 @@ extern"C"
       {
         e.dir.x = CP_Random_RangeFloat(-100, 100);
         e.dir.y = CP_Random_RangeFloat(-100, 100);
-        player* p = returnPlayer();
-        CP_Vector dir = { p->pos.x - e.pos.x, p->pos.y - e.pos.y };
+        CP_Vector const* PlayerPos = PlayerGetPos(returnPlayer());
+        CP_Vector dir = { PlayerPos->x - e.pos.x,PlayerPos->y - e.pos.y };
         float mag = sqrtf(dir.x * dir.x + dir.y * dir.y);
 
         dir.x /= mag;
@@ -81,7 +82,7 @@ extern"C"
     if (current == NULL)
       return -1;
     bool freed = false;
-
+    CP_Vector pos = *PlayerGetPos(pl);
     while (current)
     {
       
@@ -96,12 +97,12 @@ extern"C"
         freed = true;
         goto end;
       }
-      float distance = sqrtf((current->x - pl->pos.x) * (current->x - pl->pos.x) + (current->y - pl->pos.y) * (current->y - pl->pos.y));
-      if (current->users == 0 && distance < pl->playerRadius)
+      float distance = sqrtf((current->x - pos.x) * (current->x - pos.x) + (current->y - pos.y) * (current->y - pos.y));
+      if (current->users == 0 && distance < PlayerGetRadius(pl))
       {
-        if (pl->powerUp != 5)
+        if (PlayerIsInvincible(pl) == false)
         {
-          pl->health -= current->pwr;
+          PlayerUpdateHealth(*pl, static_cast<float>( - current->pwr));
         }
         freed = true;
         goto end;
@@ -125,8 +126,6 @@ extern"C"
         freed = true;
         if (e.health > 0)
           break;
-
-        pl->kills++;
         if (CP_Random_RangeInt(0, 100) > /*75*/ 100)
           break;
         float temploc[2] = { e.pos.x, e.pos.y };

@@ -28,12 +28,11 @@
 #include <string.h>
 #include <math.h>
 
+
 #define BUTTONS 4
 #define MAX_WORLD_NAME_LENGTH 30
 
 static button buttons[BUTTONS] = { 0 };
-
-static player p = { 0 };
 static int screen = 0;
 static bool inWorlds = false;
 static bool newWorld = false;
@@ -178,7 +177,7 @@ void MainMenuUpdate(void)
 {
   framesPast++;
   CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
-  drawBackGroundLayer(&p);
+  drawBackGround();
   drawWords("Simply Survive", SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 5.0f, 205  * (SCREEN_WIDTH / 1920.0f), BLACK);
   drawButtons();
   float textSize = 70.0f * SCREEN_WIDTH / 1920;

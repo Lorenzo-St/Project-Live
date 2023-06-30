@@ -11,6 +11,8 @@
 // Copyright © 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 #include <vector>
+#include "playerInfo.h"
+#include "playerInput.h"
 extern "C"
 {
 #define CPP
@@ -48,6 +50,13 @@ extern "C"
   bool invHovered = false;
   bool boxClosed = false;
 
+#ifdef _DEBUG
+  bool invicible = false;
+
+
+#endif // DEBUG
+
+
   /* standard Data*/
   int screen = 0;
   int wave = 0;
@@ -72,18 +81,27 @@ extern "C"
     return maximumEnemies;
   }
 
-  player pl = { 0 };
-  camera c = { 0 };
+  player* pl = nullptr;
   building* buildings = NULL;
+  camera c;
+  player* returnPlayer(void) 
+  {
+    return pl;
+  }
 
-  camera* retCam(void)
+  camera* retCam() 
   {
     return &c;
   }
 
-  player* returnPlayer(void)
+  bool* retWheel(void)
   {
-    return &pl;
+    return &wheelOpen;
+  }
+
+  bool* retInventory(void)
+  {
+    return &invOpen;
   }
 
   bool returnInvSel(void)
@@ -134,10 +152,9 @@ extern "C"
 
     buildings = returnBuildings();
     initAudio(bulletSounds);
-    initPlayer(&pl, &multiplier, &addTimer);
+    pl = createPlayer();
     items.clear();
     wave = 1;
-    pl.kills = 0;
     enemiesPerWave = 5;
     addTimer = 0;
     resetWheel();
@@ -150,16 +167,26 @@ extern "C"
       removeBullet(b);
     }
     addItem(0, 1);
-    addToWheel(returnItemAtPos(0), 0, 0);
-    swatchActive(0, &pl);
-    initializeAmmo(&pl);
-    addItem(2, retAmmo()->lightStorage);
-    enemiesAlive = 0;
 
+    addToWheel(returnItemAtPos(0), 0, 0);
+    swatchActive(0, pl);
+    initializeAmmo(pl);
+    addItem(2, retAmmo()->lightStorage);
+    addItem(1, 1);
+    addItem(2, 1);
+    addItem(3, 1);
+    addItem(4, 1);
+    addItem(5, 1);
+    addItem(7, 1);
+    addItem(8, 1);
+    addItem(9, 1);
+    addItem(10, 1);
+    addItem(11, 1);
+    enemiesAlive = 0;
     while (checkInsideBuilding(buildings, 0, pl) != 0)
     {
-      pl.pos.x = CP_Random_RangeFloat(-1000, 1000);
-      pl.pos.y = CP_Random_RangeFloat(-1000, 1000);
+      CP_Vector pos = { CP_Random_RangeFloat(-1000, 1000), CP_Random_RangeFloat(-1000, 1000) };
+      PlayerSetPosition(pl, &pos);
     }
   }
 
@@ -169,29 +196,26 @@ extern "C"
   {
 
     CP_Settings_Stroke(BLACK);
-    drawBackGroundLayer(&pl);
-    if (pl.health <= 0)
+    drawBackGroundLayer(pl);
+    if (PlayerGetHealth(pl) <= 0)
     {
       CP_Engine_SetNextGameState(endScreenInit, endScreenUpdate, endScreenExit);
       return;
     }
 
     CP_Graphics_ClearBackground(CP_Color_Create(117, 117, 117, 255));
+    c.x = PlayerGetPos(pl)->x;
+    c.y = PlayerGetPos(pl)->y;
 
-    pl.direction.x = CP_Input_GetMouseX() - ((SCREEN_WIDTH / 2.0f) + (pl.pos.x - c.x));
-    pl.direction.y = CP_Input_GetMouseY() - ((SCREEN_HEIGHT / 2.0f) - (pl.pos.y - c.y));
-    pl.rot = (float)(atan2(pl.direction.y, pl.direction.x) * (180.0f / 3.14159265f) + 90.0f);
-    c.x = pl.pos.x;
-    c.y = pl.pos.y;
-
+    PlayerUpdate(pl);
     /* Draw all on screen items */
-    drawBullets(head, c);
-    drawPlayer(pl, c);
-    drawEnemies(enemies, c);
-    drawBuildings(buildings, c);
+    drawBullets(head, &c);
+    drawPlayer(pl, &c);
+    drawEnemies(enemies, &c);
+    drawBuildings(buildings, &c);
     drawDirector(enemies);
-    drawItems(items, c);
-    drawPickupText(pickupText, c);
+    drawItems(items, &c);
+    drawPickupText(pickupText, &c);
     drawObjectiveBoard();
     if (boxClosed == false)
     {
@@ -214,7 +238,7 @@ extern "C"
 
       CP_Settings_TextAlignment(CP_TEXT_ALIGN_H_CENTER, CP_TEXT_ALIGN_V_MIDDLE);
 
-      if (CP_Input_KeyDown(KEY_ANY) || CP_Input_MouseDown(MOUSE_BUTTON_1))
+      if (isPressed(Any))
         boxClosed = true;
       return;
     }
@@ -225,17 +249,17 @@ extern "C"
 
     if (getTime() < 3.0f) 
     {
-      pl.powerUp = 5;
+      PlayerSetInvincible(pl, true);
     }
-    else if(pl.powerUp == 5)
+    else if(PlayerIsInvincible(pl))
     {
-      pl.powerUp = 0;
+      PlayerSetInvincible(pl, false);
     }
 
     if (wheelOpen)
-      drawWheel(&pl);
+      drawWheel(pl);
 
-    drawAmmo(&pl, invOpen, wheelOpen);
+    drawAmmo(pl, invOpen, wheelOpen);
     if (getPause() && boxClosed)
       return;
     addTime(CP_System_GetDt());
@@ -246,13 +270,13 @@ extern "C"
 
     /* Move on screen items    */
     moveEnemies(enemies, buildings);
-    moveBullets(&head, enemies, &pl, items, buildings);
+    moveBullets(&head, enemies, pl, items, buildings);
 
-    int check = checkAgainstBuilding(buildings, 0, &pl);
+    int check = checkAgainstBuilding(buildings, 0, pl);
 
     /* Check user input and collisions */
-    checkKeys(&pl, &multiplier, &head, &invOpen, &wheelOpen, getPause(), check);
-    checkItems(items, &pl, enemies.data(), pickupText);
+    checkKeys(pl,&multiplier, &head, &invOpen, &wheelOpen, getPoPause(), check);
+    checkItems(items, pl, enemies.data(), pickupText);
 
     CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
     if (enemiesAlive <= 0)
@@ -269,8 +293,6 @@ extern "C"
       snprintf(buff, _countof(buff), "New Wave in: %2.3f", addTimer);
       CP_Font_DrawText(buff, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 5.0f);
     }
-    if (pl.cooldown > 0)
-      pl.cooldown -= CP_System_GetDt();
     //drawWeapon(pl.weapon, pl.powerUpTimer, pl.powerUp);
 #ifdef _DEBUG
     if (CP_Input_KeyTriggered(KEY_K)) 
@@ -278,6 +300,10 @@ extern "C"
       enemiesAlive = 0;
       enemies.clear();
     }
+    if (CP_Input_KeyTriggered(KEY_I))
+      invicible = true;
+    if (invicible)
+      PlayerSetInvincible(pl, true);
 #endif
     if (addTimer <= 0)
     {
@@ -333,7 +359,7 @@ extern "C"
         enemiesPerWave += (int)(3.0f * (1.0f + (cbrtf(wCheck)) / (wCheck != 0 ? wCheck : 1)));
 
         addTimer = 5.0f;
-        pl.maxHealth += (int)(10 * (1 + wave / 100.0f));
+        PlayerUpdateMaxHealth(pl, (10 * (1 + wave / 100.0f)));
         wave++;
       }
       for (auto& e : enemies) 
@@ -344,34 +370,13 @@ extern "C"
 
     if (wave > 10 && !bossesEnabled)
       bossesEnabled = true;
-    multiplier -= CP_System_GetDt() * 5;
-    if (multiplier < 1)
-    {
-      multiplier = 1;
-    }
-    if (pl.powerUpTimer > 0)
-      pl.powerUpTimer -= CP_System_GetDt();
-    if (pl.powerUpTimer <= 0)
-      pl.powerUp = 0;
     CP_Settings_Fill(CP_Color_Create(0, 0, 0, 255));
     CP_Settings_TextSize(100);
-    if (pl.weapon->reloadClock > 0)
-    {
-      const float reloadPercent = (pl.weapon->reloadTime - pl.weapon->reloadClock) / pl.weapon->reloadTime;
-      for (float i = 0; i < 360 * reloadPercent; i += 60)
-      {
-        CP_Settings_Fill(CP_Color_CreateHex(0xa8bbd9ff));
-        CP_Settings_StrokeWeight(2);
-        drawArc(i, i + 61, CP_Input_GetMouseX(), CP_Input_GetMouseY(), 30);
-      }
-      pl.weapon->reloadClock -= CP_System_GetDt();
-    }
-    else if (pl.weapon->reloadClock < 0)
-      pl.weapon->reloadClock = 0;
+
 #if _DEBUG && 1
     if (CP_Input_KeyTriggered(CP_KEY('K')))
       addItem(6, 1);
-    drawDebugInfo(&pl, enemies);
+    drawDebugInfo(pl, enemies);
     CP_Settings_TextSize(80);
     CP_Settings_Fill(BLACK);
     char buffer[30];

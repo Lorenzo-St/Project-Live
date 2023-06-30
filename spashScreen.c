@@ -28,6 +28,8 @@ void SplashInit(void)
 	loadEnemies();
 	initSounds();
 	ProfileRead();
+	ProfileReadControls();
+
 	//CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
 	//CP_System_SetWindowSize(WINDOW_SIZE);
 	char buffer[40] = { 0 };

@@ -1,5 +1,6 @@
 #include <vector>
-
+#include "playerInfo.h"
+#include "playerInput.h"
 extern "C"
 {
 #include "cprocessing.h"
@@ -31,7 +32,7 @@ extern "C"
 
   CP_Vector checkLineCollision(CP_Vector* Line1Start, CP_Vector* Line1End, CP_Vector* Line2Start, CP_Vector* Line2End)
   {
-    CP_Vector result = returnPlayer()->pos;
+    CP_Vector result = *PlayerGetPos(returnPlayer());
     CP_Vector line1;
     Vector2DSub(&line1, Line1End, Line1Start);
     CP_Vector line1Normal = { line1.y, -line1.x };
@@ -66,7 +67,7 @@ extern "C"
   }
 
 
- 
+
 
   bool checkMouseBoxCollide(float x, float y, float width, float height)
   {
@@ -149,115 +150,50 @@ extern "C"
     }
   }
 
-  bool checkKeys(player* pl, float* multiplier, bullet** bullets, bool* InvOpen, bool* wheelOpen, int isPaused, int check)
+  bool checkKeys(player* pl, float* multiplier, bullet** bullets, bool* InvOpen, bool* wheelOpen, bool* isPaused, int check)
   {
-    pl->velocity.x = 0.0f;
-    pl->velocity.y = 0.0f;
-    int errored = 0;
-    float velo = (pl->move_speed * CP_System_GetDt());
-    if (CP_Input_MouseTriggered(MOUSE_BUTTON_1) && !*wheelOpen)
+    for (CP_GAMEPAD start = GAMEPAD_DPAD_UP; start <= GAMEPAD_Y; start = static_cast<CP_GAMEPAD>(static_cast<int>(start) + 1))
     {
-      if (pl->weapon->type == 2)
+
+      if (CP_Input_GamepadTriggered(start))
       {
-        playerFire(pl, bullets);
-      }
-    }
-    if (CP_Input_MouseDown(MOUSE_BUTTON_1) && !*wheelOpen)
-    {
-      if (pl->cooldown <= 0 && pl->weapon->type != 2)
-      {
-        playerFire(pl, bullets);
-        pl->cooldown = pl->weapon->attackSpeed;
-      }
-    }
-    for (int i = 0; i < KEY_COUNT; i++)
-    {
-      if (CP_Input_KeyTriggered(static_cast<CP_KEY>(playerKeys[i])))
-      {
-        switch (playerKeys[i])
+        switch (start)
         {
-        case KEY_R:
-          reloadFromReserves();
-          reloadFromStorage(returnSelected());
-          pl->weapon->reloadClock = pl->weapon->reloadTime;
-          break;
-#ifdef _DEBUG
-        case KEY_I:
 
-          pl->powerUp = 5;
-          pl->health = 300;
-          pl->powerUpTimer = INFINITY;
-          break;
-#endif
-        case KEY_Q:
-          *wheelOpen = !*wheelOpen;
-          *InvOpen = false;
-          setContexts(false);
-          break;
-        case KEY_E:
-          if (*InvOpen)
-            setContexts(false);
-          *InvOpen = !*InvOpen;
-
+          //case GAMEPAD_START:
+          //  *isPaused = !(*isPaused);
+          //  break;
+        case GAMEPAD_B:
           *wheelOpen = false;
+          *InvOpen = false;
           break;
-        case KEY_LEFT_CONTROL:
-          /* FALL THROUGH */
-        case KEY_LEFT_SHIFT:
-          if (*multiplier <= 1)
-          {
-            *multiplier = 4;
-          }
+        case GAMEPAD_DPAD_UP:
+          if (*InvOpen == true)
+            moveSelected({ 0, -1 });
           break;
-        case KEY_SPACE:
-          if (pl->weapon->type == 2)
-            playerFire(pl, bullets);
+        case GAMEPAD_DPAD_DOWN:
+          if (*InvOpen == true)
+            moveSelected({ 0, 1 });
           break;
-        }
-      }
-      if (CP_Input_KeyDown(static_cast<CP_KEY>(playerKeys[i])))
-      {
-        switch (playerKeys[i])
-        {
-        case KEY_UP:
-        case KEY_W:
-          pl->velocity.y += velo;
+        case GAMEPAD_DPAD_RIGHT:
+          if (*InvOpen == true)
+            moveSelected({ 1, 0 });
           break;
-        case KEY_LEFT:
-        case KEY_A:
-          pl->velocity.x += -velo;
+        case GAMEPAD_DPAD_LEFT:
+          if (*InvOpen == true)
+            moveSelected({ -1, 0 });
           break;
-        case KEY_DOWN:
-        case KEY_S:
-          pl->velocity.y += -velo;
-          break;
-        case KEY_RIGHT:
-        case KEY_D:
-          pl->velocity.x += velo;
-          break;
-        case 256:
-          if (isPaused)
-            isPaused = 0;
-          else
-            isPaused = 1;
-          break;
-        case KEY_SPACE:
-          if (pl->weapon->type == 2)
-            break;
-          if (pl->cooldown <= 0)
-          {
-            playerFire(pl, bullets);
-            pl->cooldown = pl->weapon->attackSpeed;
-          }
-          break;
-        }
-      }
-    }
 
-    pl->pos.x += (pl->velocity.x * *multiplier) * (check != 1 && check != 3);
-    pl->pos.y += (pl->velocity.y * *multiplier) * (check != 2 && check != 3);
-    return errored;
+
+
+        }
+      }
+
+
+    }
+    return 0;
   }
+
 
   int checkItems(std::vector<item>& items, player* pl, enemy* en, notiString* pickupText)
   {
@@ -265,12 +201,15 @@ extern "C"
     int count = 1;
     if (items.size() == 0)
       return 0;
+    CP_Vector pos = *PlayerGetPos(pl);
+    float rad = PlayerGetRadius(pl);
+
     for (auto& item: items)
     {  
       if (item.active == false)
         continue;
-      float distance = sqrtf((item.x - pl->pos.x) * (item.x - pl->pos.x) + (item.y - pl->pos.y) * (item.y - pl->pos.y));
-      if (distance < pl->playerRadius + item.radius)
+      float distance = sqrtf((item.x - pos.x) * (item.x - pos.x) + (item.y - pos.y) * (item.y - pos.y));
+      if (distance < rad + item.radius)
       {
         const InvItem* newest = getItem(item.id);
         if (newest->stackable)
@@ -298,12 +237,13 @@ extern "C"
     {
       player* p = va_arg(v, player*);
       returnStruct rc;
+      CP_Vector pos = *PlayerGetPos(p);
       for (int i = 0; i < buil; i++)
       {
         building* b = buildings + i;
         if (b->w == 0 || b->h == 0)
           continue;
-        rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, p->pos.x, p->pos.y, p->playerRadius);
+        rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, pos.x, pos.y, PlayerGetRadius(p));
         if (rc.value)
           return 1;
 
@@ -396,14 +336,16 @@ extern "C"
         if (b->w == 0 || b->h == 0)
           continue;
         returnStruct rc;
+        CP_Vector pos = *PlayerGetPos(p);
+        CP_Vector velo = *PlayerGetVelocity(p);
 
-        rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, p->pos.x, p->pos.y, p->playerRadius);
+        rc = checkCircleXRectCollision(b->x, b->y, b->w, b->h, pos.x, pos.y, PlayerGetRadius(p));
         if (rc.value == true)
         {
           float distance = sqrtf(rc.x2 * rc.x2 + rc.y2 * rc.y2);
-          if (sqrtf(((p->pos.x + (p->velocity.x)) - rc.x1) * ((p->pos.x + (p->velocity.x)) - rc.x1) + rc.y2 * rc.y2) < distance)
+          if (sqrtf(((pos.x + (velo.x)) - rc.x1) * ((pos.x + (velo.x)) - rc.x1) + rc.y2 * rc.y2) < distance)
             result += 1;
-          if (sqrtf(((p->pos.y + (p->velocity.y)) - rc.y1) * ((p->pos.y + (p->velocity.y)) - rc.y1) + rc.x2 * rc.x2) < distance)
+          if (sqrtf(((pos.y + (velo.y)) - rc.y1) * ((pos.y + (velo.y)) - rc.y1) + rc.x2 * rc.x2) < distance)
             result += 2;
         }
 

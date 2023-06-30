@@ -21,5 +21,6 @@ bool   getOptions        (void);
 bool   getPause          (void);
 bool   getGame           (void);
 bool   getGenerated      (void);
+bool*  getPoPause        (void);
 ColorMode getColorMode   (void);
 

@@ -1,4 +1,5 @@
 #include <Vector>
+#include "playerInfo.h"
 extern "C"
 {
 
@@ -72,42 +73,13 @@ extern "C"
 
   int fireAtPlayer(enemy* a, bullet** bullets, player* pl, CP_Sound* bulletSounds)
   {
-    CP_Vector pos =
-    {
-      pl->pos.x - a->pos.x,
-        pl->pos.y - a->pos.y
-    };
+    CP_Vector pos = *PlayerGetPos(pl);
+    pos.x -= a->pos.x;
+    pos.y -= a->pos.y;
     runWeaponPattern(a->weapon, &a->pos,
       &pos,
       bullets, 0);
 
-    return 0;
-  }
-
-  int playerFire(const player* pl, bullet** bullets)
-  {
-    float dir[2] = {
-      CP_Input_GetMouseX() - SCREEN_WIDTH / 2.0f,
-      -(CP_Input_GetMouseY() - SCREEN_HEIGHT / 2.0f) };
-    if (pl->weapon->reloadClock > 0)
-    {
-      return 1;
-    }
-    if (returnInvSel())
-      return 0;
-    if (retAmmo()->active[returnSelected()]-- <= 0)
-    {
-
-      retAmmo()->active[returnSelected()] = 0;
-      reloadFromReserves();
-      pl->weapon->reloadClock = pl->weapon->reloadTime;
-      return -1;
-    }
-    CP_Vector direction = { dir[0], dir[1] };
-    runWeaponPattern(pl->weapon, const_cast<CP_Vector*>(&pl->pos), &direction, bullets, 1);
-
-    CP_Sound s = getWeaponSounds(pl->weapon->type, (returnWheel())[returnSelected()].itemId);
-    CP_Sound_Play(s);
     return 0;
   }
 

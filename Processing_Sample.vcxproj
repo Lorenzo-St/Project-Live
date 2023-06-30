@@ -217,7 +217,9 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
     <ClCompile Include="mathStuff.c" />
     <ClCompile Include="moveStuff.cpp" />
     <ClCompile Include="options.c" />
+    <ClCompile Include="playerInput.cpp" />
     <ClCompile Include="playerInv.cpp" />
+    <ClCompile Include="playerInfo.cpp" />
     <ClCompile Include="profileData.cpp" />
     <ClCompile Include="randFunction.c" />
     <ClCompile Include="scoring.c" />
@@ -246,6 +248,8 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
     <ClInclude Include="mathStuff.h" />
     <ClInclude Include="moveStuff.h" />
     <ClInclude Include="options.h" />
+    <ClInclude Include="playerInfo.h" />
+    <ClInclude Include="playerInput.h" />
     <ClInclude Include="playerInv.h" />
     <ClInclude Include="profileData.h" />
     <ClInclude Include="randFunctions.h" />

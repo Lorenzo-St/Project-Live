@@ -1,9 +1,32 @@
 What you were working on last
- - Initial release final touches
- - Balence Weapons/Enemies
  - More Weapons
- - $1.99 worth of polish
  - Weapons
     - Syringe
 
  - must need music 
+
+
+But actually what you were doing last night
+
+ - Creating Player input system that uses custom input actions instead of defined checks
+   Make there be a controls.ini or something file that has all the input actions and their bindings
+   This file should be read in on game load
+   Then Fix and convert all the places that ask for a player's input to use the new input system
+
+
+
+   wasd - Move
+
+   LMouse, Space - Shoot
+   r - reload
+   q - wheel
+   e - inventory
+   space, left ctrl - dash
+
+   LBumper - Shoot
+   Reload - Square
+   Dash - Circle
+   Enter - X
+   InvNav - D-Pad
+
+

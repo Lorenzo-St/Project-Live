@@ -13,6 +13,8 @@
 
 #pragma once
 #include "structs.h"
+typedef struct camera camera;
+typedef struct player player;
 int         getAlive        (void);
 void        gameLoopInit    (void);
 void        gameLoopUpdate  (void);
@@ -21,7 +23,9 @@ void        increaseAlive   (void);
 void        decreaseAlive   (void);
 void        disableWheel    (void);
 bool        returnInvSel    (void);
-player*     returnPlayer    (void);
+bool*       retWheel        (void);
+bool*       retInventory    (void);
 camera*     retCam          (void);
+player*     returnPlayer    (void);
 objective*  returnObis      (void);
 

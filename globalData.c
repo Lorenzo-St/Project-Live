@@ -52,6 +52,11 @@ bool getPause(void)
   return isPaused;
 }
 
+bool* getPoPause(void)
+{
+  return &isPaused;
+}
+
 bool getGenerated(void) 
 {
   return generated;
