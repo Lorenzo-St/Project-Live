@@ -2,6 +2,9 @@
 #include "playerInput.h"
 #include <vector>
 #include <array>
+#include <iostream>
+#include <fstream>
+#include <string>
 #define SCREEN_WIDTH  CP_System_GetWindowWidth()
 #define SCREEN_HEIGHT CP_System_GetWindowHeight()
 typedef struct InputBinding 
@@ -185,3 +188,44 @@ void addAxisBinding(bool axis, bool positive, type t, union bindings binding)
     break;
   }
 }
+
+void writeBingings(std::ofstream& out) 
+{
+  for (auto& binding : keybindings) 
+  {
+    std::string token;
+    token += std::to_string(0) + ",";
+    token += std::to_string(binding.action) + ",";
+    token += std::to_string(binding.type) + ",";
+    token += std::to_string(binding.binding.button) + ",";
+    out << token + "\n";
+  }
+  for (int i = 0; i < positiveAxis.size(); i++) 
+  {
+    out << std::to_string(1) + ","
+        << std::to_string(1 * (i < positiveAxis.size() / 2.0f)) + ","
+        << std::to_string(1) + ","
+        << std::to_string(2 * ((i % 2 == 0) ? 0 : 1 )) + ","
+        << std::to_string(positiveAxis[i].binding.button) + ","
+        << "\n";
+  }
+  for (int i = 0; i < negativeAxis.size(); i++)
+  {
+    out << std::to_string(1) + ","
+        << std::to_string(1 * (i < negativeAxis.size() / 2.0f)) + ","
+        << std::to_string(0) + ","
+        << std::to_string(2 * ((i % 2 == 0) ? 0 : 1)) + ","
+        << std::to_string(negativeAxis[i].binding.button) + ","
+        << "\n";
+  }
+
+
+
+}
+
+
+bool checkControllerConectivity(void) 
+{
+  return CP_Input_GamepadConnected();
+}
+

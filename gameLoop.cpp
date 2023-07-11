@@ -94,6 +94,11 @@ extern "C"
     return &c;
   }
 
+  bullet** retBullets(void) 
+  {
+    return &head;
+  }
+
   bool* retWheel(void)
   {
     return &wheelOpen;
@@ -207,7 +212,6 @@ extern "C"
     c.x = PlayerGetPos(pl)->x;
     c.y = PlayerGetPos(pl)->y;
 
-    PlayerUpdate(pl);
     /* Draw all on screen items */
     drawBullets(head, &c);
     drawPlayer(pl, &c);
@@ -268,6 +272,7 @@ extern "C"
     /* Check  enemy shooting */
     enemyShoot(enemies, bulletSounds, &head, pl);
 
+    PlayerUpdate(pl);
     /* Move on screen items    */
     moveEnemies(enemies, buildings);
     moveBullets(&head, enemies, pl, items, buildings);

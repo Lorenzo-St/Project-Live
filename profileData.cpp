@@ -245,18 +245,24 @@ extern "C"
     addBinding(Dash,      Key, bindings(KEY_LEFT_SHIFT));
     addBinding(Confirm,   Key, bindings(KEY_ENTER));
     addBinding(Return,    Key, bindings(KEY_ESCAPE));
+    addBinding(Pause,     Key, bindings(KEY_ESCAPE));
+    addBinding(Back,      Key, bindings(KEY_ESCAPE));
+
     addAxisBinding(false, true,  Key, bindings(KEY_W));
     addAxisBinding(false, false, Key, bindings(KEY_S));
     addAxisBinding(true,  true,  Key, bindings(KEY_D));
     addAxisBinding(true,  false, Key, bindings(KEY_A));
     
     addBinding(Shoot,     Controller, bindings(GAMEPAD_LEFT_SHOULDER));
-    addBinding(Inventory, Controller, bindings(GAMEPAD_BACK));
+    addBinding(Inventory, Controller, bindings(GAMEPAD_LEFT_THUMB));
+    addBinding(Pause,     Controller, bindings(GAMEPAD_START));
     addBinding(Reload,    Controller, bindings(GAMEPAD_X));
     addBinding(Confirm,   Controller, bindings(GAMEPAD_A));
     addBinding(Back,      Controller, bindings(GAMEPAD_B));
+    addBinding(Back,      Controller, bindings(GAMEPAD_START));
     addBinding(Return,    Controller, bindings(GAMEPAD_START));
     addBinding(Wheel,     Controller, bindings(GAMEPAD_Y));
+    addBinding(Dash,      Controller, bindings(GAMEPAD_RIGHT_SHOULDER));
     addBinding(XAxisPos,  Controller, bindings(GAMEPAD_DPAD_RIGHT));
     addBinding(XAxisNeg,  Controller, bindings(GAMEPAD_DPAD_LEFT));
     addBinding(YAxisPos,  Controller, bindings(GAMEPAD_DPAD_UP));
@@ -297,12 +303,50 @@ extern "C"
     std::ifstream read;
     read.open(converted_str, std::ios_base::in);
     std::string token;
-    if (read.is_open() == false)
+    if (read.is_open() == false) 
+    {
+    
       SetDefaultInputs();
+      ProfileWriteInputs();
+      read.close();
+      return;
+      
+    }
+    while (!read.eof()) 
+    {
+      std::getline(read, token);
+      if (token == "")
+        break;
+      size_t offset = 0;
+      bool axis = std::stoi(token.c_str() + offset);
+      offset = token.find(',', offset) + 1;
+      if (!axis) 
+      {
+        int action = std::stoi(token.c_str() + offset);
+        offset = token.find(',', offset) + 1;
 
-
-
-
+        int ltype = std::stoi(token.c_str() + offset);
+        offset = token.find(',', offset) + 1;
+        
+        int binding = std::stoi(token.c_str() + offset);
+        addBinding(static_cast<InputAction>(action), static_cast<type>(ltype), bindings(binding));
+      }
+      else 
+      {
+        bool axisss = std::stoi(token.c_str() + offset);
+        offset = token.find(',', offset) + 1;
+        
+        bool positi = std::stoi(token.c_str() + offset);
+        offset = token.find(',', offset) + 1;
+        
+        int ltype = std::stoi(token.c_str() + offset);
+        offset = token.find(',', offset) + 1;
+        
+        int binding = std::stoi(token.c_str() + offset);
+        addAxisBinding(axisss, positi, static_cast<type>(ltype), bindings(binding));
+      }
+    }
+    read.close();
   }
 
   void ProfileWriteInputs(void) 
@@ -330,7 +374,12 @@ extern "C"
     converted_str += "Simply_Sruvive\\";
     CreateDirectory(converted_str.c_str(), NULL);
     converted_str += "Controls.ini";
+
+    std::ofstream write(converted_str);
+    writeBingings(write);
   
+
+    write.close();
   }
 
 

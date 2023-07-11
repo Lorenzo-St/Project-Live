@@ -167,25 +167,6 @@ extern "C"
           *wheelOpen = false;
           *InvOpen = false;
           break;
-        case GAMEPAD_DPAD_UP:
-          if (*InvOpen == true)
-            moveSelected({ 0, -1 });
-          break;
-        case GAMEPAD_DPAD_DOWN:
-          if (*InvOpen == true)
-            moveSelected({ 0, 1 });
-          break;
-        case GAMEPAD_DPAD_RIGHT:
-          if (*InvOpen == true)
-            moveSelected({ 1, 0 });
-          break;
-        case GAMEPAD_DPAD_LEFT:
-          if (*InvOpen == true)
-            moveSelected({ -1, 0 });
-          break;
-
-
-
         }
       }
 

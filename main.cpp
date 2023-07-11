@@ -1,3 +1,6 @@
+extern "C" 
+{
+
 #include "cprocessing.h"
 #include "spashScreen.h"
 #include "globalData.h"
@@ -8,6 +11,8 @@
 #include "mainMenu.h"
 #include "Sound.h"
 #include "profileData.h"
+}
+#include "playerInput.h"
 
 #define KEY_COUNTS 1
 
@@ -20,42 +25,30 @@ int playerInput[KEY_COUNTS] = { KEY_ESCAPE };
 
 void preUpdate(void)
 {
-  if (CP_Input_GamepadTriggered(GAMEPAD_START))
+
+
+  if (isTriggered(Back) && getPause()) 
   {
     if (getGame() && !getOptions())
-      setPause(!getPause());
+      setPause(false);
+    return;
   }
-
-  for (int i = 0; i < KEY_COUNT; i++)
+  if (isTriggered(Pause) && !getPause()) 
   {
-    if (CP_Input_KeyTriggered(playerInput[i]))
-    {
-      switch (playerInput[i])
-      {
-      case KEY_ESCAPE:
-        if(getGame() && !getOptions())
-          setPause(!getPause());
-        break;
-      }
-    }
-    if (CP_Input_KeyDown(playerInput[i]))
-    {
-      switch (playerInput[i])
-      {
-
-
-      }
-    }
+    if (getGame() && !getOptions())
+      setPause(true);
+    return;
   }
 }
 
-void postUpdate(void) 
+void postUpdate(void)
 {
 
   if (!getPause())
     return;
+  static int selected = 0;
   CP_Color C = CP_Color_CreateHex(0x8498A7A0);
-  switch (GetMode()) 
+  switch (GetMode())
   {
   case LightMode:
     C = CP_Color_CreateHex(0x8498A7A0);
@@ -75,52 +68,57 @@ void postUpdate(void)
   float y = SCREEN_HEIGHT / 3.0f;
   float width = SCREEN_WIDTH / 7.0f;
   float height = SCREEN_HEIGHT / 10.0f;
-  if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), width, height))
+#define BUTTONS 3
+  const char* names[3] = { "Resume!" , "Options!" , "Main Menu!" };
+  for (int i = 0; i < BUTTONS; ++i) 
   {
-    C = GRAY;
-    if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
-      setPause(false);
-  } 
-  else
-   C = WHITE;
-  CP_Settings_Fill(C);
-  CP_Graphics_DrawRect(x, y, width, height);
-  drawWords("Resume!", x, y, 40 * (SCREEN_WIDTH / 1920.0f), BLACK);
-
-  y += height * 1.15f;
-  if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), width, height))
-  {
-    C = GRAY;
-    if (CP_Input_MouseTriggered(MOUSE_BUTTON_1)) 
+    if (checkControllerConectivity() == false)
     {
-      CP_Engine_SetNextGameStateForced(OptionsInit, OptionsUpdate, OptionsExit);
-      setOptions(true);
+
+      if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), width, height))
+      {
+        selected = i;
+      }
     }
+    
+    if(selected == i)
+      C = GRAY;
+    else
+      C = WHITE;
+    CP_Settings_Fill(C);
+    CP_Graphics_DrawRect(x, y, width, height);
+    drawWords(names[i], x, y, 40 * (SCREEN_WIDTH / 1920.0f), BLACK);
+    y += height * 1.15f;
 
   }
-  else
-    C = WHITE;
-  CP_Settings_Fill(C);
-  CP_Graphics_DrawRect(x, y, width, height);
-  drawWords("Options!", x, y, 40 * (SCREEN_WIDTH / 1920.0f), BLACK);
-
-  y += height * 1.15f;
-  if (checkMouseBoxCollide(x - SCREEN_WIDTH / 2.0f, -(y - SCREEN_HEIGHT / 2.0f), width, height))
+  if (isTriggered(YAxisPos) && selected != 0)
   {
-    C = GRAY;
-    if (CP_Input_MouseTriggered(MOUSE_BUTTON_1))
+    --selected;
+  }
+  else if (isTriggered(YAxisNeg) && selected != BUTTONS - 1)
+  {
+    ++selected;
+  }
+  if (isTriggered(Confirm)) 
+  {
+    switch (selected)
     {
+    case 0:
+      setPause(false);
+      break;
+    case 1:
+      CP_Engine_SetNextGameStateForced(OptionsInit, OptionsUpdate, OptionsExit);
+      setOptions(true);
+      break;
+    case 2:
       setGame(false);
       CP_Engine_SetNextGameStateForced(MainMenuInit, MainMenuUpdate, MainMenuExit);
       setPause(false);
+      break;
+    
     }
-
   }
-  else
-    C = WHITE;
-  CP_Settings_Fill(C);
-  CP_Graphics_DrawRect(x, y, width, height);
-  drawWords("Main Menu!", x, y, 40 * (SCREEN_WIDTH / 1920.0f), BLACK);
+
 
 }
 

@@ -145,11 +145,17 @@ void PlayerFire(player* pl, bullet** b)
       return;
     }
     CP_Vector direction = pl->direction;
+    direction.y *= -1;
     runWeaponPattern(pl->weapon, const_cast<CP_Vector*>(&pl->pos), &direction, b, 1);
 
     CP_Sound s = getWeaponSounds(pl->weapon->type, (returnWheel())[returnSelected()].itemId);
     CP_Sound_Play(s);
+
   }
+  else
+    pl->cooldown -= CP_System_GetDt();
+
+
 }
 
 void PlayerReload(player* pl) 
@@ -195,10 +201,10 @@ void PlayerUpdate(player* pl)
   float mX = getXRawDirectional(Mouse);
   float mY = getYRawDirectional(Mouse);
   float RstickX = getXRawDirectional(Right);
-  float RstickY = getYRawDirectional(Right);
+  float RstickY = -getYRawDirectional(Right);
 
-  pl->direction.x = (RstickX == 0) ? mX : RstickX;
-  pl->direction.y = (RstickY == 0) ? mY : RstickY;
+  pl->direction.x = (checkControllerConectivity() == false) ? mX : RstickX;
+  pl->direction.y = (checkControllerConectivity() == false) ? mY : RstickY;
 
   pl->rot = (float)(atan2(pl->direction.y, pl->direction.x) * (180.0f / 3.14159265f) + 90.0f);
   PlayerCheckReload(pl);
@@ -217,9 +223,14 @@ void PlayerUpdate(player* pl)
 
   if (*retInventory() == true) 
   {
-    float X = (1.0f * isTriggered(XAxisPos)) + (-1.0f * isTriggered(XAxisNeg));
-    float Y = (1.0f * isTriggered(YAxisPos)) + (-1.0f * isTriggered(YAxisNeg));
+    float X = ( 1.0f * isTriggered(XAxisPos)) + (-1.0f * isTriggered(XAxisNeg));
+    float Y = (-1.0f * isTriggered(YAxisPos)) + ( 1.0f * isTriggered(YAxisNeg));
     moveSelected({ X, Y });
+  }
+
+  if (isPressed(Shoot)) 
+  {
+    PlayerFire(pl, retBullets());
   }
 
 }

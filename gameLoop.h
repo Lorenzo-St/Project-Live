@@ -28,4 +28,5 @@ bool*       retInventory    (void);
 camera*     retCam          (void);
 player*     returnPlayer    (void);
 objective*  returnObis      (void);
+bullet**    retBullets      (void);
 

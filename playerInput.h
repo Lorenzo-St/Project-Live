@@ -1,6 +1,6 @@
 #pragma once
 #include "cprocessing.h"
-
+#include <string>
 typedef enum InputAction 
 {
   Any,
@@ -12,6 +12,7 @@ typedef enum InputAction
   Return,
   Back,
   Dash,
+  Pause,
   XAxisPos,
   XAxisNeg,
   YAxisPos,
@@ -41,6 +42,10 @@ union bindings
   {
   
   }
+  bindings(int b) 
+  {
+    key = CP_KEY(b);
+  }
   bindings(bindings const& b) 
   {
     key = b.key;
@@ -66,6 +71,7 @@ float getXRawDirectional(JoyStick stick);
 float getYRawDirectional(JoyStick stick);
 bool isTriggered(InputAction action);
 bool isPressed(InputAction action);
+bool checkControllerConectivity(void);
 void addBinding(InputAction action, type t, union bindings binding);
 void addAxisBinding(bool axis, bool positive, type t, union bindings binding);
-
+void writeBingings(std::ofstream& out);
