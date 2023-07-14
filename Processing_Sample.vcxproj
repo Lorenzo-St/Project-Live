@@ -117,7 +117,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
 
 xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q
 
-git commit -am "Succesful $(ConfigurationName) build on $(Platform) at $(date -u +'%Y.%m.%d %H:%M:%S')"</Command>
+git commit -am "Succesful $(ConfigurationName) build on $(Platform)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -151,7 +151,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
 
 xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q
 
-git commit -am "Succesful $(ConfigurationName) build on $(Platform) at $(date -u +'%Y.%m.%d %H:%M:%S')"</Command>
+git commit -am "Succesful $(ConfigurationName) build on $(Platform)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -181,7 +181,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
 
 xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q
 
-git commit -am "Succesful $(ConfigurationName) build on $(Platform) at $(date -u +'%Y.%m.%d %H:%M:%S')"</Command>
+git commit -am "Succesful $(ConfigurationName) build on $(Platform)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -215,7 +215,7 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
 
 xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q
 
-git commit -am "Succesful $(ConfigurationName) build on $(Platform) at $(date -u +'%Y.%m.%d %H:%M:%S')"</Command>
+git commit -am "Succesful $(ConfigurationName) build on $(Platform)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
