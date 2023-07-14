@@ -109,10 +109,15 @@
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)CProcessing\lib\x86\CProcessingd.dll" "$(OutDir)" /s /r /y /q
-xcopy "$(ProjectDir)CProcessing\lib\x86\fmodL.dll" "$(OutDir)" /s /r /y /q
+      <Command>xcopy "$(ProjectDir)CProcessing\lib\$(Platform)\CProcessing.dll" "$(OutDir)" /s /r /y /q
+
+xcopy "$(ProjectDir)CProcessing\lib\$(Platform)\fmod.dll" "$(OutDir)" /s /r /y /q
+
 xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
-xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
+
+xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q
+
+git commit -am "Succesful $(ConfigurationName) build on $(Platform) at $(date -u +'%Y.%m.%d %H:%M:%S')"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -138,10 +143,15 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)CProcessing\lib\x86\CProcessing.dll" "$(OutDir)" /s /r /y /q
-xcopy "$(ProjectDir)CProcessing\lib\x86\fmod.dll" "$(OutDir)" /s /r /y /q
+      <Command>xcopy "$(ProjectDir)CProcessing\lib\$(Platform)\CProcessing.dll" "$(OutDir)" /s /r /y /q
+
+xcopy "$(ProjectDir)CProcessing\lib\$(Platform)\fmod.dll" "$(OutDir)" /s /r /y /q
+
 xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
-xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
+
+xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q
+
+git commit -am "Succesful $(ConfigurationName) build on $(Platform) at $(date -u +'%Y.%m.%d %H:%M:%S')"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -163,10 +173,15 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)CProcessing\lib\x64\CProcessingd.dll" "$(OutDir)" /s /r /y /q
-xcopy "$(ProjectDir)CProcessing\lib\x64\fmodL.dll" "$(OutDir)" /s /r /y /q
+      <Command>xcopy "$(ProjectDir)CProcessing\lib\$(Platform)\CProcessing.dll" "$(OutDir)" /s /r /y /q
+
+xcopy "$(ProjectDir)CProcessing\lib\$(Platform)\fmod.dll" "$(OutDir)" /s /r /y /q
+
 xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
-xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
+
+xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q
+
+git commit -am "Succesful $(ConfigurationName) build on $(Platform) at $(date -u +'%Y.%m.%d %H:%M:%S')"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -192,17 +207,22 @@ xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(ProjectDir)CProcessing\lib\x64\CProcessing.dll" "$(OutDir)" /s /r /y /q
-xcopy "$(ProjectDir)CProcessing\lib\x64\fmod.dll" "$(OutDir)" /s /r /y /q
+      <Command>xcopy "$(ProjectDir)CProcessing\lib\$(Platform)\CProcessing.dll" "$(OutDir)" /s /r /y /q
+
+xcopy "$(ProjectDir)CProcessing\lib\$(Platform)\fmod.dll" "$(OutDir)" /s /r /y /q
+
 xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q
-xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q</Command>
+
+xcopy "$(ProjectDir)Managed\*" "$(OutDir)Managed\" /s /r /y /q
+
+git commit -am "Succesful $(ConfigurationName) build on $(Platform) at $(date -u +'%Y.%m.%d %H:%M:%S')"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="addStuff.cpp" />
     <ClCompile Include="checkStuff.cpp" />
     <ClCompile Include="colorStuff.c" />
-    <ClCompile Include="credits.c" />
+    <ClCompile Include="credits.cpp" />
     <ClCompile Include="debugInfo.cpp" />
     <ClCompile Include="drawStuff.cpp" />
     <ClCompile Include="endScreen.cpp" />

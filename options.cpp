@@ -13,6 +13,7 @@
 
 #include "playerInput.h"
 #include <string>
+#include <array>
 extern "C" {
 #include "cprocessing.h"
 #include "options.h"
@@ -32,12 +33,13 @@ extern "C" {
 #define AUDIO_SLIDERS 2
 #define DISPLASY_BUTTONS 7
 
-  static button optionsButton[OPTIONSBUTTONS] = { 0 };
-  static button displayScreen[DISPLASY_BUTTONS] = { 0 };
+  static std::array<button, OPTIONSBUTTONS>  optionsButton = { 0 };
+  static std::array<button, DISPLASY_BUTTONS> displayScreen = { 0 };
   static int opsSubScreen = 0;
-  static slider audioSliders[AUDIO_SLIDERS] = { 0 };
-  static bool InnerSelected;
-
+  static std::array<slider, AUDIO_SLIDERS> audioSliders = { 0 };
+  static bool InnerSelected = false;
+  static int* screenSelections;
+  static bool enteredFrame;
   void initSliders(void)
   {
     for (int i = 0; i < AUDIO_SLIDERS; i++)
@@ -50,6 +52,7 @@ extern "C" {
         audioSliders[i].y = SCREEN_HEIGHT / 3.0f;
         audioSliders[i].length = SCREEN_WIDTH / 5.0f;
         audioSliders[i].value = GetSounds();
+        CP_Sound_SetGroupVolume(CP_SOUND_GROUP_0, audioSliders[i].value);
 
         break;
       case 1:
@@ -171,6 +174,8 @@ extern "C" {
   // this function will be called once at the beginning of the program
   void OptionsInit(void)
   {
+    InnerSelected = false;
+    enteredFrame = true;
     setPause(false);
     initSliders();
     setupOptionsButtons();
@@ -181,25 +186,37 @@ extern "C" {
   void drawSliders(void)
   {
 
-    for (int i = 0; i < AUDIO_SLIDERS; i++)
+    for (auto const&slider: audioSliders)
     {
-      CP_Settings_Fill(CP_Color_Create(255, 255, 255, 255));
+      switch (getColorMode())
+      {
+      case DarkMode:
+        CP_Settings_Fill(WHITE);
+        break;
+      case LightMode:
+        CP_Settings_Fill(BLACK);
+        break;
+      }
       CP_Settings_TextSize(50 * SCREEN_HEIGHT / 1080.0f);
-      CP_Font_DrawText(audioSliders[i].title, audioSliders[i].x, audioSliders[i].y - 50);
-      CP_Graphics_DrawRect(audioSliders[i].x, audioSliders[i].y, audioSliders[i].length, 20);
-      float x = (audioSliders[i].length * audioSliders[i].value);
-      if (audioSliders[i].selected == 1)
+      CP_Font_DrawText(slider.title, slider.x, slider.y - 50);
+      CP_Settings_Fill(GRAY_BUT);
+      CP_Graphics_DrawRect(slider.x, slider.y, slider.length, 20);
+      float x = (slider.length * slider.value);
+      if (slider.selected == 1)
         CP_Settings_Fill(CP_Color_Create(50, 50, 50, 255));
       else
         CP_Settings_Fill(CP_Color_Create(200, 200, 200, 255));
 
-      CP_Graphics_DrawRect(audioSliders[i].x + x - (audioSliders[i].length * .5f), audioSliders[i].y, 20, 30);
-      
-      std::string buffer;
-      buffer = std::to_string(audioSliders[i].value);
-      CP_Font_DrawText(buffer.c_str(), 300, audioSliders[i].y);
-    
-    
+      CP_Graphics_DrawRect(slider.x + x - (slider.length * .5f), slider.y, 20, 30);
+
+      // Testing stuff
+      // ------------------------------------------------
+      // std::string buffer;
+      // buffer = std::to_string(slider.value);
+      // CP_Font_DrawText(buffer.c_str(), 300, slider.y);
+      // ------------------------------------------------
+
+
     }
   }
 
@@ -208,18 +225,26 @@ extern "C" {
     float mX = CP_Input_GetMouseX();
     float mY = CP_Input_GetMouseY();
     static int selected = 0;
-
+    bool changed = checkControllerConectivity();
     for (int i = 0; i < AUDIO_SLIDERS; i++)
     {
       audioSliders[i].selected = false;
-      if (mX > audioSliders[i].x + (.5 * audioSliders[i].length) || mX < audioSliders[i].x - (.5 * audioSliders[i].length) || mY > audioSliders[i].y + (10) || mY < audioSliders[i].y - (10))
+      if (!changed)
       {
-      }
-      else
-      {
-        selected = i;
+        if (mX > audioSliders[i].x + (.5 * audioSliders[i].length) || mX < audioSliders[i].x - (.5 * audioSliders[i].length) || mY > audioSliders[i].y + (10) || mY < audioSliders[i].y - (10))
+        {
+          ;
+        }
+        else
+        {
+          selected = i;
+          changed = true;
+        }
       }
     }
+
+    if (changed == false)
+      selected = -1;
 
     if (isTriggered(YAxisPos))
     {
@@ -231,32 +256,52 @@ extern "C" {
     }
     if (selected >= AUDIO_SLIDERS)
       selected = 0;
-    if (selected < 0)
+    if (changed == true && selected < 0)
       selected = AUDIO_SLIDERS - 1;
-    float xRawS = getXRawDirectional(Left);
-    float xRawK = getXRawDirectional(None);
-    float xRawM = getXRawDirectional(Mouse);
-    float xRaw = (xRawS == 0) ? ((xRawK == 0) ? ((checkControllerConectivity() == false) ? xRawM: 0) : xRawK) : xRawS;
+    float xRaw = 0;
+    if (selected != -1)
+      audioSliders[selected].selected = true;
 
-      float halfLength = audioSliders[selected].length / 2.0f;
-      float devisor, divedend;
-      devisor = (xRaw - (audioSliders[selected].x - halfLength));
-      divedend = (((audioSliders[selected].x + halfLength)) - (audioSliders[selected].x - halfLength));
-      audioSliders[selected].value += devisor / divedend;
-      switch (selected)
+    if (checkControllerConectivity())
+    {
+      float xRawS = getXRawDirectional(Left);
+      float xRawK = getXRawDirectional(None);
+      xRaw = (xRawS == 0) ? ((xRawK == 0) ? 0 : xRawK) : xRawS;
+      xRaw /= 20;
+    }
+    else if (selected != -1)
+    {
+      float pos = getXRawDirectional(Mouse) - (audioSliders[selected].x - (SCREEN_WIDTH / 2.0f));
+      if (abs(pos) < audioSliders[selected].x + audioSliders[selected].length / 2.0f && isPressed(Confirm))
       {
-      case 0:
-        CP_Sound_SetGroupVolume(CP_SOUND_GROUP_0, audioSliders[selected].value);
-        SetSounds(audioSliders[selected].value);
-        break;
-      case 1:
-        CP_Sound_SetGroupVolume(CP_SOUND_GROUP_1, audioSliders[selected].value);
-        SetMusic(audioSliders[selected].value);
-        break;
+        xRaw = (pos / audioSliders[selected].length + .5f) - audioSliders[selected].value;
       }
-      
-    
-    
+
+    }
+
+    if (selected == -1)
+      return;
+    audioSliders[selected].value += xRaw;
+
+    if (audioSliders[selected].value > 1)
+      audioSliders[selected].value = 1;
+    if (audioSliders[selected].value < 0)
+      audioSliders[selected].value = 0;
+
+    switch (selected)
+    {
+    case 0:
+      CP_Sound_SetGroupVolume(CP_SOUND_GROUP_0, audioSliders[selected].value);
+      SetSounds(audioSliders[selected].value);
+      break;
+    case 1:
+      CP_Sound_SetGroupVolume(CP_SOUND_GROUP_1, audioSliders[selected].value);
+      SetMusic(audioSliders[selected].value);
+      break;
+    }
+
+
+
 
   }
 
@@ -286,16 +331,22 @@ extern "C" {
     float mX = CP_Input_GetMouseX();
     float mY = CP_Input_GetMouseY();
     static int selected = 0;
+    bool changed = checkControllerConectivity();
+    screenSelections = &selected;
     for (int i = 0; i < OPTIONSBUTTONS; i++)
     {
       optionsButton[i].selected = false;
-      if (mX > optionsButton[i].x + (.5 * optionsButton[i].width) || mX < optionsButton[i].x - (.5 * optionsButton[i].width) || mY > optionsButton[i].y + (.5 * optionsButton[i].height) || mY < optionsButton[i].y - (.5 * optionsButton[i].height))
+      if (!changed)
       {
-        ;
-      }
-      else
-      {
-        selected = i;
+        if (mX > optionsButton[i].x + (.5 * optionsButton[i].width) || mX < optionsButton[i].x - (.5 * optionsButton[i].width) || mY > optionsButton[i].y + (.5 * optionsButton[i].height) || mY < optionsButton[i].y - (.5 * optionsButton[i].height))
+        {
+          ;
+        }
+        else
+        {
+          changed = true;
+          selected = i;
+        }
       }
     }
     if (isTriggered(XAxisNeg))
@@ -306,12 +357,16 @@ extern "C" {
     {
       ++selected;
     }
+    if (changed == false)
+      selected = -1;
     if (selected >= OPTIONSBUTTONS - 1)
       selected = 0;
-    if (selected < 0)
+    if (changed == true && selected < 0)
       selected = OPTIONSBUTTONS - 2;
-
-    optionsButton[selected].selected = true;
+    if (selected != -1)
+    {
+      optionsButton[selected].selected = true;
+    }
 
     if (isPressed(Confirm))
     {
@@ -326,6 +381,7 @@ extern "C" {
         break;
       case 2:
         opsSubScreen = 3;
+
         break;
       case 3:
         if (getGame())
@@ -337,85 +393,150 @@ extern "C" {
         else
           CP_Engine_SetNextGameState(MainMenuInit, MainMenuUpdate, MainMenuExit);
         break;
+      default:
+        break;
       }
+      InnerSelected = true;
     }
   }
 
-  void drawSubScreen(void)
+  void ckeckDisplayScreen()
   {
     float mX = CP_Input_GetMouseX();
     float mY = CP_Input_GetMouseY();
+    static int selected = 0;
+    bool changed = checkControllerConectivity();
+  
+    for (int i = 0; i < DISPLASY_BUTTONS; i++)
+    {
+      displayScreen[i].selected = false;
+      if (!changed) 
+      {
+        if (mX > displayScreen[i].x + (.5 * displayScreen[i].width) || mX < displayScreen[i].x - (.5 * displayScreen[i].width) || mY > displayScreen[i].y + (.5 * displayScreen[i].height) || mY < displayScreen[i].y - (.5 * displayScreen[i].height))
+        {
+          ;
+        }
+        else
+        {
+          selected = i;
+          changed = true;
+        }
+      }
+    }
+
+    if (isTriggered(YAxisPos))
+    {
+      --selected;
+    }
+    else if (isTriggered(YAxisNeg))
+    {
+      ++selected;
+    }
+    if (isTriggered(XAxisPos))
+      selected = 5;
+    else if (isTriggered(XAxisNeg))
+      selected = 0;
+    if (changed == false)
+      selected = -1;
+    if (selected >= DISPLASY_BUTTONS)
+      selected = 0;
+    if (changed == true && selected < 0)
+      selected = DISPLASY_BUTTONS - 1;
+    if (selected != -1)
+    {
+      displayScreen[selected].selected = true;
+    }
+
+
+    if (isPressed(Confirm))
+    {
+      switch (selected)
+      {
+      case 0:
+        CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
+          SetFullScreen(true);
+          break;
+      case 1:
+        CP_System_SetWindowSize(1920, 1080);
+          SetWindowSize({ 1920, 1080 });
+          SetFullScreen(false);
+        break;
+      case 2:
+        CP_System_SetWindowSize(1080, 720);
+        SetWindowSize({ 1080, 720 });
+        SetFullScreen(false);
+        break;
+      case 3:
+        CP_System_SetWindowSize(800, 600);
+        SetWindowSize({ 800, 600 });
+        SetFullScreen(false);
+        break;
+      case 4:
+        CP_System_SetWindowSize(640, 480);
+        SetWindowSize({ 640, 480 });
+        SetFullScreen(false);
+        break;
+      case 5:
+        setColorMode(LightMode);
+        break;
+      case 6:
+        setColorMode(DarkMode);
+        break;
+      }
+      setupOptionsButtons();
+      initSliders();
+    }
+
+  }
+
+  void drawDisplayScreen(void) 
+  {
+    char buffer[1000] = { 0 };
+    switch (getColorMode()) 
+    {
+    case DarkMode:
+      CP_Settings_Fill(WHITE);
+      break;
+    case LightMode:
+      CP_Settings_Fill(BLACK);
+      break;
+    }
+
+    snprintf(buffer, sizeof buffer, "The current window size is %i by %i", SCREEN_WIDTH, SCREEN_HEIGHT);
+    CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT * .20f);
+
+    for (int i = 0; i < DISPLASY_BUTTONS; ++i) 
+    {
+
+      if (displayScreen[i].selected == 1)
+      {
+        CP_Settings_Fill(GRAY);
+        CP_Graphics_DrawRect(displayScreen[i].x, displayScreen[i].y, displayScreen[i].width, displayScreen[i].height);
+        CP_Settings_Fill(WHITE);
+        CP_Font_DrawText(displayScreen[i].words, displayScreen[i].x, displayScreen[i].y);
+      }
+      else
+      {
+        CP_Settings_Fill(BLACK);
+        CP_Graphics_DrawRect(displayScreen[i].x, displayScreen[i].y, displayScreen[i].width, displayScreen[i].height);
+        CP_Settings_Fill(WHITE);
+        CP_Font_DrawText(displayScreen[i].words, displayScreen[i].x, displayScreen[i].y);
+      }
+    }
+
+  }
+
+
+  void drawSubScreen(void)
+  {
+
     char buffer[1000] = { 0 };
     switch (opsSubScreen)
     {
     case 0:
-      snprintf(buffer, sizeof buffer, "The current window size is %i by %i", SCREEN_WIDTH, SCREEN_HEIGHT);
-      CP_Font_DrawText(buffer, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT * .20f);
-      for (int i = 0; i < DISPLASY_BUTTONS; i++)
-      {
-        if (mX > displayScreen[i].x + (.5 * displayScreen[i].width) || mX < displayScreen[i].x - (.5 * displayScreen[i].width) || mY > displayScreen[i].y + (.5 * displayScreen[i].height) || mY < displayScreen[i].y - (.5 * displayScreen[i].height))
-        {
-          displayScreen[i].selected = 0;
-        }
-        else
-        {
-          displayScreen[i].selected = 1;
-        }
-        if (displayScreen[i].selected == 1)
-        {
-          CP_Settings_Fill(GRAY);
-          CP_Graphics_DrawRect(displayScreen[i].x, displayScreen[i].y, displayScreen[i].width, displayScreen[i].height);
-          CP_Settings_Fill(WHITE);
-          CP_Font_DrawText(displayScreen[i].words, displayScreen[i].x, displayScreen[i].y);
-        }
-        else
-        {
-          CP_Settings_Fill(BLACK);
-          CP_Graphics_DrawRect(displayScreen[i].x, displayScreen[i].y, displayScreen[i].width, displayScreen[i].height);
-          CP_Settings_Fill(WHITE);
-          CP_Font_DrawText(displayScreen[i].words, displayScreen[i].x, displayScreen[i].y);
-        }
-        if (displayScreen[i].selected)
-        {
-          if (CP_Input_MouseClicked())
-          {
-            switch (i)
-            {
-            case 0:
-              CP_System_FullscreenAdvanced(CP_System_GetDisplayWidth(), CP_System_GetDisplayHeight());
-              SetFullScreen(true);
-              break;
-            case 1:
-              CP_System_SetWindowSize(1920, 1080);
-              SetWindowSize({ 1920, 1080 });
-              SetFullScreen(false);
-              break;
-            case 2:
-              CP_System_SetWindowSize(1080, 720);
-              SetWindowSize({ 1080, 720 });
-              SetFullScreen(false);
-              break;
-            case 3:
-              CP_System_SetWindowSize(800, 600);
-              SetWindowSize({ 800, 600 });
-              SetFullScreen(false);
-              break;
-            case 4:
-              CP_System_SetWindowSize(640, 480);
-              SetWindowSize({ 640, 480 });
-              SetFullScreen(false);
-              break;
-            case 5:
-              setColorMode(LightMode);
-              break;
-            case 6:
-              setColorMode(DarkMode);
-              break;
-            }
-            setupOptionsButtons();
-          }
-        }
-      }
+      drawDisplayScreen();
+      if(InnerSelected)
+        ckeckDisplayScreen();
       break;
     case 1:
       snprintf(buffer, sizeof buffer, "Wumpus is very lonely today");
@@ -454,32 +575,38 @@ extern "C" {
       CP_Graphics_DrawEllipse(xpos - 175 * SCREEN_WIDTH / 1920.0f, ypos + 357 * SCREEN_WIDTH / 1920.0f, 30 * SCREEN_WIDTH / 1920.0f, 30 * SCREEN_WIDTH / 1920.0f);
 
       CP_Font_DrawText("W", xpos, ypos);
-      CP_Font_DrawText("Move up", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos);
-      CP_Font_DrawText("A", xpos, ypos + 100 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Move left", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 100 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("S", xpos, ypos + 200 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Move down", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 200 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("D", xpos, ypos + 300 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Move right", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 300 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("A", xpos,     ypos + 100 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("S", xpos,     ypos + 200 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("D", xpos,     ypos + 300 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("R", xpos * 3, ypos);
+      CP_Font_DrawText("Q", xpos * 3, ypos + 100 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("E", xpos * 3, ypos + 200 * SCREEN_WIDTH / 1920.0f);
       CP_Font_DrawText("Space", xpos, ypos + 400 * SCREEN_WIDTH / 1920.0f);
 
 
-
-      CP_Font_DrawText("R", xpos * 3, ypos);
-      CP_Font_DrawText("Reload", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos);
-      CP_Font_DrawText("Q", xpos * 3, ypos + 100 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Switch Weapons", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 100 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("E", xpos * 3, ypos + 200 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Open Inventory", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 200 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Shift", xpos * 3, ypos + 300 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Dash", xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 300 * SCREEN_WIDTH / 1920.0f);
-
-      CP_Font_DrawText("Shoot", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Aim (Move mouse)", xpos + 300 * SCREEN_WIDTH / 1920.0f, ypos + 550 * SCREEN_WIDTH / 1920.0f);
+      switch (getColorMode())
+      {
+      case DarkMode:
+        CP_Settings_Fill(WHITE);
+        break;
+      case LightMode:
+        CP_Settings_Fill(BLACK);
+        break;
+      }
+      CP_Font_DrawText("Left Mouse",       xpos     - 150 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Move up",          xpos     + 300 * SCREEN_WIDTH / 1920.0f, ypos);
+      CP_Font_DrawText("Move left",        xpos     + 300 * SCREEN_WIDTH / 1920.0f, ypos + 100 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Move down",        xpos     + 300 * SCREEN_WIDTH / 1920.0f, ypos + 200 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Move right",       xpos     + 300 * SCREEN_WIDTH / 1920.0f, ypos + 300 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Shoot",            xpos     + 300 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Aim (Move mouse)", xpos     + 300 * SCREEN_WIDTH / 1920.0f, ypos + 550 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Reload",           xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos);
+      CP_Font_DrawText("Switch Weapons",   xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 100 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Open Inventory",   xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 200 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Dash",             xpos * 3 + 300 * SCREEN_WIDTH / 1920.0f, ypos + 300 * SCREEN_WIDTH / 1920.0f);
+      CP_Font_DrawText("Shift",            xpos * 3,                                ypos + 300 * SCREEN_WIDTH / 1920.0f);
       CP_Settings_TextSize(20 * SCREEN_WIDTH / 1920.0f);
-      CP_Font_DrawText("Left Mouse", xpos - 150 * SCREEN_WIDTH / 1920.0f, ypos + 400 * SCREEN_WIDTH / 1920.0f);
-
-      drawWords("Rebinding to be added at a later date", xpos * 3, ypos * 2.25f, 50 * SCREEN_WIDTH / 1920.0f, WHITE);
+      drawWords("Rebinding to be added at a later date", xpos * 3, ypos * 2.25f, 50 * SCREEN_WIDTH / 1920.0f, (getColorMode() == LightMode) ? BLACK : WHITE);
     }
       break;
     case 3:
@@ -496,6 +623,11 @@ extern "C" {
   // this function will be called repeatedly every frame
   void OptionsUpdate(void)
   {
+    if(enteredFrame)
+    {
+      enteredFrame = false;
+      return;
+    }
     CP_Settings_TextSize(40 * (SCREEN_WIDTH / 1920.0f));
     switch (getColorMode())
     {
@@ -507,22 +639,31 @@ extern "C" {
       break;
     }
       drawOptionsButtons();
-    if (!InnerSelected)
+    if (!InnerSelected || !checkControllerConectivity())
     {
       checkOptionsButtons();
     }
     drawSubScreen();
-    if (isPressed(YAxisPos))
+    if (isPressed(Back))
       InnerSelected = false;
-    if (isPressed(YAxisNeg))
+    if (isPressed(Confirm))
       InnerSelected = true;
-
+    if (!InnerSelected) 
+    {
+      for (auto& slider : audioSliders)
+        slider.selected = false;
+      for (auto& button : displayScreen)
+        button.selected = false;
+    }
+    else if (InnerSelected)
+      for (auto& button : optionsButton)
+        button.selected = false;
   }
 
   // use CP_Engine_SetNextGameState to specify this function as the exit function
   // this function will be called once just before leaving the current gamestate
   void OptionsExit(void)
   {
-
+    *screenSelections = 0;
   }
 }

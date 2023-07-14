@@ -21,7 +21,7 @@ extern "C"
 #include "structs.h"
 #include "gameLoop.h"
 #include "stdio.h"
-#define BUTTONS 3
+#define BUTTONS 2
 
   button endButtons[BUTTONS] = { 0 };
 
@@ -35,21 +35,14 @@ extern "C"
       switch (i)
       {
       case 0:
-        snprintf(endButtons[i].words, sizeof endButtons[i].words, "YES!");
-        endButtons[i].x = (SCREEN_WIDTH / 3.0f);
+        snprintf(endButtons[i].words, sizeof endButtons[i].words, "Restart!");
+        endButtons[i].x = (SCREEN_WIDTH / 2.0f);
         endButtons[i].y = (SCREEN_HEIGHT / 1.5f);
         endButtons[i].width = width;
         endButtons[i].height = height;
         break;
       case 1:
-        snprintf(endButtons[i].words, sizeof endButtons[i].words, "NO!");
-        endButtons[i].x = (SCREEN_WIDTH / 1.5f);
-        endButtons[i].y = (SCREEN_HEIGHT / 1.5f);
-        endButtons[i].width = width;
-        endButtons[i].height = height;
-        break;
-      case 2:
-        snprintf(endButtons[i].words, sizeof endButtons[i].words, "Save & Exit!");
+        snprintf(endButtons[i].words, sizeof endButtons[i].words, "Quit!");
         endButtons[i].x = (SCREEN_WIDTH / 2.0f);
         endButtons[i].y = (SCREEN_HEIGHT / 1.25f);
         endButtons[i].width = width;
@@ -99,9 +92,6 @@ extern "C"
         break;
       case 1:
         CP_Engine_SetNextGameState(MainMenuInit, MainMenuUpdate, MainMenuExit);
-        break;
-      case 2:
-        CP_Engine_SetNextGameState(scoresInit, scoresUpdate, scoresExit);
         break;
       }
     }

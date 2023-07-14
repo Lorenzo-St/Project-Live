@@ -54,7 +54,7 @@ extern "C" {
 			if (alpha < -10)
 				CP_Engine_SetNextGameStateForced(MainMenuInit, MainMenuUpdate, MainMenuExit);
 		}
-		if (isPressed(Any) || isTriggered(Any))
+		if (isPressed(Any) || isTriggered(Any) || isPressed(Confirm) || isTriggered(Confirm))
 		{
 			counter = 100;
 			alpha = -100;
